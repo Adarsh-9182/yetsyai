@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YetsyAI — Cinematic AI Video</title>
+  <meta name="description" content="Direct impossible shots. Cinematic AI video with real camera language — no camera required." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ══════════ NAV ══════════ -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#">
+        <span class="brand-mark"></span>
+        YETSYAI
+      </a>
+      <nav class="nav-links">
+        <a href="#motions">Motions</a>
+        <a href="#how">How it works</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+      <a href="#pricing" class="btn btn-primary btn-sm">Start creating</a>
+    </div>
+  </header>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero">
+    <canvas id="field"></canvas>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
+      <span class="badge reveal">● &nbsp;v2.0 — now rendering in 4K</span>
+      <h1 class="reveal">Direct impossible shots.<br /><em>No camera required.</em></h1>
+      <p class="lede reveal">
+        Type a scene. Pick a camera move — crash zoom, FPV drone, bullet time.
+        YetsyAI turns your words into cinema-grade video in seconds.
+      </p>
+
+      <div class="prompt-bar reveal" id="promptBar">
+        <span class="prompt-icon">✦</span>
+        <span class="prompt-text" id="promptText"></span><span class="caret"></span>
+        <button class="btn btn-primary" id="generateBtn">Generate</button>
+      </div>
+
+      <div class="hero-meta reveal">
+        <span>No filming</span><i>·</i><span>No editing suite</span><i>·</i><span>Just direction</span>
+      </div>
+    </div>
+    <div class="film-grain"></div>
+  </section>
+
+  <!-- ══════════ MARQUEE ══════════ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack">
+      <span>CRASH ZOOM</span><span>◆</span><span>DOLLY IN</span><span>◆</span>
+      <span>ORBIT</span><span>◆</span><span>WHIP PAN</span><span>◆</span>
+      <span>BULLET TIME</span><span>◆</span><span>FPV DRONE</span><span>◆</span>
+      <span>CRANE UP</span><span>◆</span><span>SNORRICAM</span><span>◆</span>
+      <span>ROBO ARM</span><span>◆</span><span>SUPER DOLLY</span><span>◆</span>
+    </div>
+  </div>
+
+  <!-- ══════════ CAMERA MOTIONS ══════════ -->
+  <section class="section" id="motions">
+    <div class="section-head reveal">
+      <span class="kicker">Camera language</span>
+      <h2>Motions a film crew would envy</h2>
+      <p>Every preset is a real cinematography move. Hover a card to preview the motion.</p>
+    </div>
+
+    <div class="motion-grid">
+      <figure class="motion-card reveal" data-motion="crash-zoom">
+        <div class="motion-preview scene-a"><div class="scene-subject"></div></div>
+        <figcaption><strong>Crash Zoom</strong><span>Violent push toward the subject</span></figcaption>
+      </figure>
+      <figure class="motion-card reveal" data-motion="dolly-out">
+        <div class="motion-preview scene-b"><div class="scene-subject"></div></div>
+        <figcaption><strong>Dolly Out</strong><span>Slow reveal of the wider world</span></figcaption>
+      </figure>
+      <figure class="motion-card reveal" data-motion="orbit">
+        <div class="motion-preview scene-c"><div class="scene-subject"></div></div>
+        <figcaption><strong>Orbit</strong><span>360° sweep around the subject</span></figcaption>
+      </figure>
+      <figure class="motion-card reveal" data-motion="whip-pan">
+        <div class="motion-preview scene-d"><div class="scene-subject"></div></div>
+        <figcaption><strong>Whip Pan</strong><span>Blur-fast horizontal snap</span></figcaption>
+      </figure>
+      <figure class="motion-card reveal" data-motion="bullet-time">
+        <div class="motion-preview scene-e"><div class="scene-subject"></div></div>
+        <figcaption><strong>Bullet Time</strong><span>Frozen instant, moving eye</span></figcaption>
+      </figure>
+      <figure class="motion-card reveal" data-motion="fpv">
+        <div class="motion-preview scene-f"><div class="scene-subject"></div></div>
+        <figcaption><strong>FPV Drone</strong><span>Dive, bank and thread the gap</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ══════════ HOW IT WORKS ══════════ -->
+  <section class="section section-alt" id="how">
+    <div class="section-head reveal">
+      <span class="kicker">Workflow</span>
+      <h2>From idea to screen in three moves</h2>
+    </div>
+    <ol class="steps">
+      <li class="reveal">
+        <span class="step-num">01</span>
+        <h3>Write the scene</h3>
+        <p>&ldquo;A monk walks across a salt flat at dawn, red robes in the wind.&rdquo; Plain words. No jargon needed.</p>
+      </li>
+      <li class="reveal">
+        <span class="step-num">02</span>
+        <h3>Choose the shot</h3>
+        <p>Pick a camera motion and a look &mdash; anamorphic, 16mm grain, neon noir &mdash; like choosing a lens from a kit.</p>
+      </li>
+      <li class="reveal">
+        <span class="step-num">03</span>
+        <h3>Roll</h3>
+        <p>YetsyAI renders your shot in seconds. Iterate takes like a director, keep the one that sings.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ══════════ GALLERY ══════════ -->
+  <section class="section" id="gallery">
+    <div class="section-head reveal">
+      <span class="kicker">Made with YetsyAI</span>
+      <h2>Stills from the community</h2>
+    </div>
+    <div class="gallery">
+      <figure class="shot reveal still-1"><figcaption>Neon monsoon · Tokyo</figcaption><span class="shot-tag">0:08</span></figure>
+      <figure class="shot reveal still-2 tall"><figcaption>Salt flat pilgrimage</figcaption><span class="shot-tag">0:12</span></figure>
+      <figure class="shot reveal still-3"><figcaption>Deep sea launch</figcaption><span class="shot-tag">0:06</span></figure>
+      <figure class="shot reveal still-4"><figcaption>Golden hour interstate</figcaption><span class="shot-tag">0:10</span></figure>
+      <figure class="shot reveal still-5 tall"><figcaption>Glass cathedral</figcaption><span class="shot-tag">0:09</span></figure>
+      <figure class="shot reveal still-6"><figcaption>Ember festival</figcaption><span class="shot-tag">0:07</span></figure>
+    </div>
+  </section>
+
+  <!-- ══════════ PRICING ══════════ -->
+  <section class="section section-alt" id="pricing">
+    <div class="section-head reveal">
+      <span class="kicker">Pricing</span>
+      <h2>Start free. Scale when it clicks.</h2>
+    </div>
+    <div class="tiers">
+      <div class="tier reveal">
+        <h3>Scout</h3>
+        <p class="price">$0<span>/mo</span></p>
+        <ul>
+          <li>25 credits monthly</li>
+          <li>720p renders</li>
+          <li>6 camera motions</li>
+          <li>Community gallery</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Start free</a>
+      </div>
+      <div class="tier tier-featured reveal">
+        <span class="tier-flag">Most popular</span>
+        <h3>Director</h3>
+        <p class="price">$29<span>/mo</span></p>
+        <ul>
+          <li>1,000 credits monthly</li>
+          <li>4K renders, no watermark</li>
+          <li>All 40+ camera motions</li>
+          <li>Style presets &amp; LUTs</li>
+          <li>Priority render queue</li>
+        </ul>
+        <a href="#" class="btn btn-primary">Go Director</a>
+      </div>
+      <div class="tier reveal">
+        <h3>Studio</h3>
+        <p class="price">$99<span>/mo</span></p>
+        <ul>
+          <li>Unlimited standard renders</li>
+          <li>Team seats &amp; shared library</li>
+          <li>API access</li>
+          <li>Commercial license</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Contact sales</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ FINAL CTA ══════════ -->
+  <section class="cta">
+    <div class="cta-inner reveal">
+      <h2>The camera is in your head.<br />We just built the crew.</h2>
+      <a href="#" class="btn btn-primary btn-lg">Start creating — it's free</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="brand"><span class="brand-mark"></span> YETSYAI</span>
+      <p>YetsyAI — an AI filmmaking studio in your browser. Early preview.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
