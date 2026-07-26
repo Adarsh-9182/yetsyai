@@ -1,0 +1,16 @@
+{
+  "name": "yetsyai-habit-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A minimal, offline-first habit tracker with streaks, analytics, and weekly reports.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve -l 5173 .",
+    "test": "node js/logic.test.mjs",
+    "test:e2e": "node js/smoke.test.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.48.0"
+  }
+}
