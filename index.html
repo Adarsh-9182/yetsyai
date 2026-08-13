@@ -2,203 +2,536 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YetsyAI — Cinematic AI Video</title>
-  <meta name="description" content="Direct impossible shots. Cinematic AI video with real camera language — no camera required." />
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>NutritiScan — Your AI Doctor</title>
+  <meta name="description" content="NutritiScan — an AI doctor and personal health intelligence platform. Understand symptoms, reports, medications and test results through a calm, trustworthy conversation." />
+  <meta name="theme-color" content="#f7f6f3" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="nutritiscan.css" />
 </head>
 <body>
 
-  <!-- ══════════ NAV ══════════ -->
-  <header class="nav" id="nav">
-    <div class="nav-inner">
-      <a class="brand" href="#">
-        <span class="brand-mark"></span>
-        YETSYAI
-      </a>
-      <nav class="nav-links">
-        <a href="#motions">Motions</a>
-        <a href="#how">How it works</a>
-        <a href="#gallery">Gallery</a>
-        <a href="#pricing">Pricing</a>
-      </nav>
-      <a href="#pricing" class="btn btn-primary btn-sm">Start creating</a>
+<!-- ═══════════ ICON SPRITE ═══════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5h3l2-5 3 9 2.5-6 1.5 2h5"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6h5v6"/></symbol>
+    <symbol id="i-stethoscope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3v5a4 4 0 0 0 8 0V3"/><path d="M4.5 3H3m1.5 0H6M11 3H9.5m3 0H14"/><path d="M8.5 12v2a5 5 0 0 0 5 5h.5a4 4 0 0 0 4-4v-2"/><circle cx="18" cy="10" r="2"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.6-9.2-9A4.8 4.8 0 0 1 12 6a4.8 4.8 0 0 1 9.2 5c-2.2 4.4-9.2 9-9.2 9Z"/><path d="M3.5 12h4l1.5-3 2 5 1.5-2h8"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4M9 21h6"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.2"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8l4 4v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v4h4"/><path d="M8 12h8M8 16h6"/></symbol>
+    <symbol id="i-pill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5 15.5 15.5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 20 5l-4 15-4-6-8-2Z"/><path d="m12 14 4-4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v5M12 17.5v.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></symbol>
+    <symbol id="i-check-c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.5"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.5A3 3 0 0 0 6 18a3 3 0 0 0 3 2V4Z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.5A3 3 0 0 1 18 18a3 3 0 0 1-3 2V4Z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h3l1.5 5-2 1.5a12 12 0 0 0 6 6l1.5-2 5 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 3 3 7-8"/><path d="M16 7h4v4"/></symbol>
+    <symbol id="i-lab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v6l-5 9a1.5 1.5 0 0 0 1.3 2.2h13.4A1.5 1.5 0 0 0 20 18l-5-9V3"/><path d="M8 3h8M7.5 14h9"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6m0 9.6-7.6-3.6"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18 10l-4-4L4 16v4Z"/><path d="m13 7 4 4"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5 4 5 9a5 5 0 0 1-10 0c0-1.5.5-2.5 1.5-3.5C9 10 10 12 12 12c0-3-1-5 0-9Z"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.4 4.6L18 10l-4.6 1.4L12 16l-1.4-4.6L6 10l4.6-1.4L12 4Z"/><path d="M18.5 15.5l.6 2 2 .6-2 .6-.6 2-.6-2-2-.6 2-.6.6-2Z"/></symbol>
+  </defs>
+</svg>
+
+<!-- ═══════════ APP SHELL ═══════════ -->
+<div class="app" id="app" data-view="home" data-context="off">
+
+  <!-- ── LEFT RAIL ── -->
+  <div class="rail-scrim" data-close-rail></div>
+  <aside class="rail">
+    <div class="brand">
+      <span class="brand-mark"><svg><use href="#i-logo"/></svg></span>
+      <div>
+        <div class="brand-name">Nutriti<b>Scan</b></div>
+        <div class="brand-sub">AI Doctor</div>
+      </div>
     </div>
-  </header>
 
-  <!-- ══════════ HERO ══════════ -->
-  <section class="hero">
-    <canvas id="field"></canvas>
-    <div class="hero-vignette"></div>
-    <div class="hero-content">
-      <span class="badge reveal">● &nbsp;v2.0 — now rendering in 4K</span>
-      <h1 class="reveal">Direct impossible shots.<br /><em>No camera required.</em></h1>
-      <p class="lede reveal">
-        Type a scene. Pick a camera move — crash zoom, FPV drone, bullet time.
-        YetsyAI turns your words into cinema-grade video in seconds.
-      </p>
+    <button class="rail-new" data-nav="chat" data-fresh="1">
+      <svg><use href="#i-plus"/></svg> New consultation
+    </button>
 
-      <div class="prompt-bar reveal" id="promptBar">
-        <span class="prompt-icon">✦</span>
-        <span class="prompt-text" id="promptText"></span><span class="caret"></span>
-        <button class="btn btn-primary" id="generateBtn">Generate</button>
+    <button class="nav-item accent" data-nav="home"><svg><use href="#i-home"/></svg> Home</button>
+    <button class="nav-item" data-nav="chat"><svg><use href="#i-stethoscope"/></svg> AI Doctor</button>
+    <button class="nav-item" data-nav="health"><svg><use href="#i-heart"/></svg> Health</button>
+    <button class="nav-item" data-nav="history"><svg><use href="#i-history"/></svg> History</button>
+    <button class="nav-item" data-nav="trust"><svg><use href="#i-shield"/></svg> Trust &amp; Safety</button>
+
+    <div class="rail-label">Recent</div>
+    <div class="rail-convos" id="railConvos">
+      <div class="convo-item" data-open-convo="chest"><span class="t">Chest pain assessment</span><span class="d">Just now</span></div>
+      <div class="convo-item" data-open-convo="headache"><span class="t">Headache assessment</span><span class="d">Aug 13</span></div>
+      <div class="convo-item" data-open-convo="report"><span class="t">Blood report review</span><span class="d">Aug 10</span></div>
+      <div class="convo-item" data-open-convo="med"><span class="t">Medication question</span><span class="d">Aug 8</span></div>
+      <div class="convo-item" data-open-convo="skin"><span class="t">Skin concern</span><span class="d">Aug 2</span></div>
+    </div>
+
+    <div class="rail-foot">
+      <button class="userchip" data-nav="profile" style="width:100%;border:none;background:none;text-align:left">
+        <span class="avatar">AB</span>
+        <div><div class="nm">Adarsh B.</div><div class="em">Personal health context</div></div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── CENTER STAGE ── -->
+  <main class="stage">
+
+    <!-- ════ HOME ════ -->
+    <section class="view active" data-view-name="home">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Home</h2>
+        <div class="spacer"></div>
+        <button class="iconbtn" data-open-search title="Search"><svg><use href="#i-search"/></svg></button>
+      </div>
+      <div class="scroll home-scroll">
+        <div class="hero">
+          <span class="hero-eyebrow"><span class="dot"></span> NutritiScan is ready</span>
+          <h1>How are you feeling today?</h1>
+          <p class="lede">Tell me what's going on. I'll help you understand what might be happening and what to do next.</p>
+
+          <div class="composer">
+            <div class="composer-input">
+              <textarea id="homeInput" rows="1" placeholder="Describe your symptoms…"></textarea>
+              <button class="send-btn" id="homeSend" disabled><svg><use href="#i-send"/></svg></button>
+            </div>
+            <div class="composer-actions">
+              <button class="act-chip" data-action="voice"><svg><use href="#i-mic"/></svg> <span>Voice</span></button>
+              <button class="act-chip" data-action="image"><svg><use href="#i-camera"/></svg> <span>Image</span></button>
+              <button class="act-chip" data-nav="report"><svg><use href="#i-doc"/></svg> <span>Medical report</span></button>
+              <button class="act-chip" data-nav="meds"><svg><use href="#i-pill"/></svg> <span>Medication</span></button>
+              <button class="act-chip" data-open-search><svg><use href="#i-plus"/></svg> <span>More</span></button>
+            </div>
+          </div>
+
+          <div class="suggests" id="suggests">
+            <button class="suggest" data-prompt="I've had a headache since yesterday.">I've had a headache since yesterday</button>
+            <button class="suggest" data-prompt="I have chest pain since this morning.">Chest pain since this morning</button>
+            <button class="suggest" data-prompt="Can you explain my blood report?" data-go="report">Explain my blood report</button>
+            <button class="suggest" data-prompt="I have stomach pain after eating.">Stomach pain after eating</button>
+            <button class="suggest" data-prompt="I have fever and a sore throat.">Fever and sore throat</button>
+          </div>
+
+          <div class="hero-safety"><svg><use href="#i-lock"/></svg> Private by default · NutritiScan can make mistakes — confirm important decisions with a clinician.</div>
+        </div>
+
+        <div class="home-lower">
+          <div class="home-lower-in">
+            <div class="section-eyebrow">For you</div>
+            <div class="proactive-grid" id="proactiveGrid">
+              <button class="proactive" data-nav="report">
+                <span class="ic"><svg><use href="#i-doc"/></svg></span>
+                <div class="t">Blood report waiting to be reviewed</div>
+                <div class="d">Uploaded Aug 10 · Hemoglobin flagged below range.</div>
+                <div class="go">Analyze report <svg width="14" height="14"><use href="#i-arrow"/></svg></div>
+              </button>
+              <button class="proactive" data-prompt="I've been getting recurring headaches recently.">
+                <span class="ic"><svg><use href="#i-brain"/></svg></span>
+                <div class="t">You mentioned recurring headaches</div>
+                <div class="d">Continue the assessment where you left off.</div>
+                <div class="go">Continue assessment <svg width="14" height="14"><use href="#i-arrow"/></svg></div>
+              </button>
+              <button class="proactive" data-nav="meds">
+                <span class="ic"><svg><use href="#i-pill"/></svg></span>
+                <div class="t">Medication list updated yesterday</div>
+                <div class="d">Review your current medications and interactions.</div>
+                <div class="go">Review medications <svg width="14" height="14"><use href="#i-arrow"/></svg></div>
+              </button>
+            </div>
+
+            <div class="section-eyebrow">Health overview</div>
+            <div class="mini-grid">
+              <div class="mini"><div class="lbl"><svg><use href="#i-stethoscope"/></svg> Recent symptoms</div><div class="val">2 <small>this week</small></div></div>
+              <div class="mini"><div class="lbl"><svg><use href="#i-pill"/></svg> Active medications</div><div class="val">2</div></div>
+              <div class="mini"><div class="lbl"><svg><use href="#i-doc"/></svg> Recent reports</div><div class="val">1 <small>needs review</small></div></div>
+              <div class="mini"><div class="lbl"><svg><use href="#i-alert"/></svg> Health alerts</div><div class="val">1</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ AI DOCTOR CHAT ════ -->
+    <section class="view" data-view-name="chat">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <span class="brand-mark" style="width:32px;height:32px"><svg><use href="#i-logo"/></svg></span>
+        <div>
+          <h2 id="chatTitle">AI Doctor</h2>
+          <div class="sub" id="chatSub">Listening · not a substitute for emergency care</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="iconbtn" data-action="voice" title="Voice consultation"><svg><use href="#i-mic"/></svg></button>
+        <button class="iconbtn" id="ctxToggle" title="Context panel"><svg><use href="#i-heart"/></svg></button>
       </div>
 
-      <div class="hero-meta reveal">
-        <span>No filming</span><i>·</i><span>No editing suite</span><i>·</i><span>Just direction</span>
+      <div class="scroll chat-scroll">
+        <div class="chat-thread" id="thread"><!-- messages injected --></div>
       </div>
-    </div>
-    <div class="film-grain"></div>
-  </section>
 
-  <!-- ══════════ MARQUEE ══════════ -->
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee-track" id="marqueeTrack">
-      <span>CRASH ZOOM</span><span>◆</span><span>DOLLY IN</span><span>◆</span>
-      <span>ORBIT</span><span>◆</span><span>WHIP PAN</span><span>◆</span>
-      <span>BULLET TIME</span><span>◆</span><span>FPV DRONE</span><span>◆</span>
-      <span>CRANE UP</span><span>◆</span><span>SNORRICAM</span><span>◆</span>
-      <span>ROBO ARM</span><span>◆</span><span>SUPER DOLLY</span><span>◆</span>
+      <div class="dock">
+        <div class="dock-in">
+          <div class="dock-composer">
+            <button class="mini-act" data-action="image" title="Add image"><svg><use href="#i-camera"/></svg></button>
+            <button class="mini-act" data-nav="report" title="Add report"><svg><use href="#i-doc"/></svg></button>
+            <textarea id="chatInput" rows="1" placeholder="Describe your symptoms…"></textarea>
+            <button class="mini-act" data-action="voice" title="Voice"><svg><use href="#i-mic"/></svg></button>
+            <button class="send-btn" id="chatSend" disabled><svg><use href="#i-send"/></svg></button>
+          </div>
+          <div class="dock-disc">NutritiScan provides health information, not a diagnosis. In an emergency, call your local emergency number.</div>
+        </div>
+      </div>
+
+      <!-- EMERGENCY overlay -->
+      <div class="emergency" id="emergency">
+        <div class="em-inner">
+          <div class="em-badge"><svg><use href="#i-alert"/></svg></div>
+          <h1>This needs urgent medical attention</h1>
+          <p>Some of the symptoms you've described can be associated with serious conditions that cannot be safely evaluated through chat.</p>
+          <div class="em-actions">
+            <button class="em-call" onclick="NS.toast('This is a prototype — in a real emergency, call your local emergency number.')"><svg><use href="#i-phone"/></svg> Get emergency help now</button>
+            <button class="btn btn-ghost btn-lg" data-nav="handoff">Show symptoms summary</button>
+          </div>
+          <div class="em-flags">
+            <div class="h">Why NutritiScan is escalating</div>
+            <ul id="emFlags"></ul>
+          </div>
+          <button class="em-dismiss" id="emDismiss">This was a mistake — return to conversation</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ HEALTH (dashboard / profile / memory hub) ════ -->
+    <section class="view" data-view-name="health">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Health</h2>
+        <div class="spacer"></div>
+        <button class="iconbtn" data-nav="timeline" title="Timeline"><svg><use href="#i-clock"/></svg></button>
+      </div>
+      <div class="scroll"><div class="wrap wrap-wide">
+        <div class="page-head">
+          <h1>Health overview</h1>
+          <p>Your personal health context. Everything here is under your control.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-alert"/></svg><h3>Health alerts</h3></div>
+          <div class="panel-body pad0">
+            <div class="biomarker" style="grid-template-columns:auto 1fr auto">
+              <span class="med-pill" style="background:var(--amber-soft);color:var(--amber)"><svg><use href="#i-drop"/></svg></span>
+              <div><div class="bm-name">Hemoglobin below reference range</div><div class="bm-sub">From blood report · Aug 10</div></div>
+              <button class="btn btn-ghost btn-sm" data-nav="report">Review</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-user"/></svg><h3>Personal information</h3><div class="spacer"></div><button class="iconbtn" data-nav="profile"><svg><use href="#i-edit"/></svg></button></div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div class="ctx-row"><span>Age</span><b>29</b></div>
+              <div class="ctx-row"><span>Sex</span><b>Male</b></div>
+              <div class="ctx-row"><span>Height</span><b>178 cm</b></div>
+              <div class="ctx-row"><span>Weight</span><b>74 kg</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-pill"/></svg><h3>Active medications</h3><div class="spacer"></div><button class="btn btn-ghost btn-sm" data-nav="meds">Manage</button></div>
+          <div class="panel-body pad0" id="healthMeds"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-brain"/></svg><h3>NutritiScan Memory</h3><div class="spacer"></div><span class="ctx-tag" id="memCount">3 memories</span></div>
+          <div class="panel-body pad0" id="healthMemory"></div>
+          <div class="panel-body" style="border-top:1px solid var(--line-2)">
+            <p style="font-size:.82rem;color:var(--ink-3)">Information NutritiScan can use to personalize your conversations. You can edit, delete, or turn off any memory at any time.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-lock"/></svg><h3>Privacy controls</h3></div>
+          <div class="panel-body" id="privacyControls"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ════ HISTORY ════ -->
+    <section class="view" data-view-name="history">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Conversation history</h2>
+        <div class="spacer"></div>
+        <button class="iconbtn" data-open-search><svg><use href="#i-search"/></svg></button>
+      </div>
+      <div class="scroll"><div class="wrap">
+        <div class="page-head"><h1>Your consultations</h1><p>Every conversation is saved privately and is fully searchable.</p></div>
+        <div class="panel"><div class="panel-body pad0" id="historyList"></div></div>
+      </div></div>
+    </section>
+
+    <!-- ════ TRUST & SAFETY ════ -->
+    <section class="view" data-view-name="trust">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Trust &amp; Safety</h2>
+      </div>
+      <div class="scroll"><div class="wrap wrap-wide">
+        <div class="trust-banner">
+          <svg><use href="#i-shield"/></svg>
+          <div>
+            <h3>NutritiScan can make mistakes</h3>
+            <p>NutritiScan helps you understand your health, but it is not a doctor and does not provide a diagnosis. Important medical decisions should always be confirmed with a qualified healthcare professional.</p>
+          </div>
+        </div>
+        <div class="trust-grid">
+          <div class="trust-card"><div class="ic"><svg><use href="#i-brain"/></svg></div><h4>How NutritiScan works</h4><p>It reasons over your described symptoms, history and reports to explain possibilities and next steps — never a definitive diagnosis.</p></div>
+          <div class="trust-card"><div class="ic"><svg><use href="#i-info"/></svg></div><h4>AI limitations</h4><p>It cannot examine you, run tests, or account for everything a clinician would. Uncertainty is always shown clearly.</p></div>
+          <div class="trust-card"><div class="ic"><svg><use href="#i-alert"/></svg></div><h4>Medical safety</h4><p>Emergency and high-risk patterns trigger a clear safety interface that prioritizes getting you appropriate care.</p></div>
+          <div class="trust-card"><div class="ic"><svg><use href="#i-lock"/></svg></div><h4>Data protection</h4><p>Your health data is private by default. You control what is remembered and can delete it at any time.</p></div>
+          <div class="trust-card"><div class="ic"><svg><use href="#i-book"/></svg></div><h4>Evidence</h4><p>Medical explanations reference established clinical guidelines and trusted medical organizations.</p></div>
+          <div class="trust-card"><div class="ic"><svg><use href="#i-stethoscope"/></svg></div><h4>Human clinician involvement</h4><p>NutritiScan is designed to bridge you to real care, generating handoff summaries for your clinician.</p></div>
+        </div>
+        <div class="panel" style="margin-top:20px">
+          <div class="panel-head"><svg><use href="#i-book"/></svg><h3>Evidence &amp; sources</h3></div>
+          <div class="panel-body">
+            <div class="ev-item"><div class="src">Managing acute chest pain</div><div class="meta">National clinical guideline · Reviewed 2024</div><div class="desc">Guidance on assessing chest pain and identifying features that require urgent evaluation.</div></div>
+            <div class="ev-item"><div class="src">Iron deficiency anaemia</div><div class="meta">Peer-reviewed clinical review · 2023</div><div class="desc">Reference ranges and common causes of low hemoglobin.</div></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:22px"><button class="btn btn-ghost" onclick="NS.toast('Thanks — issue reporting is a prototype.')"><svg><use href="#i-alert"/></svg> Report an issue</button></div>
+      </div></div>
+    </section>
+
+    <!-- ════ MEDICAL REPORT ANALYZER ════ -->
+    <section class="view" data-view-name="report">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Medical report analyzer</h2>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-sm" data-nav="chat" data-fresh="1"><svg><use href="#i-stethoscope"/></svg> Ask about this</button>
+      </div>
+      <div class="scroll"><div class="wrap">
+        <div class="panel">
+          <div class="panel-body">
+            <div class="upload-zone" id="uploadZone">
+              <div class="uic"><svg><use href="#i-doc"/></svg></div>
+              <h4>Upload a medical report</h4>
+              <p>NutritiScan converts complex medical language into clear explanations.</p>
+              <button class="btn btn-primary btn-sm" id="loadSample"><svg><use href="#i-sparkles"/></svg> Load sample blood report</button>
+              <div class="upload-types">
+                <span class="utype">Blood tests</span><span class="utype">MRI</span><span class="utype">CT</span><span class="utype">X-ray</span><span class="utype">ECG</span><span class="utype">Prescriptions</span><span class="utype">Lab results</span><span class="utype">Discharge summary</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="reportResult" style="display:none">
+          <div class="page-head" style="margin-top:6px">
+            <h1>Your blood report</h1>
+            <p>Complete blood count · Collected Aug 10, 2026 · <span style="color:var(--amber);font-weight:600">1 value outside range</span></p>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><svg><use href="#i-lab"/></svg><h3>Results</h3><div class="spacer"></div><span style="font-size:.78rem;color:var(--ink-4)">Tap a value for detail</span></div>
+            <div class="panel-body pad0" id="biomarkers"></div>
+          </div>
+          <div class="disclaimer"><svg><use href="#i-info"/></svg><div>NutritiScan explains what your report shows — it does not diagnose. Discuss these results with your doctor, who can interpret them alongside your full history.</div></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ════ LAB RESULT DETAIL / TREND ════ -->
+    <section class="view" data-view-name="labdetail">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <button class="iconbtn" data-nav="report" title="Back"><svg style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
+        <h2 id="labTitle">Biomarker</h2>
+      </div>
+      <div class="scroll"><div class="wrap" id="labDetailBody"></div></div>
+    </section>
+
+    <!-- ════ MEDICATION ASSISTANT ════ -->
+    <section class="view" data-view-name="meds">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Medication assistant</h2>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-sm" onclick="NS.toast('Add medication — prototype')"><svg><use href="#i-plus"/></svg> Add</button>
+      </div>
+      <div class="scroll"><div class="wrap">
+        <div class="page-head"><h1>Your medications</h1><p>Understand what you take, why, and how your medicines interact. Never change prescription medication without professional guidance.</p></div>
+
+        <div class="interaction" style="margin-bottom:16px">
+          <svg><use href="#i-alert"/></svg>
+          <div><div class="it">Possible interaction to review</div><div class="id">Taking Ibuprofen regularly alongside Lisinopril may reduce its blood-pressure effect and affect kidney function in some people. Worth mentioning to your doctor or pharmacist.</div></div>
+        </div>
+
+        <div class="panel"><div class="panel-body pad0" id="medsList"></div></div>
+
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-stethoscope"/></svg><h3>Ask about a medication</h3></div>
+          <div class="panel-body">
+            <div class="suggests" style="justify-content:flex-start;margin:0">
+              <button class="suggest" data-prompt="What is Lisinopril and why was it prescribed?">What is this medicine?</button>
+              <button class="suggest" data-prompt="Can I take Ibuprofen and Lisinopril together?">Can I take these together?</button>
+              <button class="suggest" data-prompt="What are common side effects of Lisinopril?">Common side effects?</button>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ════ TIMELINE ════ -->
+    <section class="view" data-view-name="timeline">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <button class="iconbtn" data-nav="health"><svg style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
+        <h2>Health timeline</h2>
+      </div>
+      <div class="scroll"><div class="wrap">
+        <div class="page-head"><h1>Your health timeline</h1><p>NutritiScan uses this timeline to understand how your health changes over time.</p></div>
+        <div class="tl-month">August 2026</div>
+        <div class="timeline" id="timeline"></div>
+      </div></div>
+    </section>
+
+    <!-- ════ DOCTOR HANDOFF ════ -->
+    <section class="view" data-view-name="handoff">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <button class="iconbtn" data-nav="chat"><svg style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
+        <h2>Continue with a clinician</h2>
+      </div>
+      <div class="scroll"><div class="wrap">
+        <div class="page-head"><h1>Doctor handoff summary</h1><p>A concise summary you can share with a healthcare professional, so you don't have to start from scratch.</p></div>
+        <div class="handoff" id="handoffCard"></div>
+      </div></div>
+    </section>
+
+    <!-- ════ PROFILE / SETTINGS ════ -->
+    <section class="view" data-view-name="profile">
+      <div class="topbar">
+        <button class="iconbtn menu-btn" data-open-rail><svg><use href="#i-menu"/></svg></button>
+        <h2>Profile &amp; settings</h2>
+      </div>
+      <div class="scroll"><div class="wrap">
+        <div class="page-head"><h1>Your profile</h1><p>NutritiScan uses this to give you safer, more personal guidance. Nothing is required.</p></div>
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-user"/></svg><h3>Personal information</h3></div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div class="field"><label>Age</label><input value="29"/></div>
+              <div class="field"><label>Sex</label><select><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
+              <div class="field"><label>Height (cm)</label><input value="178"/></div>
+              <div class="field"><label>Weight (kg)</label><input value="74"/></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-heart"/></svg><h3>Medical history</h3></div>
+          <div class="panel-body">
+            <div class="field" style="margin-bottom:12px"><label>Known conditions</label><input value="Hypertension"/></div>
+            <div class="field" style="margin-bottom:12px"><label>Allergies</label><input value="Penicillin"/></div>
+            <div class="field"><label>Family history</label><input value="Type 2 diabetes (father)"/></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><svg><use href="#i-lock"/></svg><h3>Settings</h3></div>
+          <div class="panel-body" id="settingsBody"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px"><button class="btn btn-ghost" data-nav="trust"><svg><use href="#i-shield"/></svg> Trust &amp; Safety Center</button></div>
+      </div></div>
+    </section>
+
+  </main>
+
+  <!-- ── RIGHT CONTEXT PANEL ── -->
+  <aside class="context" id="context">
+    <div class="ctx-title">Current context</div>
+    <div class="ctx-card">
+      <h4><svg><use href="#i-stethoscope"/></svg> Symptoms</h4>
+      <div id="ctxSymptoms"><div class="ctx-empty">No active symptoms in this conversation yet.</div></div>
+    </div>
+    <div class="ctx-card">
+      <h4><svg><use href="#i-pill"/></svg> Medications</h4>
+      <div><span class="ctx-tag">Lisinopril 10mg</span><span class="ctx-tag">Ibuprofen 200mg</span></div>
+    </div>
+    <div class="ctx-card">
+      <h4><svg><use href="#i-doc"/></svg> Recent reports</h4>
+      <div class="ctx-row"><span>Blood report</span><b style="color:var(--amber)">Review</b></div>
+    </div>
+    <div class="ctx-card">
+      <h4><svg><use href="#i-brain"/></svg> Relevant history</h4>
+      <div><span class="ctx-tag">Hypertension</span><span class="ctx-tag">Penicillin allergy</span></div>
+    </div>
+  </aside>
+
+  <!-- Mobile bottom tab bar -->
+  <nav class="tabbar">
+    <button class="tab active" data-nav="home"><svg><use href="#i-home"/></svg> Home</button>
+    <button class="tab" data-nav="history"><svg><use href="#i-history"/></svg> History</button>
+    <button class="tab doctor" data-nav="chat" data-fresh="1"><span class="tab-fab"><svg><use href="#i-stethoscope"/></svg></span> Doctor</button>
+    <button class="tab" data-nav="health"><svg><use href="#i-heart"/></svg> Health</button>
+    <button class="tab" data-nav="profile"><svg><use href="#i-user"/></svg> Profile</button>
+  </nav>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+<div class="scrim" id="voiceScrim">
+  <div class="modal voice-modal listening" id="voiceModal">
+    <div class="voice-orb"><svg><use href="#i-mic"/></svg></div>
+    <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="voice-status" id="voiceStatus">Listening…</div>
+    <div class="voice-sub" id="voiceSub">Tell me what's bothering you.</div>
+    <div class="voice-controls">
+      <button class="voice-end" id="voiceEnd"><svg><use href="#i-x"/></svg></button>
     </div>
   </div>
+</div>
 
-  <!-- ══════════ CAMERA MOTIONS ══════════ -->
-  <section class="section" id="motions">
-    <div class="section-head reveal">
-      <span class="kicker">Camera language</span>
-      <h2>Motions a film crew would envy</h2>
-      <p>Every preset is a real cinematography move. Hover a card to preview the motion.</p>
+<div class="scrim" id="searchScrim">
+  <div class="modal" id="searchModal" style="max-width:520px">
+    <div class="search-box">
+      <svg><use href="#i-search"/></svg>
+      <input id="searchInput" placeholder="Search consultations, reports, medications…"/>
+      <button class="iconbtn" data-close-search style="border:none"><svg><use href="#i-x"/></svg></button>
     </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
 
-    <div class="motion-grid">
-      <figure class="motion-card reveal" data-motion="crash-zoom">
-        <div class="motion-preview scene-a"><div class="scene-subject"></div></div>
-        <figcaption><strong>Crash Zoom</strong><span>Violent push toward the subject</span></figcaption>
-      </figure>
-      <figure class="motion-card reveal" data-motion="dolly-out">
-        <div class="motion-preview scene-b"><div class="scene-subject"></div></div>
-        <figcaption><strong>Dolly Out</strong><span>Slow reveal of the wider world</span></figcaption>
-      </figure>
-      <figure class="motion-card reveal" data-motion="orbit">
-        <div class="motion-preview scene-c"><div class="scene-subject"></div></div>
-        <figcaption><strong>Orbit</strong><span>360° sweep around the subject</span></figcaption>
-      </figure>
-      <figure class="motion-card reveal" data-motion="whip-pan">
-        <div class="motion-preview scene-d"><div class="scene-subject"></div></div>
-        <figcaption><strong>Whip Pan</strong><span>Blur-fast horizontal snap</span></figcaption>
-      </figure>
-      <figure class="motion-card reveal" data-motion="bullet-time">
-        <div class="motion-preview scene-e"><div class="scene-subject"></div></div>
-        <figcaption><strong>Bullet Time</strong><span>Frozen instant, moving eye</span></figcaption>
-      </figure>
-      <figure class="motion-card reveal" data-motion="fpv">
-        <div class="motion-preview scene-f"><div class="scene-subject"></div></div>
-        <figcaption><strong>FPV Drone</strong><span>Dive, bank and thread the gap</span></figcaption>
-      </figure>
-    </div>
-  </section>
+<div class="scrim" id="imageScrim">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3>Image assessment</h3><button class="iconbtn" data-close-image style="border:none"><svg><use href="#i-x"/></svg></button></div>
+    <div class="modal-body" id="imageModalBody"></div>
+  </div>
+</div>
 
-  <!-- ══════════ HOW IT WORKS ══════════ -->
-  <section class="section section-alt" id="how">
-    <div class="section-head reveal">
-      <span class="kicker">Workflow</span>
-      <h2>From idea to screen in three moves</h2>
-    </div>
-    <ol class="steps">
-      <li class="reveal">
-        <span class="step-num">01</span>
-        <h3>Write the scene</h3>
-        <p>&ldquo;A monk walks across a salt flat at dawn, red robes in the wind.&rdquo; Plain words. No jargon needed.</p>
-      </li>
-      <li class="reveal">
-        <span class="step-num">02</span>
-        <h3>Choose the shot</h3>
-        <p>Pick a camera motion and a look &mdash; anamorphic, 16mm grain, neon noir &mdash; like choosing a lens from a kit.</p>
-      </li>
-      <li class="reveal">
-        <span class="step-num">03</span>
-        <h3>Roll</h3>
-        <p>YetsyAI renders your shot in seconds. Iterate takes like a director, keep the one that sings.</p>
-      </li>
-    </ol>
-  </section>
+<div class="toast" id="toast"><svg><use href="#i-check-c"/></svg><span id="toastMsg"></span></div>
 
-  <!-- ══════════ GALLERY ══════════ -->
-  <section class="section" id="gallery">
-    <div class="section-head reveal">
-      <span class="kicker">Made with YetsyAI</span>
-      <h2>Stills from the community</h2>
-    </div>
-    <div class="gallery">
-      <figure class="shot reveal still-1"><figcaption>Neon monsoon · Tokyo</figcaption><span class="shot-tag">0:08</span></figure>
-      <figure class="shot reveal still-2 tall"><figcaption>Salt flat pilgrimage</figcaption><span class="shot-tag">0:12</span></figure>
-      <figure class="shot reveal still-3"><figcaption>Deep sea launch</figcaption><span class="shot-tag">0:06</span></figure>
-      <figure class="shot reveal still-4"><figcaption>Golden hour interstate</figcaption><span class="shot-tag">0:10</span></figure>
-      <figure class="shot reveal still-5 tall"><figcaption>Glass cathedral</figcaption><span class="shot-tag">0:09</span></figure>
-      <figure class="shot reveal still-6"><figcaption>Ember festival</figcaption><span class="shot-tag">0:07</span></figure>
-    </div>
-  </section>
-
-  <!-- ══════════ PRICING ══════════ -->
-  <section class="section section-alt" id="pricing">
-    <div class="section-head reveal">
-      <span class="kicker">Pricing</span>
-      <h2>Start free. Scale when it clicks.</h2>
-    </div>
-    <div class="tiers">
-      <div class="tier reveal">
-        <h3>Scout</h3>
-        <p class="price">$0<span>/mo</span></p>
-        <ul>
-          <li>25 credits monthly</li>
-          <li>720p renders</li>
-          <li>6 camera motions</li>
-          <li>Community gallery</li>
-        </ul>
-        <a href="#" class="btn btn-ghost">Start free</a>
-      </div>
-      <div class="tier tier-featured reveal">
-        <span class="tier-flag">Most popular</span>
-        <h3>Director</h3>
-        <p class="price">$29<span>/mo</span></p>
-        <ul>
-          <li>1,000 credits monthly</li>
-          <li>4K renders, no watermark</li>
-          <li>All 40+ camera motions</li>
-          <li>Style presets &amp; LUTs</li>
-          <li>Priority render queue</li>
-        </ul>
-        <a href="#" class="btn btn-primary">Go Director</a>
-      </div>
-      <div class="tier reveal">
-        <h3>Studio</h3>
-        <p class="price">$99<span>/mo</span></p>
-        <ul>
-          <li>Unlimited standard renders</li>
-          <li>Team seats &amp; shared library</li>
-          <li>API access</li>
-          <li>Commercial license</li>
-        </ul>
-        <a href="#" class="btn btn-ghost">Contact sales</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════ FINAL CTA ══════════ -->
-  <section class="cta">
-    <div class="cta-inner reveal">
-      <h2>The camera is in your head.<br />We just built the crew.</h2>
-      <a href="#" class="btn btn-primary btn-lg">Start creating — it's free</a>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      <span class="brand"><span class="brand-mark"></span> YETSYAI</span>
-      <p>YetsyAI — an AI filmmaking studio in your browser. Early preview.</p>
-    </div>
-  </footer>
-
-  <script src="app.js"></script>
+<script src="nutritiscan.js"></script>
 </body>
 </html>
