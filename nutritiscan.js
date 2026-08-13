@@ -850,7 +850,7 @@
     if (id==="med")    { NS.go("meds"); return; }
     if (id==="skin")   { NS.go("chat"); openImageAssessment(); return; }
     const map = { chest:"I have chest pain since this morning.", headache:"I've had a headache since yesterday.", stomach:"I have stomach pain after eating." };
-    Chat.reset(); Chat.start(map[id] || "I'd like to continue my assessment.");
+    NS.submit(map[id] || "I'd like to continue my assessment.", { fresh: true });
   }
 
   NS.toast = function (msg) {
@@ -906,8 +906,7 @@
     }, 3200);
     NS._v2 = setTimeout(()=>{
       scrim.classList.remove("on");
-      Chat.reset();
-      Chat.start("I've had a headache since yesterday and I'm sensitive to light.");
+      NS.submit("I've had a headache since yesterday and I'm sensitive to light.", { fresh: true });
     }, 5200);
   }
   function closeVoice() {
@@ -939,7 +938,7 @@
     const prompt = e.target.closest("[data-prompt]");
     if (prompt) {
       if (prompt.dataset.go==="report") { loadReport(); NS.go("report"); return; }
-      Chat.reset(); Chat.start(prompt.dataset.prompt); return;
+      NS.submit(prompt.dataset.prompt, { fresh: true }); return;
     }
     const act = e.target.closest("[data-action]");
     if (act) {
@@ -1011,9 +1010,162 @@
   $("#voiceEnd").addEventListener("click", closeVoice);
   window.addEventListener("keydown",(e)=>{ if(e.key==="Escape"){ $$(".scrim.on").forEach(s=>{s.classList.remove("on"); if(s.id==="voiceScrim")closeVoice();}); }});
 
+  /* ═══════════════════════ REAL AI BACKEND (Claude + RAG) ═══════════════════════
+     When the NutritiScan backend (ai/server.mjs) is reachable, chat is powered by
+     Claude (claude-opus-5) with a medical/safety system prompt and retrieval-
+     augmented grounding. When it isn't (e.g. the static GitHub Pages demo), we
+     fall back to the local deterministic engine so the prototype still works. */
+  NS.config = Object.assign({ backend: "", enabled: false },
+    (typeof window !== "undefined" && window.NS_CONFIG) || {});
+
+  (function detectBackend() {
+    // Same-origin by default; if the page is served by server.mjs, /api/health answers.
+    const base = NS.config.backend || (location.protocol.startsWith("http") ? location.origin : "");
+    if (!base) return;
+    fetch(base.replace(/\/$/, "") + "/api/health", { method: "GET" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => { if (j && j.ok) { NS.config.backend = base.replace(/\/$/, ""); NS.config.enabled = true; NS.config.model = j.model;
+        $("#chatSub") && ($("#chatSub").textContent = "Grounded in medical literature · confirm with a clinician"); } })
+      .catch(() => {});
+  })();
+
+  const patientContext = () => ({
+    age: 29, sex: "male",
+    conditions: ["hypertension"], allergies: ["penicillin"],
+    medications: DATA.meds.map((m) => `${m.name} ${m.dose}`),
+    memory: DATA.memory.filter((m) => m.on).map((m) => m.text),
+  });
+
+  const AIChat = {
+    history: [],
+    reset() { thread.innerHTML = ""; this.history = []; $("#emergency").classList.remove("on"); },
+    async consult(text, { fresh } = {}) {
+      NS.go("chat");
+      if (fresh) this.reset();
+      if (!this.history.length) thread.innerHTML = "";
+      bubbleUser(text);
+      this.history.push({ role: "user", content: text });
+      $("#chatTitle").textContent = "AI Doctor";
+      const th = thinking("Connecting to NutritiScan…");
+      try {
+        const res = await fetch(NS.config.backend + "/api/consult", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: this.history, patient: patientContext() }),
+        });
+        if (!res.ok || !res.body) throw new Error("backend");
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "", done = false, handled = false;
+        while (!done) {
+          const { value, done: d } = await reader.read(); done = d;
+          buf += dec.decode(value || new Uint8Array(), { stream: !done });
+          let idx;
+          while ((idx = buf.indexOf("\n\n")) >= 0) {
+            const chunk = buf.slice(0, idx); buf = buf.slice(idx + 2);
+            const ev = (chunk.match(/^event: (.*)$/m) || [])[1];
+            const dataLine = (chunk.match(/^data: (.*)$/m) || [])[1];
+            if (!dataLine) continue;
+            const data = JSON.parse(dataLine);
+            if (ev === "status") { th.innerHTML = `<div class="thinking"><span class="dots"><i></i><i></i><i></i></span> ${data.label}</div>`; scrollThread(); }
+            else if (ev === "final") { handled = true; this.renderFinal(th, data.payload, data.citations || []); }
+            else if (ev === "error") { throw new Error(data.message || "backend"); }
+          }
+        }
+        if (!handled) throw new Error("empty");
+      } catch (e) {
+        // graceful fallback to the offline engine
+        th.closest(".msg") && th.closest(".msg").remove();
+        this.history.pop();
+        NS.config.enabled = false;
+        Chat.start(text);
+      }
+    },
+    renderFinal(th, p, citations) {
+      this.history.push({ role: "assistant", content: p.reply || "" });
+      const symptoms = (p.handoff && p.handoff.symptoms) || [];
+      if (p.mode === "emergency") {
+        th.closest(".msg").remove();
+        buildHandoff(p.handoff);
+        triggerEmergency((p.emergency_flags && p.emergency_flags.length) ? p.emergency_flags : ["Potential emergency features described"]);
+        return;
+      }
+      const triMap = { green: "green", amber: "amber", red: "red" };
+      const confMap = { high: "high", moderate: "mod", insufficient: "low" };
+      let html = `<div class="ai-text"><p>${escapeHtml(p.reply || "")}</p></div>`;
+      if (p.mode === "assess") {
+        if (p.confidence) html = `<div class="ai-text"><p>${escapeHtml(p.reply || "")} ${RESP.confidence(confMap[p.confidence] || "low")}</p></div>`;
+        if (p.triage && triMap[p.triage]) html += RESP.triage(triMap[p.triage], triageText(p.triage));
+        if (p.causes && p.causes.length) html += RESP.causes(groupCauses(p.causes));
+        if (p.reasoning && p.reasoning.length) html += RESP.reasoning(p.reasoning.map((r) => ({ k: r.factor, v: r.value })));
+        if (p.next_steps && p.next_steps.length) html += RESP.steps(p.next_steps);
+        if (p.disclaimer) html += RESP.disclaimer(escapeHtml(p.disclaimer));
+        if ((p.evidence && p.evidence.length) || citations.length) html += aiEvidence(p.evidence, citations);
+        html += RESP.actions([{ label: "Continue with a clinician", ic: "i-share", primary: true, nav: "handoff" }, { label: "Save to health record", ic: "i-check", fn: "save" }]);
+        buildHandoff(p.handoff);
+        updateContextSymptoms(symptoms, p.triage);
+      } else if (p.mode === "ask" && p.followups && p.followups.length) {
+        html += aiFollowups(p.followups);
+        updateContextSymptoms(symptoms);
+      }
+      typeInto(th, html, 200).then(() => {
+        if (p.mode === "ask") wireAIFollowups(th);
+      });
+    },
+  };
+
+  function escapeHtml(s) { const d = document.createElement("div"); d.textContent = String(s == null ? "" : s); return d.innerHTML; }
+  function triageText(t) { return { green: "Based on what you've shared, there are no obvious emergency warning signs.", amber: "Your symptoms should be evaluated by a healthcare professional.", red: "These symptoms can indicate a medical emergency. Seek urgent care now." }[t] || ""; }
+  function groupCauses(list) {
+    const g = { common: [], important: [] };
+    list.forEach((c) => (g[c.group] || g.common).push({ n: escapeHtml(c.name), l: Math.max(1, Math.min(3, c.likelihood || 1)) }));
+    const out = [];
+    if (g.common.length) out.push({ kind: "common", label: "Common possibilities", items: g.common });
+    if (g.important.length) out.push({ kind: "important", label: "Less common but important", items: g.important });
+    return out;
+  }
+  function aiEvidence(evidence, citations) {
+    const items = (evidence && evidence.length ? evidence.map((e) => ({ src: e.title, meta: e.source + (e.url ? " · " + e.url : ""), desc: e.detail }))
+      : citations.slice(0, 3).map((c) => ({ src: c.title, meta: `${c.source}${c.year ? " · " + c.year : ""}`, desc: c.url || "" })));
+    return `<details class="evidence"><summary>${ic("i-book")} Why am I seeing this? · Sources</summary>
+      ${items.map((e) => `<div class="ev-item"><div class="src">${escapeHtml(e.src)}</div><div class="meta">${escapeHtml(e.meta)}</div><div class="desc">${escapeHtml(e.desc)}</div></div>`).join("")}</details>`;
+  }
+  function aiFollowups(followups) {
+    const blocks = followups.map((b, i) => `
+      <div class="qblock" data-block="q${i}" data-multi="${!!b.multi}">
+        <div class="q">${escapeHtml(b.question)}${b.multi ? `<span class="hint">Select all that apply</span>` : ""}</div>
+        <div class="opts">${b.options.map((o) => `<button class="opt" data-val="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join("")}</div>
+      </div>`).join("");
+    return `<div class="qcard">${blocks}<div class="qcard-foot"><button class="btn btn-primary btn-sm" data-continue disabled>Continue ${ic("i-arrow")}</button><span class="note">Answer only what's relevant.</span></div></div>`;
+  }
+  function wireAIFollowups(node) {
+    const qcard = node.querySelector(".qcard"); if (!qcard) return;
+    const contBtn = qcard.querySelector("[data-continue]");
+    qcard.addEventListener("click", (e) => {
+      const opt = e.target.closest(".opt"); if (!opt) return;
+      const block = opt.closest(".qblock");
+      if (block.dataset.multi === "true") opt.classList.toggle("sel");
+      else { block.querySelectorAll(".opt").forEach((o) => o.classList.remove("sel")); opt.classList.add("sel"); }
+      contBtn.disabled = !Array.from(qcard.querySelectorAll(".qblock")).every((bl) => bl.querySelector(".opt.sel"));
+    });
+    contBtn.addEventListener("click", () => {
+      const parts = Array.from(qcard.querySelectorAll(".qblock")).map((bl) => Array.from(bl.querySelectorAll(".opt.sel")).map((o) => o.dataset.val).join(", ")).filter(Boolean);
+      qcard.querySelectorAll(".opt:not(.sel)").forEach((o) => (o.style.opacity = ".45"));
+      qcard.querySelectorAll(".opt").forEach((o) => (o.style.pointerEvents = "none"));
+      qcard.querySelector(".qcard-foot").remove();
+      AIChat.consult(parts.join(" · "));
+    });
+  }
+
+  /* Unified entry point — real AI when available, offline engine otherwise. */
+  NS.submit = function (text, opts = {}) {
+    if (NS.config.enabled) return AIChat.consult(text, opts);
+    if (opts.fresh) Chat.reset();
+    return Chat.start(text);
+  };
+
   /* ───────────────────────── INIT ───────────────────────── */
-  wireComposer("#homeInput", "#homeSend", (v)=>{ Chat.reset(); Chat.start(v); });
-  wireComposer("#chatInput", "#chatSend", (v)=>Chat.start(v));
+  wireComposer("#homeInput", "#homeSend", (v)=>NS.submit(v, { fresh: true }));
+  wireComposer("#chatInput", "#chatSend", (v)=>NS.submit(v));
   $("#loadSample") && $("#loadSample").addEventListener("click", ()=>{ loadReport(); NS.toast("Report analyzed"); });
 
   renderMeds(); renderMemory(); renderHistory(); renderTimeline();

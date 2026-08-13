@@ -1,0 +1,13 @@
+{
+  "name": "nutritiscan-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "NutritiScan AI Doctor backend — Claude (claude-opus-5) with a medical/safety system prompt and retrieval-augmented grounding over open-access literature (Europe PMC / PubMed, arXiv).",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0"
+  }
+}
