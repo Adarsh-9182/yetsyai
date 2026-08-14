@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=Fraunces:opsz,wght@9..144,380;9..144,450;9..144,520&display=swap');
+@import './globals.base.css';
+
+/* Next.js root wiring — let the app shell own the full viewport */
+html, body { height: 100%; }
+#__next, main.__root { height: 100dvh; }
+
+/* Small refinements layered on top of the design system */
+.hero h1 { text-wrap: balance; }
+.page-head h1 { text-wrap: balance; }
+.badge-live { display:inline-flex; align-items:center; gap:7px; font-size:.72rem; font-weight:600; letter-spacing:.02em; color:var(--accent-ink); background:var(--accent-soft); border:1px solid var(--accent-line); padding:4px 10px; border-radius:20px; }
+.badge-live .d { width:6px;height:6px;border-radius:50%;background:var(--green); box-shadow:0 0 0 3px var(--green-soft); }
+.notice { max-width:660px; margin:18px auto 0; font-size:.8rem; color:var(--ink-3); background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:10px 14px; text-align:center; box-shadow:var(--shadow-xs); }
+.notice b { color:var(--ink); }
