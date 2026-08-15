@@ -1,0 +1,249 @@
+// NutritiScan database schema.
+// Runs on SQLite locally (no server needed). To move to Postgres later, change
+// `provider` to "postgresql" and point DATABASE_URL at your database — the
+// models below are written to port cleanly. Enum-like fields use String because
+// SQLite has no native enums; allowed values are documented inline.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  profile       HealthProfile?
+  goals         HealthGoal[]
+  meals         Meal[]
+  nutrition     NutritionRecord[]
+  conversations Conversation[]
+  insights      HealthInsight[]
+  symptoms      SymptomRecord[]
+  labReports    LabReport[]
+  medications   Medication[]
+  events        HealthEvent[]
+  aiInteractions AIInteraction[]
+  consents      Consent[]
+  auditLogs     AuditLog[]
+}
+
+model HealthProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ageYears      Int?
+  sex           String?  // "male" | "female" | "intersex" | "prefer_not_to_say"
+  heightCm      Float?
+  weightKg      Float?
+  activityLevel String?  // "sedentary" | "light" | "moderate" | "active" | "very_active"
+  sleepHours    Float?
+  dietPattern   String?  // "omnivore" | "vegetarian" | "vegan" | "eggetarian" | ...
+  allergies     String?  // JSON array of strings
+  preferences   String?  // JSON array of strings (cuisines, dislikes)
+  conditions    String?  // JSON array — existing conditions
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model HealthGoal {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   // "fat_loss" | "muscle_gain" | "maintenance" | "general_health" | ...
+  targetValue Float?
+  targetUnit  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Meal {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String?
+  loggedAt    DateTime   @default(now())
+  source      String     // "photo" | "text" | "barcode" | "search"
+  imageUrl    String?
+  rawInput    String?    // e.g. "2 rotis + 150g paneer + dal"
+  caloriesKcal Float?
+  proteinG    Float?
+  carbsG      Float?
+  fatG        Float?
+  fiberG      Float?
+  qualityScore Int?      // "Rate My Meal" 0–100
+  estimated   Boolean    @default(true)
+  items       FoodItem[]
+  createdAt   DateTime   @default(now())
+}
+
+model FoodItem {
+  id          String  @id @default(cuid())
+  mealId      String
+  meal        Meal    @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  name        String
+  quantity    String? // "2 pieces", "150 g"
+  caloriesKcal Float?
+  proteinG    Float?
+  carbsG      Float?
+  fatG        Float?
+  fiberG      Float?
+}
+
+model NutritionRecord {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime // day granularity
+  caloriesKcal Float    @default(0)
+  proteinG     Float    @default(0)
+  carbsG       Float    @default(0)
+  fatG         Float    @default(0)
+  fiberG       Float    @default(0)
+  waterMl      Float    @default(0)
+
+  @@unique([userId, date])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String       // "user" | "assistant" | "system"
+  content        String       // plain text, or JSON for structured assistant messages
+  structured     String?      // JSON: summary/causes/steps/warnings/questions/sources
+  agent          String?      // which agent produced it (triage/nutrition/safety/...)
+  safetyLevel    String?      // "none" | "caution" | "urgent" | "emergency"
+  createdAt      DateTime     @default(now())
+}
+
+model HealthInsight {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   // "protein_trend" | "hydration" | "fiber_pattern" | ...
+  title     String
+  body      String
+  metric    String?  // JSON with the numbers behind the insight
+  createdAt DateTime @default(now())
+}
+
+model SymptomRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  description String
+  severity    String?  // "mild" | "moderate" | "severe"
+  onset       String?
+  safetyLevel String?  // "none" | "caution" | "urgent" | "emergency"
+  loggedAt    DateTime @default(now())
+}
+
+model LabReport {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  fileUrl   String?
+  reportDate DateTime?
+  createdAt DateTime    @default(now())
+  results   LabResult[]
+}
+
+model LabResult {
+  id           String    @id @default(cuid())
+  reportId     String
+  report       LabReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  testName     String
+  value        String
+  unit         String?
+  refLow       Float?
+  refHigh      Float?
+  flag         String?   // "low" | "normal" | "high"
+  explanation  String?
+}
+
+model Medication {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  dose      String?
+  schedule  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model HealthEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   // "meal" | "symptom" | "weight" | "conversation" | "lab" | "visit" | ...
+  title     String
+  detail    String?
+  refId     String?  // id of the underlying record
+  occurredAt DateTime @default(now())
+}
+
+// A vetted medical/nutrition source used for citations. Populated by us —
+// the AI is never allowed to invent a Source row.
+model Source {
+  id          String   @id @default(cuid())
+  title       String
+  publisher   String?
+  url         String
+  publishedAt DateTime?
+  excerpt     String?
+  createdAt   DateTime @default(now())
+}
+
+// Observability: one row per AI call (see docs/ARCHITECTURE.md §AI observability).
+model AIInteraction {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  agent       String
+  model       String
+  inputKind   String   // "text" | "image" | "document"
+  latencyMs   Int?
+  inputTokens Int?
+  outputTokens Int?
+  safetyLevel String?
+  createdAt   DateTime @default(now())
+}
+
+model Consent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope     String   // "store_health_data" | "meal_photos" | "lab_reports" | ...
+  granted   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // "data_export" | "data_delete" | "login" | "profile_update" | ...
+  detail    String?
+  createdAt DateTime @default(now())
+}

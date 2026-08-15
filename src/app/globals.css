@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ──────────────────────────────────────────────────────────
+   One source of truth for the whole product. Values are HSL channels so
+   Tailwind's <alpha-value> works and a dark theme can be added later. */
+:root {
+  --bg: 40 20% 98%;          /* soft off-white */
+  --surface: 0 0% 100%;      /* cards */
+  --panel: 44 16% 96%;       /* alt sections */
+  --ink: 170 12% 12%;        /* deep charcoal, faint green undertone */
+  --muted: 172 7% 42%;       /* secondary text */
+  --line: 160 10% 90%;       /* hairline borders */
+  --accent: 174 64% 30%;     /* restrained clinical teal */
+  --accent-soft: 174 52% 94%;
+  --danger: 2 72% 50%;
+  --danger-soft: 6 82% 96%;
+  --warn: 34 92% 44%;
+  --success: 150 52% 38%;
+  --radius: 14px;
+}
+
+* {
+  border-color: hsl(var(--line));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: hsl(var(--bg));
+  color: hsl(var(--ink));
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular numerals for data/metrics (Apple-Health-like) */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

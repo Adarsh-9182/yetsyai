@@ -1,13 +1,23 @@
-# Secrets — NEVER commit your real API key
+# Secrets — NEVER commit real keys
 .env
+.env*.local
 
-# Dependencies (re-created by `npm install`)
-node_modules/
+# Dependencies
+/node_modules
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Prisma local database
+/prisma/*.db
+/prisma/*.db-journal
+
+# Local scratch / screenshots
+design-*.png
+shot.mjs
 
 # OS / editor noise
 .DS_Store
 *.log
-
-# Local design screenshots / scratch scripts
-design-*.png
-shot.mjs

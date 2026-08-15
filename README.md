@@ -1,75 +1,64 @@
 # NutritiScan
 
-An AI health assistant that helps people understand symptoms **and** eat to
-prevent problems — combining a careful symptom-guidance chat with a nutrition
-and prevention angle. Built to be clearer, safer, and more useful than a plain
-symptom checker.
+**Your intelligent health companion** — an AI-powered health & nutrition product
+that helps you understand symptoms, understand nutrition, and make better
+decisions. Built to be more sophisticated, trustworthy, and useful than a
+generic symptom checker.
 
-> ⚠️ NutritiScan provides general health and nutrition information for
-> educational purposes only. It is not a substitute for professional medical
-> advice, diagnosis, or treatment.
+> ⚠️ NutritiScan provides evidence-informed guidance for educational purposes
+> only. It is not a medical device and is not a substitute for professional
+> medical advice, diagnosis, or treatment. In an emergency, call your local
+> emergency number.
 
----
+## Stack
 
-## What's inside (the whole app in 4 files)
+Next.js 14 (App Router) · React · TypeScript · Tailwind · Prisma (SQLite → Postgres)
+· provider-agnostic AI (Anthropic today). See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
+[`docs/SAFETY.md`](docs/SAFETY.md), and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-| File | What it is |
-|------|-----------|
-| `server.js` | The **back-end**. Holds the secret key, talks to the Claude AI, serves the site. The health-assistant "personality" and all safety rules live here in `SYSTEM_PROMPT`. |
-| `public/index.html` | The **web page** people see — landing page + chat box. |
-| `public/styles.css` | How it looks. |
-| `public/app.js` | The chat logic in the browser: sends your message to `server.js`, shows the reply. |
+## Run it locally
 
----
+You need [Node.js](https://nodejs.org) 18.18+.
 
-## Run it on your computer (first time)
-
-You need [Node.js](https://nodejs.org) version 18 or newer installed.
-
-**1. Get a free Claude API key**
-- Go to <https://console.anthropic.com>
-- Sign up, then open **Settings → API Keys → Create Key**
-- Copy the key (it starts with `sk-ant-...`). You only see it once.
-
-**2. Add your key to the project**
-- Copy the example file to a real one:
-  ```bash
-  cp .env.example .env
-  ```
-- Open `.env` and paste your key after the `=`:
-  ```
-  ANTHROPIC_API_KEY=sk-ant-your-real-key-here
-  ```
-- The `.env` file is private and is never uploaded (it's in `.gitignore`).
-
-**3. Install and start**
 ```bash
+# 1. Install dependencies
 npm install
-npm start
+
+# 2. Configure environment
+cp .env.example .env
+#   then open .env and paste your Claude API key:
+#   ANTHROPIC_API_KEY=sk-ant-...   (get one at https://console.anthropic.com)
+
+# 3. Create the local database (SQLite file — no server needed)
+npm run db:push
+
+# 4. Start the app
+npm run dev
 ```
 
-**4. Open it**
-Visit <http://localhost:3000> and start chatting.
+Open <http://localhost:3000>. The AI companion lives at `/ask`.
+(Without an API key the site still runs; the companion returns a clear
+"AI isn't configured yet" message instead of answering.)
 
-To auto-restart the server whenever you edit a file, use `npm run dev` instead.
+## Project layout
 
----
-
-## Cost
-
-Every message uses the Claude API, which is pay-as-you-go. New accounts get
-free credits to start. To lower cost later, open `server.js` and change:
-```js
-const MODEL = "claude-opus-5";
 ```
-to `"claude-sonnet-5"` (cheaper) or `"claude-haiku-4-5"` (cheapest).
+src/
+  app/            routes: / (landing), /ask (AI doctor), /api/chat
+  components/
+    ui/           design-system primitives (Button, Card, Badge)
+    landing/      landing page sections
+    companion/    AI-doctor rendering (emergency banner, structured message)
+  lib/
+    ai/           provider abstraction, agents, orchestrator, types
+    safety/       deterministic emergency red-flag detection
+prisma/schema.prisma   full data model (SQLite locally)
+docs/                  architecture, safety, roadmap
+```
 
----
+## Switching to production infra later
 
-## Roadmap ideas (next steps)
-
-- Streaming replies (words appear as they're written)
-- User accounts and saved conversation history
-- Food/label photo scanning
-- A "talk to a real clinician" hand-off
-- Deploy to the web so anyone can use it
+- **Postgres:** change `provider` in `prisma/schema.prisma` to `postgresql` and
+  point `DATABASE_URL` at your database, then `npm run db:push`.
+- **A different AI model:** set `NUTRITISCAN_MODEL`, or implement a new provider
+  in `src/lib/ai/` — no feature code changes.
