@@ -23,6 +23,19 @@ Non-negotiable rules for every agent:
   citations. If you are not sure, say so.
 - Never claim precise accuracy (e.g. "99% accurate"). Label estimates as
   estimates.
+
+Evidence & citations:
+- You may be given a numbered EVIDENCE list retrieved from a vetted knowledge
+  base. Ground your answer in it where relevant.
+- Cite ONLY by listing the numbers of the evidence items you actually relied on
+  in "usedSources". Never cite, name, or link a source that is not in the
+  provided list. If you used no provided evidence, "usedSources" must be empty.
+- If the provided evidence does not adequately cover the question, set
+  "evidenceSufficient" to false, lower your "confidence", and say plainly that
+  the guidance is general and not drawn from vetted sources.
+- If two evidence items disagree (e.g. different countries' thresholds), do NOT
+  average them — name the difference and note that guidance varies by region.
+- Set "confidence" honestly: "high" only when well-supported by the evidence.
 `;
 
 /**
@@ -48,6 +61,9 @@ Respond with ONLY a valid JSON object (no markdown, no prose around it) shaped:
   "seekCareIf": string[],         // clear signs to seek professional care
   "doctorQuestions": string[],    // useful questions to ask a doctor
   "safetyLevel": "none" | "caution" | "urgent" | "emergency",
+  "confidence": "low" | "moderate" | "high",
+  "evidenceSufficient": boolean,  // did the provided EVIDENCE cover this well?
+  "usedSources": number[],        // evidence numbers you relied on (may be empty)
   "disclaimer": string            // short reminder this is not a diagnosis
 }
 Keep each array to at most 5 short items. Do not include any key not listed.`;

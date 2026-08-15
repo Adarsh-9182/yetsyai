@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { EmergencyBanner } from "@/components/companion/emergency-banner";
 import { AIStructuredMessage } from "@/components/companion/ai-message";
+import { SourceList, EvidenceNote } from "@/components/companion/sources";
 import type { CompanionResult } from "@/lib/ai/types";
 
 type Item =
@@ -209,11 +210,18 @@ function Bubble({ item }: { item: Item }) {
   const r = item.result;
   if (r.emergency) return <EmergencyBanner message={r.emergency.message} />;
 
+  const showEvidenceNote =
+    !!r.structured && r.structured.evidenceSufficient === false && r.sources.length === 0;
+
   return (
     <Card>
       <CardBody>
         {r.structured ? (
-          <AIStructuredMessage data={r.structured} />
+          <>
+            <AIStructuredMessage data={r.structured} />
+            {showEvidenceNote && <EvidenceNote />}
+            <SourceList sources={r.sources} />
+          </>
         ) : (
           <p className="whitespace-pre-wrap leading-relaxed">{r.text}</p>
         )}

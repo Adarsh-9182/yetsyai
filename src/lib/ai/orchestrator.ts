@@ -1,18 +1,17 @@
 import { getAIProvider } from "./index";
 import { systemFor, type AgentName } from "./agents";
 import { screenForRedFlags } from "@/lib/safety/redflags";
+import { retrieveEvidence } from "@/lib/knowledge/retrieve";
+import type { RetrievedRecord } from "@/lib/knowledge/types";
 import {
   StructuredResponseSchema,
+  type CitedSource,
   type CompanionResult,
   type StructuredResponse,
 } from "./types";
 import type { ChatMessage } from "./provider";
 
-/**
- * Lightweight router: picks which specialized agent handles a message.
- * Deliberately simple and transparent for now; can be upgraded to a
- * model-based router later without changing callers.
- */
+/** Lightweight, transparent intent router. Upgradeable to a model-based router. */
 function routeAgent(latestUserText: string): AgentName {
   const t = latestUserText.toLowerCase();
   const nutritionHints =
@@ -25,7 +24,6 @@ function routeAgent(latestUserText: string): AgentName {
 }
 
 function extractJson(raw: string): unknown | null {
-  // Models occasionally wrap JSON in prose or code fences; be forgiving.
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = fenced ? fenced[1] : raw;
   const start = candidate.indexOf("{");
@@ -38,12 +36,44 @@ function extractJson(raw: string): unknown | null {
   }
 }
 
-/**
- * Main entry point for the AI Health Companion.
- * 1. Deterministic red-flag screen (emergency short-circuit).
- * 2. Route to a specialized agent.
- * 3. Call the provider and parse a structured response.
- */
+/** Format retrieved evidence as a numbered list the model cites by number. */
+function buildEvidenceBlock(hits: RetrievedRecord[]): string {
+  if (hits.length === 0) {
+    return "\n\nEVIDENCE: (none retrieved from the vetted knowledge base). Set evidenceSufficient=false, lower confidence, and give only general guidance without citing sources.";
+  }
+  const lines = hits
+    .map(
+      (h) =>
+        `[${h.index}] ${h.record.title} — ${h.record.publisher} (${h.record.jurisdiction}, tier ${h.record.evidenceTier}): ${h.record.excerpt}`,
+    )
+    .join("\n");
+  return `\n\nEVIDENCE (cite only these, by number, in usedSources):\n${lines}`;
+}
+
+/** Resolve the model's cited indices back to the actual retrieved records. */
+function resolveCitations(
+  used: number[],
+  hits: RetrievedRecord[],
+): CitedSource[] {
+  const byIndex = new Map(hits.map((h) => [h.index, h]));
+  const seen = new Set<number>();
+  const out: CitedSource[] = [];
+  for (const n of used) {
+    const h = byIndex.get(n);
+    if (!h || seen.has(n)) continue;
+    seen.add(n);
+    out.push({
+      index: h.index,
+      title: h.record.title,
+      publisher: h.record.publisher,
+      url: h.record.url,
+      evidenceTier: h.record.evidenceTier,
+      reviewStatus: h.record.reviewStatus,
+    });
+  }
+  return out;
+}
+
 export async function runCompanion(
   messages: ChatMessage[],
 ): Promise<CompanionResult> {
@@ -58,19 +88,22 @@ export async function runCompanion(
       model: "n/a",
       safetyLevel: "emergency",
       emergency: { category: flag.category, message: flag.message },
+      sources: [],
+      evidence: { retrieved: 0, sufficient: false },
       latencyMs: 0,
     };
   }
 
-  // 2. Route.
+  // 2. Route + retrieve grounding evidence.
   const agent = routeAgent(latestText);
+  const { hits, sufficient } = retrieveEvidence(latestText);
   const provider = getAIProvider();
 
-  // 3. Generate.
+  // 3. Generate, grounded in the retrieved evidence.
   const result = await provider.complete({
-    system: systemFor(agent),
+    system: systemFor(agent) + buildEvidenceBlock(hits),
     messages,
-    maxTokens: 1500,
+    maxTokens: 1600,
   });
 
   const parsedRaw = extractJson(result.text);
@@ -80,12 +113,17 @@ export async function runCompanion(
     if (safe.success) structured = safe.data;
   }
 
+  // 4. Resolve citations to real records (drops any invented index).
+  const sources = structured ? resolveCitations(structured.usedSources, hits) : [];
+
   return {
     agent,
     model: result.model,
     safetyLevel: structured?.safetyLevel ?? "none",
     structured,
     text: structured ? undefined : result.text,
+    sources,
+    evidence: { retrieved: hits.length, sufficient },
     latencyMs: result.latencyMs,
   };
 }

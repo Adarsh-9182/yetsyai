@@ -13,7 +13,7 @@ Built phase by phase. A phase is "done" only when it actually works — not mock
 | 5 | Personalized Nutrition engine + Indian food intelligence | ⏳ planned |
 | 6 | Health Timeline + Insights (from real data) | ⏳ planned |
 | 7 | Lab Report analysis | ⏳ planned |
-| 8 | Medical knowledge retrieval + citations | ⏳ planned |
+| 8 | Medical knowledge retrieval + citations | 🟡 grounding engine + citations built (curated KB, BM25 retrieval, evidence tiers, confidence/abstention). See `docs/CLINICAL-PLATFORM.md` |
 | 9 | Security, privacy center, consent, audit logs, AI observability | ⏳ planned |
 | 10 | Testing, performance, accessibility, final polish | ⏳ planned |
 

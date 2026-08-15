@@ -6,13 +6,31 @@ import {
   ShieldAlert,
   MessageCircleQuestion,
   Info,
+  Gauge,
 } from "lucide-react";
 import type { StructuredResponse } from "@/lib/ai/types";
+
+const CONFIDENCE_STYLE: Record<string, string> = {
+  low: "bg-danger-soft text-danger",
+  moderate: "bg-accent-soft text-accent",
+  high: "bg-accent-soft text-accent",
+};
 
 /** Renders a structured AI answer as calm, scannable sections (never a wall of text). */
 export function AIStructuredMessage({ data }: { data: StructuredResponse }) {
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${CONFIDENCE_STYLE[data.confidence]}`}
+        >
+          <Gauge className="h-3 w-3" /> {data.confidence} confidence
+        </span>
+        {!data.evidenceSufficient && (
+          <span className="text-[11px] text-muted">general guidance</span>
+        )}
+      </div>
+
       {data.summary && <p className="leading-relaxed">{data.summary}</p>}
 
       {data.needMoreInfo && data.questions.length > 0 && (
