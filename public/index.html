@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NutritiScan — AI Health & Nutrition Intelligence</title>
-  <meta name="description" content="NutritiScan is an AI health assistant that decodes your symptoms and builds nutrition into every answer — instant, clear guidance with real safety, free to start." />
+  <title>NutritiScan — AI Health & Nutrition Companion</title>
+  <meta name="description" content="NutritiScan is an AI health assistant that decodes your symptoms and builds nutrition into every answer — clear, calm guidance with real safety, free to start." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-  <!-- decorative background glow -->
-  <div class="bg-orbs" aria-hidden="true">
-    <span class="orb orb-1"></span>
-    <span class="orb orb-2"></span>
-    <span class="orb orb-3"></span>
-  </div>
 
   <!-- ══════════ NAV ══════════ -->
   <header class="nav" id="nav">
@@ -27,7 +23,7 @@
         <a href="#why">Why us</a>
         <a href="#chat">Ask NutritiScan</a>
       </nav>
-      <a href="#chat" class="btn btn-primary btn-sm">Start free →</a>
+      <a href="#chat" class="btn btn-primary btn-sm">Start free</a>
     </div>
   </header>
 
@@ -35,10 +31,10 @@
   <section class="hero" id="top">
     <div class="hero-content">
       <span class="badge"><span class="dot"></span> AI health guidance · free to start</span>
-      <h1>Decode your health.<br /><em>Fuel your body.</em></h1>
+      <h1>Understand your health,<br /><em>and how to nourish it.</em></h1>
       <p class="lede">
         Describe how you feel and NutritiScan tells you what might be going on,
-        what to do now, and how food and lifestyle fit in — instant, clear, and
+        what to do now, and how food and lifestyle fit in — clear, calm, and
         built with real safety guardrails.
       </p>
       <div class="hero-cta">
@@ -47,7 +43,9 @@
       </div>
       <div class="hero-stats">
         <div><strong>24/7</strong><span>always available</span></div>
+        <div class="divider"></div>
         <div><strong>0s</strong><span>waiting room</span></div>
+        <div class="divider"></div>
         <div><strong>2-in-1</strong><span>symptoms + nutrition</span></div>
       </div>
       <p class="hero-note">Not a substitute for professional medical care.</p>
@@ -98,7 +96,7 @@
         <p>Emergency red flags are caught instantly and sent to real emergency care — no risky guessing.</p>
       </article>
       <article class="card">
-        <div class="card-icon">⚡</div>
+        <div class="card-icon">✦</div>
         <h3>Clear, human answers</h3>
         <p>Plain language, the reasoning behind it, and one concrete next step. No wall of disclaimers.</p>
       </article>
@@ -119,11 +117,7 @@
       </div>
       <div class="chat-log" id="chatLog">
         <div class="msg msg-bot">
-          <div class="msg-bubble">
-            Hi, I’m NutritiScan. Tell me how you’re feeling or ask me a health
-            or nutrition question — for example, “I’ve had a sore throat for two
-            days” or “what should I eat for more energy?”
-          </div>
+          <div class="msg-bubble">Hi, I’m NutritiScan. Tell me how you’re feeling or ask me a health or nutrition question — for example, “I’ve had a sore throat for two days” or “what should I eat for more energy?”</div>
         </div>
       </div>
 
