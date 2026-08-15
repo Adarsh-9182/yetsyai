@@ -40,6 +40,14 @@ Open <http://localhost:3000>. The AI companion lives at `/ask`.
 (Without an API key the site still runs; the companion returns a clear
 "AI isn't configured yet" message instead of answering.)
 
+## Deploy to Vercel
+
+The app is deploy-ready and needs only `ANTHROPIC_API_KEY` (no database at this
+stage). Fastest path: sign in to [vercel.com](https://vercel.com) with GitHub →
+import this repo → add the `ANTHROPIC_API_KEY` env var → Deploy. Full
+step-by-step (dashboard + CLI, and the responsible-launch note) is in
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Project layout
 
 ```

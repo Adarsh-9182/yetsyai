@@ -8,8 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push"
+  },
+  "engines": {
+    "node": ">=18.18"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
