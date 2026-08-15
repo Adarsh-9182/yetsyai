@@ -1,0 +1,147 @@
+/* ============================================================================
+   NutritiScan — styles.css
+   A calm, trustworthy look: fresh greens, soft neutrals, generous space.
+   ============================================================================ */
+
+:root {
+  --bg:        #f6f8f5;
+  --surface:   #ffffff;
+  --ink:       #16241d;
+  --ink-soft:  #4c5c53;
+  --brand:     #0f9d76;   /* fresh medical green */
+  --brand-dk:  #0a7d5d;
+  --accent:    #f2a03d;   /* warm nutrition amber */
+  --line:      #e2e8e2;
+  --radius:    16px;
+  --shadow:    0 10px 30px rgba(16, 40, 30, 0.08);
+  --maxw:      1080px;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { line-height: 1.15; letter-spacing: -0.02em; }
+a { color: inherit; text-decoration: none; }
+em { font-style: normal; color: var(--brand); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .5rem; border: none; cursor: pointer;
+  font-weight: 600; font-size: 1rem;
+  padding: .7rem 1.3rem; border-radius: 999px;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: var(--brand-dk); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn-ghost:hover { border-color: var(--brand); color: var(--brand-dk); }
+.btn-sm { padding: .5rem 1rem; font-size: .9rem; }
+.btn-lg { padding: .85rem 1.6rem; font-size: 1.05rem; }
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(246, 248, 245, 0.85);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  max-width: var(--maxw); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.5rem;
+}
+.brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.2rem; }
+.brand-mark {
+  display: inline-grid; place-items: center;
+  width: 1.7rem; height: 1.7rem; border-radius: 8px;
+  background: var(--brand); color: #fff; font-size: 1rem;
+}
+.nav-links { display: flex; gap: 1.6rem; }
+.nav-links a { color: var(--ink-soft); font-weight: 500; }
+.nav-links a:hover { color: var(--brand-dk); }
+
+/* ── Hero ── */
+.hero {
+  max-width: var(--maxw); margin: 0 auto;
+  padding: 5rem 1.5rem 3.5rem; text-align: center;
+}
+.badge {
+  display: inline-block; font-size: .85rem; font-weight: 600;
+  color: var(--brand-dk); background: #e3f4ee;
+  padding: .35rem .9rem; border-radius: 999px; margin-bottom: 1.4rem;
+}
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 800; }
+.lede {
+  max-width: 620px; margin: 1.3rem auto 0;
+  font-size: 1.2rem; color: var(--ink-soft);
+}
+.hero-cta { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+.hero-note { margin-top: 1.2rem; font-size: .85rem; color: var(--ink-soft); }
+
+/* ── Sections ── */
+.section { max-width: var(--maxw); margin: 0 auto; padding: 4.5rem 1.5rem; }
+.section-alt { background: var(--surface); max-width: none; }
+.section-alt > * { max-width: var(--maxw); margin-left: auto; margin-right: auto; }
+.section-head { text-align: center; margin-bottom: 2.8rem; }
+.kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .8rem; font-weight: 700; color: var(--brand); }
+.section-head h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-top: .5rem; }
+.section-head p { color: var(--ink-soft); margin-top: .7rem; font-size: 1.1rem; }
+
+/* ── Steps ── */
+.steps { list-style: none; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.steps li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.8rem; }
+.step-num { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+.steps h3 { margin: .6rem 0 .4rem; font-size: 1.25rem; }
+.steps p { color: var(--ink-soft); }
+
+/* ── Cards ── */
+.cards { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.8rem; }
+.card-icon { font-size: 2rem; }
+.card h3 { margin: .7rem 0 .4rem; font-size: 1.25rem; }
+.card p { color: var(--ink-soft); }
+
+/* ── Chat ── */
+.chat {
+  max-width: 720px; margin: 0 auto;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+}
+.chat-log { padding: 1.4rem; min-height: 280px; max-height: 460px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+.msg { display: flex; }
+.msg-user { justify-content: flex-end; }
+.msg-bubble {
+  max-width: 80%; padding: .8rem 1.1rem; border-radius: 16px;
+  font-size: 1rem; white-space: pre-wrap; word-wrap: break-word;
+}
+.msg-bot .msg-bubble { background: #eef4f0; color: var(--ink); border-bottom-left-radius: 4px; }
+.msg-user .msg-bubble { background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+.msg-bubble.thinking { color: var(--ink-soft); font-style: italic; }
+
+.chat-input { display: flex; gap: .6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--line); }
+.chat-input input {
+  flex: 1; border: 1.5px solid var(--line); border-radius: 999px;
+  padding: .7rem 1.1rem; font-size: 1rem; outline: none;
+}
+.chat-input input:focus { border-color: var(--brand); }
+.chat-disclaimer { text-align: center; font-size: .8rem; color: var(--ink-soft); padding: 0 1.4rem 1.1rem; }
+
+/* ── Footer ── */
+.footer { background: var(--ink); color: #cdd8d1; }
+.footer-inner { max-width: var(--maxw); margin: 0 auto; padding: 2.5rem 1.5rem; text-align: center; }
+.footer .brand { color: #fff; justify-content: center; margin-bottom: .8rem; }
+.footer p { font-size: .85rem; max-width: 620px; margin: 0 auto; }
+
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+}

@@ -1,0 +1,9 @@
+# Secrets — NEVER commit your real API key
+.env
+
+# Dependencies (re-created by `npm install`)
+node_modules/
+
+# OS / editor noise
+.DS_Store
+*.log
