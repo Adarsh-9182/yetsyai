@@ -12,6 +12,14 @@
 </head>
 <body>
 
+  <!-- soft Gemini-style aurora background -->
+  <div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <span class="blob b4"></span>
+  </div>
+
   <!-- ══════════ NAV ══════════ -->
   <header class="nav" id="nav">
     <div class="nav-inner">
@@ -29,26 +37,45 @@
 
   <!-- ══════════ HERO ══════════ -->
   <section class="hero" id="top">
-    <div class="hero-content">
-      <span class="badge"><span class="dot"></span> AI health guidance · free to start</span>
-      <h1>Understand your health,<br /><em>and how to nourish it.</em></h1>
-      <p class="lede">
-        Describe how you feel and NutritiScan tells you what might be going on,
-        what to do now, and how food and lifestyle fit in — clear, calm, and
-        built with real safety guardrails.
-      </p>
-      <div class="hero-cta">
-        <a href="#chat" class="btn btn-primary btn-lg">Ask NutritiScan</a>
-        <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
+    <div class="hero-grid">
+      <div class="hero-content">
+        <span class="badge"><span class="dot"></span> AI health guidance · free to start</span>
+        <h1>Understand your health,<br /><em>and how to nourish it.</em></h1>
+        <p class="lede">
+          Describe how you feel and NutritiScan tells you what might be going on,
+          what to do now, and how food and lifestyle fit in — clear, calm, and
+          built with real safety guardrails.
+        </p>
+        <div class="hero-cta">
+          <a href="#chat" class="btn btn-primary btn-lg">Ask NutritiScan</a>
+          <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>24/7</strong><span>always available</span></div>
+          <div class="divider"></div>
+          <div><strong>0s</strong><span>waiting room</span></div>
+          <div class="divider"></div>
+          <div><strong>2-in-1</strong><span>symptoms + nutrition</span></div>
+        </div>
       </div>
-      <div class="hero-stats">
-        <div><strong>24/7</strong><span>always available</span></div>
-        <div class="divider"></div>
-        <div><strong>0s</strong><span>waiting room</span></div>
-        <div class="divider"></div>
-        <div><strong>2-in-1</strong><span>symptoms + nutrition</span></div>
+
+      <div class="hero-visual">
+        <figure class="hero-photo">
+          <img
+            src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1100&q=80&auto=format&fit=crop"
+            alt="A fresh, colourful bowl of healthy food"
+            loading="eager"
+            onerror="this.closest('.hero-photo').classList.add('img-fallback'); this.remove();"
+          />
+        </figure>
+        <div class="hero-chip">
+          <span class="chip-dot"></span>
+          <div>
+            <strong>Nutrition insight</strong>
+            <span>More iron-rich foods could lift your energy.</span>
+          </div>
+        </div>
       </div>
-      <p class="hero-note">Not a substitute for professional medical care.</p>
     </div>
   </section>
 
@@ -100,6 +127,30 @@
         <h3>Clear, human answers</h3>
         <p>Plain language, the reasoning behind it, and one concrete next step. No wall of disclaimers.</p>
       </article>
+    </div>
+  </section>
+
+  <!-- ══════════ FEATURE BAND (image + text) ══════════ -->
+  <section class="section band">
+    <div class="band-grid">
+      <figure class="band-photo">
+        <img
+          src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1000&q=80&auto=format&fit=crop"
+          alt="Fresh fruit and vegetables laid out on a table"
+          loading="lazy"
+          onerror="this.closest('.band-photo').classList.add('img-fallback'); this.remove();"
+        />
+      </figure>
+      <div class="band-text">
+        <span class="kicker">Prevention, not just triage</span>
+        <h2>Food is the first medicine</h2>
+        <p>
+          NutritiScan doesn’t just tell you what might be wrong — it helps you
+          understand how what you eat and how you live shape how you feel, so
+          small changes today prevent bigger problems tomorrow.
+        </p>
+        <a href="#chat" class="btn btn-primary">Try it free</a>
+      </div>
     </div>
   </section>
 
