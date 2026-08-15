@@ -3,11 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NutritiScan — Your AI Health & Nutrition Companion</title>
-  <meta name="description" content="NutritiScan is an AI health assistant that helps you understand symptoms and eat to prevent problems — clear guidance, real safety, always free to start." />
+  <title>NutritiScan — AI Health & Nutrition Intelligence</title>
+  <meta name="description" content="NutritiScan is an AI health assistant that decodes your symptoms and builds nutrition into every answer — instant, clear guidance with real safety, free to start." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+
+  <!-- decorative background glow -->
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
 
   <!-- ══════════ NAV ══════════ -->
   <header class="nav" id="nav">
@@ -20,23 +27,28 @@
         <a href="#why">Why us</a>
         <a href="#chat">Ask NutritiScan</a>
       </nav>
-      <a href="#chat" class="btn btn-primary btn-sm">Start free</a>
+      <a href="#chat" class="btn btn-primary btn-sm">Start free →</a>
     </div>
   </header>
 
   <!-- ══════════ HERO ══════════ -->
   <section class="hero" id="top">
     <div class="hero-content">
-      <span class="badge">● &nbsp;Free AI health guidance</span>
-      <h1>Understand your health.<br /><em>Eat to stay well.</em></h1>
+      <span class="badge"><span class="dot"></span> AI health guidance · free to start</span>
+      <h1>Decode your health.<br /><em>Fuel your body.</em></h1>
       <p class="lede">
-        Describe how you feel and NutritiScan helps you understand what might be
-        going on, what to do now, and how food and lifestyle fit in — with clear
-        safety guidance and no waiting room.
+        Describe how you feel and NutritiScan tells you what might be going on,
+        what to do now, and how food and lifestyle fit in — instant, clear, and
+        built with real safety guardrails.
       </p>
       <div class="hero-cta">
-        <a href="#chat" class="btn btn-primary btn-lg">Ask NutritiScan — free</a>
+        <a href="#chat" class="btn btn-primary btn-lg">Ask NutritiScan</a>
         <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>24/7</strong><span>always available</span></div>
+        <div><strong>0s</strong><span>waiting room</span></div>
+        <div><strong>2-in-1</strong><span>symptoms + nutrition</span></div>
       </div>
       <p class="hero-note">Not a substitute for professional medical care.</p>
     </div>
@@ -46,7 +58,7 @@
   <section class="section" id="how">
     <div class="section-head">
       <span class="kicker">How it works</span>
-      <h2>Guidance in three steps</h2>
+      <h2>Answers in three steps</h2>
     </div>
     <ol class="steps">
       <li>
@@ -57,7 +69,7 @@
       <li>
         <span class="step-num">02</span>
         <h3>Answer a couple of questions</h3>
-        <p>NutritiScan asks only what matters, like a good clinician, to give you guidance that actually fits.</p>
+        <p>NutritiScan asks only what matters, like a good clinician, so the guidance actually fits you.</p>
       </li>
       <li>
         <span class="step-num">03</span>
@@ -71,7 +83,7 @@
   <section class="section section-alt" id="why">
     <div class="section-head">
       <span class="kicker">Why NutritiScan</span>
-      <h2>Care that also keeps you well</h2>
+      <h2>Care that keeps you well</h2>
       <p>Most symptom checkers stop at “maybe see a doctor.” We go further.</p>
     </div>
     <div class="cards">
@@ -83,10 +95,10 @@
       <article class="card">
         <div class="card-icon">🛡️</div>
         <h3>Safety first</h3>
-        <p>Emergency red flags are caught immediately and sent to real emergency care — no risky guessing.</p>
+        <p>Emergency red flags are caught instantly and sent to real emergency care — no risky guessing.</p>
       </article>
       <article class="card">
-        <div class="card-icon">💬</div>
+        <div class="card-icon">⚡</div>
         <h3>Clear, human answers</h3>
         <p>Plain language, the reasoning behind it, and one concrete next step. No wall of disclaimers.</p>
       </article>
@@ -102,8 +114,10 @@
     </div>
 
     <div class="chat" id="chatBox">
+      <div class="chat-titlebar">
+        <span class="chat-dot"></span> NutritiScan · online
+      </div>
       <div class="chat-log" id="chatLog">
-        <!-- messages get added here by app.js -->
         <div class="msg msg-bot">
           <div class="msg-bubble">
             Hi, I’m NutritiScan. Tell me how you’re feeling or ask me a health
