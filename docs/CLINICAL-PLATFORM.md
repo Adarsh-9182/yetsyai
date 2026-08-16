@@ -22,7 +22,7 @@ uncertainty → response → audit`
 | Abstention + calibrated uncertainty | 🟡 v1 (confidence + evidenceSufficient) | `src/lib/ai/types.ts` |
 | Claim extraction + evidence verification pass | ⏳ planned | second-pass verifier over the draft |
 | Hallucination detection (separate model) | ⏳ research | LLM-judge first; trained detector later |
-| Deterministic clinical tools (BMI/BMR/TDEE…) | ⏳ next | `src/lib/tools/` (planned) |
+| Deterministic clinical tools (BMI/BMR/TDEE…) | 🟡 module built + tested | `src/lib/tools/health.ts`; LLM tool-calling wiring next |
 | AI audit logging | 🟡 schema ready | `AIInteraction` table; wiring pending |
 
 ## Model strategy (spec §4–6)
