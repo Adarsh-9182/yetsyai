@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NutritiScan — Your intelligent health companion",
+  title: "NutritiScan — Your AI Doctor for health & nutrition",
   description:
-    "NutritiScan combines AI-powered health guidance, nutrition intelligence, meal analysis, and personalized insights in one private health companion.",
+    "NutritiScan is an AI doctor that listens to your symptoms, explains in plain language, shows its sources, and knows when to send you to real care. AI guidance — not a substitute for a licensed physician.",
 };
 
 export const viewport: Viewport = {

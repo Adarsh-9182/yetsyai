@@ -11,10 +11,10 @@ export function SiteFooter() {
           NutritiScan
         </div>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
-          NutritiScan provides evidence-informed health and nutrition guidance for
-          educational purposes only. It is not a medical device and is not a
-          substitute for professional medical advice, diagnosis, or treatment.
-          In an emergency, call your local emergency number.
+          NutritiScan is an AI doctor that provides evidence-informed health and
+          nutrition guidance for educational purposes only. It is not a medical
+          device and is not a substitute for a licensed physician&rsquo;s advice,
+          diagnosis, or treatment. In an emergency, call your local emergency number.
         </p>
         <p className="mt-6 text-xs text-muted">
           © {new Date().getFullYear()} NutritiScan · Your intelligent health companion

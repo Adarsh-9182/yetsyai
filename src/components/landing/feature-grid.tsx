@@ -11,7 +11,7 @@ import { Card, CardBody } from "@/components/ui/card";
 const FEATURES = [
   {
     icon: Stethoscope,
-    title: "AI Health Companion",
+    title: "AI Doctor",
     body: "Describe how you feel. NutritiScan asks the right follow-ups, then gives possible causes, next steps, and when to seek care — never a diagnosis.",
   },
   {
