@@ -4,13 +4,22 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NutritiScan — Your AI Doctor for health & nutrition",
+  title: "Adarsh Bhardwaj — Software & AI Engineer",
   description:
-    "NutritiScan is an AI doctor that listens to your symptoms, explains in plain language, shows its sources, and knows when to send you to real care. AI guidance — not a substitute for a licensed physician.",
+    "Portfolio of Adarsh Bhardwaj — Software & AI Engineer building production-grade AI applications, autonomous agents, RAG pipelines, and AI products. Founder of Paisa AI CFO.",
+  keywords: ["AI Engineer", "Software Engineer", "Machine Learning", "LangChain", "FastAPI", "React", "Python", "Adarsh Bhardwaj"],
+  authors: [{ name: "Adarsh Bhardwaj" }],
+  creator: "Adarsh Bhardwaj",
+  openGraph: {
+    type: "website",
+    title: "Adarsh Bhardwaj — Software & AI Engineer",
+    description: "Building production-grade AI applications, autonomous agents, and AI products.",
+    siteName: "Adarsh Bhardwaj Portfolio",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fbfaf7",
+  themeColor: "#050508",
   width: "device-width",
   initialScale: 1,
 };
