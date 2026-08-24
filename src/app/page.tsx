@@ -1,19 +1,35 @@
-import { SiteNav } from "@/components/landing/site-nav";
-import { Hero } from "@/components/landing/hero";
-import { FeatureGrid } from "@/components/landing/feature-grid";
-import { NutritionBand } from "@/components/landing/nutrition-band";
-import { SiteFooter } from "@/components/landing/site-footer";
+import { NeuralBackground } from "@/components/portfolio/neural-bg";
+import { CursorGlow } from "@/components/portfolio/cursor";
+import { Nav } from "@/components/portfolio/nav";
+import { Hero } from "@/components/portfolio/hero";
+import { About } from "@/components/portfolio/about";
+import { Skills } from "@/components/portfolio/skills";
+import { Experience } from "@/components/portfolio/experience";
+import { Projects } from "@/components/portfolio/projects";
+import { Contact } from "@/components/portfolio/contact";
+import { Footer } from "@/components/portfolio/footer";
 
-export default function HomePage() {
+export default function PortfolioPage() {
   return (
     <>
-      <SiteNav />
-      <main>
+      {/* Fixed background layers */}
+      <NeuralBackground />
+      <CursorGlow />
+
+      {/* Navigation */}
+      <Nav />
+
+      {/* Page content */}
+      <main className="relative z-10">
         <Hero />
-        <FeatureGrid />
-        <NutritionBand />
+        <About />
+        <Skills />
+        <Experience />
+        <Projects />
+        <Contact />
       </main>
-      <SiteFooter />
+
+      <Footer />
     </>
   );
 }
