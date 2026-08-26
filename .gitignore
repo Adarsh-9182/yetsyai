@@ -18,6 +18,9 @@ next-env.d.ts
 design-*.png
 shot.mjs
 
+# TypeScript build info
+tsconfig.tsbuildinfo
+
 # OS / editor noise
 .DS_Store
 *.log
