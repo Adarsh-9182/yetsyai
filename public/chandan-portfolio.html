@@ -1,0 +1,977 @@
+<title>Chandan Kumar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ── Tokens ── */
+:root {
+  --bg:       #070b14;
+  --bg2:      #0d1524;
+  --bg3:      #131e30;
+  --border:   #1c2a3f;
+  --teal:     #00d4aa;
+  --teal-dim: #00d4aa22;
+  --amber:    #ffa94d;
+  --amber-dim:#ffa94d18;
+  --text:     #dde8f5;
+  --text2:    #6a88a8;
+  --text3:    #3a5470;
+  --white:    #f0f7ff;
+  --danger:   #ff5f6d;
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:       #f2f6fc;
+    --bg2:      #ffffff;
+    --bg3:      #e8f0fa;
+    --border:   #c8d8ed;
+    --text:     #0d1829;
+    --text2:    #4a6580;
+    --text3:    #8aа8c4;
+    --white:    #0d1829;
+    --teal-dim: #00d4aa18;
+    --amber-dim:#ffa94d14;
+  }
+}
+:root[data-theme="light"] {
+  --bg:       #f2f6fc;
+  --bg2:      #ffffff;
+  --bg3:      #e8f0fa;
+  --border:   #c8d8ed;
+  --text:     #0d1829;
+  --text2:    #4a6580;
+  --text3:    #8aа8c4;
+  --white:    #0d1829;
+  --teal-dim: #00d4aa18;
+  --amber-dim:#ffa94d14;
+}
+:root[data-theme="dark"] {
+  --bg:       #070b14;
+  --bg2:      #0d1524;
+  --bg3:      #131e30;
+  --border:   #1c2a3f;
+  --text:     #dde8f5;
+  --text2:    #6a88a8;
+  --text3:    #3a5470;
+  --white:    #f0f7ff;
+  --teal-dim: #00d4aa22;
+  --amber-dim:#ffa94d18;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; }
+button { cursor: pointer; font: inherit; }
+
+/* ── Canvas bg ── */
+#canvas-bg {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; opacity: .45;
+}
+
+/* ── Layout ── */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+section { padding: 100px 0; }
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 60px;
+  border-bottom: 1px solid transparent;
+  transition: background .3s, border-color .3s;
+}
+nav.scrolled { background: var(--bg); border-color: var(--border); }
+.nav-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 24px;
+  height: 100%; display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800; font-size: 1.05rem;
+  color: var(--white);
+  letter-spacing: -.02em;
+}
+.nav-logo span { color: var(--teal); }
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  font-size: .82rem; font-weight: 500;
+  color: var(--text2);
+  letter-spacing: .04em; text-transform: uppercase;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--teal); }
+.nav-cta {
+  display: flex; align-items: center; gap: 10px;
+}
+.btn-teal {
+  padding: 8px 18px; border-radius: 6px;
+  background: var(--teal); color: #070b14;
+  font-size: .8rem; font-weight: 700;
+  letter-spacing: .03em;
+  transition: opacity .2s, transform .2s;
+  border: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-teal:hover { opacity: .85; transform: translateY(-1px); }
+.btn-ghost {
+  padding: 7px 16px; border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: .8rem; font-weight: 500;
+  background: transparent;
+  transition: border-color .2s, color .2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+.theme-btn {
+  width: 34px; height: 34px; border-radius: 6px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: border-color .2s, color .2s;
+}
+.theme-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ── Section label ── */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: .72rem; font-weight: 500;
+  color: var(--teal);
+  letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.eyebrow::after {
+  content: ''; flex: 1; max-width: 40px;
+  height: 1px; background: var(--teal); opacity: .4;
+}
+
+/* ── Hero ── */
+#hero {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding-top: 60px;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 60px;
+  align-items: center;
+  width: 100%;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 4px;
+  border: 1px solid var(--teal); background: var(--teal-dim);
+  font-family: var(--font-mono); font-size: .72rem;
+  color: var(--teal); margin-bottom: 28px;
+}
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  color: var(--white);
+  text-wrap: balance;
+  margin-bottom: 8px;
+}
+.hero-name .accent { color: var(--teal); }
+.hero-role {
+  font-family: var(--font-mono);
+  font-size: clamp(.9rem, 2vw, 1.1rem);
+  color: var(--text2);
+  margin-bottom: 22px;
+  min-height: 1.6em;
+}
+.cursor { color: var(--teal); animation: blink .75s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+
+.hero-desc {
+  font-size: 1.05rem; color: var(--text2);
+  max-width: 520px; line-height: 1.8;
+  margin-bottom: 36px;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+.hero-stats {
+  display: flex; gap: 32px; flex-wrap: wrap;
+}
+.stat-item { text-align: left; }
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 800;
+  color: var(--teal); line-height: 1;
+}
+.stat-label { font-size: .75rem; color: var(--text2); margin-top: 3px; }
+
+/* Hero visual */
+.hero-visual {
+  width: 240px; height: 240px;
+  position: relative; flex-shrink: 0;
+}
+.hero-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  animation: spin 20s linear infinite;
+}
+.hero-ring-2 {
+  position: absolute; inset: 20px;
+  border-radius: 50%;
+  border: 1px dashed var(--teal);
+  opacity: .3;
+  animation: spin 14s linear infinite reverse;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.hero-core {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6px;
+}
+.hero-core-icon {
+  width: 80px; height: 80px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--teal) 0%, #0099a8 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 40px #00d4aa44;
+}
+.hero-core-icon svg { width: 40px; height: 40px; color: #070b14; }
+.hero-tags {
+  position: absolute;
+  inset: -16px;
+  pointer-events: none;
+}
+.orb-chip {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: .65rem; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--bg2); border: 1px solid var(--border);
+  color: var(--text2);
+  white-space: nowrap;
+}
+.orb-chip:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); border-color: var(--teal); color: var(--teal); }
+.orb-chip:nth-child(2) { top: 22%; right: -8px; }
+.orb-chip:nth-child(3) { bottom: 22%; right: -8px; border-color: var(--amber); color: var(--amber); }
+.orb-chip:nth-child(4) { bottom: 0; left: 50%; transform: translateX(-50%); }
+.orb-chip:nth-child(5) { bottom: 22%; left: -8px; border-color: var(--teal); color: var(--teal); }
+.orb-chip:nth-child(6) { top: 22%; left: -8px; }
+
+/* ── About ── */
+#about { background: var(--bg2); }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.about-text h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800; letter-spacing: -.03em;
+  color: var(--white); line-height: 1.15;
+  text-wrap: balance; margin-bottom: 20px;
+}
+.about-text h2 em { color: var(--teal); font-style: normal; }
+.about-text p { color: var(--text2); line-height: 1.85; margin-bottom: 16px; font-size: .97rem; }
+.about-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.about-card {
+  padding: 20px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+.about-card:hover { border-color: var(--teal); }
+.about-card-icon { font-size: 1.6rem; margin-bottom: 10px; }
+.about-card h4 { font-family: var(--font-display); font-size: .9rem; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+.about-card p { font-size: .8rem; color: var(--text2); line-height: 1.6; }
+.info-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.info-chip {
+  padding: 5px 12px; border-radius: 4px;
+  background: var(--bg3); border: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: .72rem;
+  color: var(--text2);
+}
+
+/* ── Skills ── */
+.skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; margin-bottom: 56px; }
+.skill-bars { display: flex; flex-direction: column; gap: 18px; }
+.skill-bar-item {}
+.skill-bar-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.skill-bar-label { font-size: .85rem; font-weight: 500; color: var(--text); }
+.skill-bar-pct { font-family: var(--font-mono); font-size: .78rem; color: var(--teal); }
+.skill-bar-track { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.skill-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--teal), var(--amber)); width: 0; transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+
+.skill-cats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.skill-cat {
+  padding: 18px; border-radius: 10px;
+  background: var(--bg2); border: 1px solid var(--border);
+  transition: border-color .2s, transform .2s;
+}
+.skill-cat:hover { border-color: var(--teal); transform: translateY(-3px); }
+.skill-cat-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.skill-cat-icon {
+  width: 30px; height: 30px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.skill-cat-title { font-family: var(--font-display); font-size: .82rem; font-weight: 700; color: var(--white); }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  font-family: var(--font-mono); font-size: .65rem; font-weight: 500;
+  padding: 3px 9px; border-radius: 3px;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2);
+  transition: border-color .15s, color .15s;
+}
+.tag:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ── Experience ── */
+#experience { background: var(--bg2); }
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 1px; background: linear-gradient(to bottom, var(--teal), var(--border), transparent);
+}
+.exp-item { position: relative; margin-bottom: 36px; }
+.exp-dot {
+  position: absolute; left: -28px; top: 8px;
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--teal);
+  box-shadow: 0 0 10px #00d4aa66;
+}
+.exp-card {
+  padding: 24px 28px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+.exp-card:hover { border-color: var(--teal); }
+.exp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 4px; }
+.exp-role { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--white); }
+.exp-badge {
+  padding: 3px 10px; border-radius: 3px;
+  font-family: var(--font-mono); font-size: .62rem; font-weight: 500;
+  white-space: nowrap; flex-shrink: 0;
+}
+.badge-teal { background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal); }
+.badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber); }
+.badge-purple { background: #7c5cfc18; color: #9d80ff; border: 1px solid #7c5cfc; }
+.exp-company { font-size: .85rem; color: var(--text2); margin-bottom: 14px; }
+.exp-period { font-family: var(--font-mono); font-size: .72rem; color: var(--text3); margin-bottom: 14px; }
+.exp-points { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.exp-points li { font-size: .85rem; color: var(--text2); padding-left: 14px; position: relative; }
+.exp-points li::before { content: ''; position: absolute; left: 0; top: .65em; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+
+/* ── Projects ── */
+.projects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.proj-card {
+  padding: 28px; border-radius: 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+  position: relative; overflow: hidden;
+}
+.proj-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  opacity: 0; transition: opacity .25s;
+}
+.proj-card:hover { border-color: var(--teal); transform: translateY(-4px); box-shadow: 0 16px 40px #00d4aa0f; }
+.proj-card:hover::before { opacity: 1; }
+.proj-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+.proj-icon { font-size: 1.8rem; flex-shrink: 0; }
+.proj-status { display: flex; align-items: center; gap: 5px; }
+.proj-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.proj-status-label { font-family: var(--font-mono); font-size: .65rem; }
+.proj-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+.proj-sub { font-size: .78rem; color: var(--text3); margin-bottom: 12px; font-family: var(--font-mono); }
+.proj-desc { font-size: .84rem; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
+.proj-links { display: flex; gap: 8px; }
+.proj-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 5px;
+  font-size: .75rem; font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--text2); background: transparent;
+  transition: border-color .15s, color .15s;
+}
+.proj-link:hover { border-color: var(--teal); color: var(--teal); }
+.proj-link.primary { background: var(--teal); border-color: var(--teal); color: #070b14; }
+.proj-link.primary:hover { opacity: .85; }
+
+/* ── Achievements ── */
+#achievements { background: var(--bg2); }
+.ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.ach-section h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.ach-list { display: flex; flex-direction: column; gap: 12px; }
+.ach-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 18px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+.ach-item:hover { border-color: var(--amber); }
+.ach-item-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+.ach-item-title { font-size: .87rem; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+.ach-item-desc { font-size: .78rem; color: var(--text2); line-height: 1.55; }
+
+.cert-list { display: flex; flex-direction: column; gap: 12px; }
+.cert-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 18px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+.cert-item:hover { border-color: var(--teal); }
+.cert-icon {
+  width: 38px; height: 38px; border-radius: 9px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.cert-info { flex: 1; min-width: 0; }
+.cert-title { font-size: .85rem; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+.cert-issuer { font-size: .75rem; color: var(--text2); margin-bottom: 8px; }
+.cert-date { font-family: var(--font-mono); font-size: .62rem; color: var(--text3); }
+
+/* ── Contact ── */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.contact-text h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800; letter-spacing: -.03em;
+  color: var(--white); line-height: 1.15;
+  text-wrap: balance; margin-bottom: 16px;
+}
+.contact-text h2 em { color: var(--teal); font-style: normal; }
+.contact-text p { color: var(--text2); font-size: .97rem; line-height: 1.8; margin-bottom: 28px; }
+.avail { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 4px; border: 1px solid var(--teal); background: var(--teal-dim); font-family: var(--font-mono); font-size: .72rem; color: var(--teal); }
+.contact-cards { display: flex; flex-direction: column; gap: 12px; }
+.contact-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px; border-radius: 10px;
+  background: var(--bg2); border: 1px solid var(--border);
+  transition: border-color .2s, transform .2s;
+}
+.contact-card:hover { border-color: var(--teal); transform: translateX(4px); }
+.contact-card-icon {
+  width: 40px; height: 40px; border-radius: 9px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--teal-dim); color: var(--teal);
+}
+.contact-card-icon.amber-icon { background: var(--amber-dim); color: var(--amber); }
+.contact-card-icon svg { width: 18px; height: 18px; }
+.contact-card-label { font-size: .72rem; color: var(--text3); margin-bottom: 2px; font-family: var(--font-mono); }
+.contact-card-value { font-size: .9rem; font-weight: 500; color: var(--white); }
+
+/* ── Section heading ── */
+.section-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800; letter-spacing: -.03em;
+  color: var(--white); line-height: 1.15;
+  text-wrap: balance; margin-bottom: 16px;
+}
+.section-h2 em { color: var(--teal); font-style: normal; }
+.section-sub { color: var(--text2); font-size: .97rem; line-height: 1.8; margin-bottom: 56px; max-width: 600px; }
+
+/* ── Footer ── */
+footer {
+  padding: 36px 0; border-top: 1px solid var(--border);
+  background: var(--bg2);
+}
+.footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.footer-brand { font-family: var(--font-display); font-weight: 700; font-size: .95rem; color: var(--text2); }
+.footer-brand span { color: var(--teal); }
+.footer-copy { font-size: .78rem; color: var(--text3); }
+
+/* ── Responsive ── */
+@media (max-width: 820px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-visual { display: none; }
+  .about-grid, .skills-grid, .projects-grid, .ach-grid, .contact-grid { grid-template-columns: 1fr; }
+  .skill-cats { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+}
+@media (max-width: 540px) {
+  .skill-cats { grid-template-columns: 1fr; }
+  .about-cards { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .hero-ring, .hero-ring-2 { animation: none; }
+  .pulse { animation: none; }
+  .skill-bar-fill { transition: none; }
+}
+</style>
+
+<!-- Canvas background -->
+<canvas id="canvas-bg"></canvas>
+
+<!-- Nav -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">Chandan<span>.</span></a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#achievements">Achievements</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-cta">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">☀</button>
+      <a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="btn-ghost">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+      <a href="#contact" class="btn-teal">Hire Me</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="reveal">
+        <div class="hero-tag"><span class="pulse"></span> Open to opportunities</div>
+        <h1 class="hero-name">Chandan<br><em>Kumar</em></h1>
+        <div class="hero-role" id="typewriter"><span id="typed-text"></span><span class="cursor">|</span></div>
+        <p class="hero-desc">
+          AI Engineer &amp; BTech CSE graduate building intelligent systems — from deep learning pipelines
+          to full-stack AI products. I turn complex research into tools people actually use.
+        </p>
+        <div class="hero-actions">
+          <a href="#projects" class="btn-teal">View Projects</a>
+          <a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="btn-ghost">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            github.com/chandan1909kumarck-dotcom
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="stat-num">8+</div><div class="stat-label">Projects Built</div></div>
+          <div class="stat-item"><div class="stat-num">4+</div><div class="stat-label">Years Coding</div></div>
+          <div class="stat-item"><div class="stat-num">5+</div><div class="stat-label">Certifications</div></div>
+          <div class="stat-item"><div class="stat-num">3+</div><div class="stat-label">AI Products</div></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="hero-ring"></div>
+        <div class="hero-ring-2"></div>
+        <div class="hero-core">
+          <div class="hero-core-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 01-.659 1.591L9.5 14.5m4.25-11.396c.251.023.501.05.75.082M12 14.5l-3.75 2.25M12 14.5l3.75 2.25M12 14.5v4.5m-3.75-2.25L4.5 19.5m11.25-3L19.5 19.5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="hero-tags">
+          <span class="orb-chip">Python</span>
+          <span class="orb-chip">React</span>
+          <span class="orb-chip">PyTorch</span>
+          <span class="orb-chip">CSS/HTML</span>
+          <span class="orb-chip">TensorFlow</span>
+          <span class="orb-chip">JavaScript</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <div class="eyebrow">About Me</div>
+        <h2>Engineering AI that <em>actually ships</em></h2>
+        <p>I'm Chandan Kumar — an AI Engineer and BTech CSE graduate (25–29) who loves turning complex machine learning research into products people actually use.</p>
+        <p>My work spans deep learning, NLP, computer vision, and full-stack web development. I build end-to-end — from data pipelines and model training to frontend interfaces and cloud deployments.</p>
+        <p>I believe the best AI systems are the ones that are both technically rigorous and genuinely useful. I care as much about clean code and fast APIs as I do about model accuracy.</p>
+        <div class="info-row">
+          <span class="info-chip">BTech CSE</span>
+          <span class="info-chip">AI / ML</span>
+          <span class="info-chip">Full-Stack</span>
+          <span class="info-chip">Open Source</span>
+          <span class="info-chip">Research</span>
+        </div>
+      </div>
+      <div class="about-cards">
+        <div class="about-card">
+          <div class="about-card-icon">🧠</div>
+          <h4>AI-First Mindset</h4>
+          <p>Every system I build has intelligence at its core — from neural networks to LLM-powered applications.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🚀</div>
+          <h4>Full-Stack Capable</h4>
+          <p>Python backends, React frontends, cloud deployments — comfortable across the entire stack.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">💡</div>
+          <h4>Problem Solver</h4>
+          <p>I love tackling hard engineering problems with creative, AI-driven approaches and clean code.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🔬</div>
+          <h4>Continuous Learner</h4>
+          <p>Always exploring deep learning, NLP, computer vision, and the latest AI research papers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Skills -->
+<section id="skills">
+  <div class="container reveal">
+    <div class="eyebrow">Skills</div>
+    <h2 class="section-h2">Tech Stack &amp; <em>Superpowers</em></h2>
+    <p class="section-sub">Full-stack AI engineer comfortable across the entire product lifecycle — from model training to cloud deployment and pixel-perfect UIs.</p>
+
+    <div class="skills-grid">
+      <div>
+        <h3 style="font-family:var(--font-display);font-weight:700;color:var(--white);font-size:1rem;margin-bottom:22px;">Core Proficiencies</h3>
+        <div class="skill-bars" id="skillBars">
+          <div class="skill-bar-item"><div class="skill-bar-top"><span class="skill-bar-label">Python &amp; AI/ML</span><span class="skill-bar-pct">92%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-pct="92"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span class="skill-bar-label">Deep Learning &amp; NLP</span><span class="skill-bar-pct">88%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-pct="88"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span class="skill-bar-label">JavaScript / React</span><span class="skill-bar-pct">85%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-pct="85"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span class="skill-bar-label">Backend Development</span><span class="skill-bar-pct">83%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-pct="83"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span class="skill-bar-label">HTML &amp; CSS / UI</span><span class="skill-bar-pct">80%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-pct="80"></div></div></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;">
+        <div style="text-align:center;">
+          <div style="font-family:var(--font-display);font-size:5rem;font-weight:800;color:var(--teal);line-height:1;">4+</div>
+          <div style="color:var(--text2);font-size:.85rem;margin-top:6px;">Years of coding</div>
+          <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;">
+            <div style="text-align:center;"><div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--amber);">8+</div><div style="font-size:.7rem;color:var(--text3);">Projects</div></div>
+            <div style="text-align:center;"><div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--amber);">5+</div><div style="font-size:.7rem;color:var(--text3);">Certs</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="skill-cats">
+      <div class="skill-cat"><div class="skill-cat-head"><div class="skill-cat-icon" style="background:#ffa94d20;color:var(--amber);">⚡</div><span class="skill-cat-title">Languages</span></div><div class="tags"><span class="tag">Python</span><span class="tag">JavaScript</span><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">TypeScript</span><span class="tag">C++</span><span class="tag">SQL</span></div></div>
+      <div class="skill-cat"><div class="skill-cat-head"><div class="skill-cat-icon" style="background:#00d4aa20;color:var(--teal);">🔷</div><span class="skill-cat-title">Frameworks</span></div><div class="tags"><span class="tag">React</span><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">Flask</span><span class="tag">Django</span><span class="tag">Node.js</span><span class="tag">Tailwind</span></div></div>
+      <div class="skill-cat"><div class="skill-cat-head"><div class="skill-cat-icon" style="background:#9d80ff20;color:#9d80ff;">🤖</div><span class="skill-cat-title">AI / ML</span></div><div class="tags"><span class="tag">TensorFlow</span><span class="tag">PyTorch</span><span class="tag">Scikit-learn</span><span class="tag">OpenCV</span><span class="tag">YOLO</span><span class="tag">LangChain</span><span class="tag">HuggingFace</span></div></div>
+      <div class="skill-cat"><div class="skill-cat-head"><div class="skill-cat-icon" style="background:#00d4aa20;color:var(--teal);">🗄️</div><span class="skill-cat-title">Databases</span></div><div class="tags"><span class="tag">PostgreSQL</span><span class="tag">MongoDB</span><span class="tag">MySQL</span><span class="tag">Redis</span><span class="tag">ChromaDB</span><span class="tag">Pinecone</span></div></div>
+      <div class="skill-cat"><div class="skill-cat-head"><div class="skill-cat-icon" style="background:#ffa94d20;color:var(--amber);">☁️</div><span class="skill-cat-title">Cloud &amp; DevOps</span></div><div class="tags"><span class="tag">AWS</span><span class="tag">GCP</span><span class="tag">Docker</span><span class="tag">GitHub Actions</span><span class="tag">Vercel</span><span class="tag">Netlify</span></div></div>
+      <div class="skill-cat"><div class="skill-cat-head"><div class="skill-cat-icon" style="background:#9d80ff20;color:#9d80ff;">🛠️</div><span class="skill-cat-title">Tools</span></div><div class="tags"><span class="tag">Git</span><span class="tag">REST APIs</span><span class="tag">Jupyter</span><span class="tag">Postman</span><span class="tag">Linux</span><span class="tag">VS Code</span><span class="tag">Figma</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Experience -->
+<section id="experience">
+  <div class="container reveal">
+    <div class="eyebrow">Experience</div>
+    <h2 class="section-h2">Where I've <em>Built &amp; Shipped</em></h2>
+    <p class="section-sub">From internships at AI product companies to full-time engineering — here's my journey.</p>
+    <div class="timeline">
+      <div class="exp-item">
+        <div class="exp-dot" style="background:var(--teal);box-shadow:0 0 10px #00d4aa66;"></div>
+        <div class="exp-card">
+          <div class="exp-header"><span class="exp-role">AI Engineer</span><span class="exp-badge badge-teal">Full-Time</span></div>
+          <div class="exp-company">TechVision AI — Intelligent Automation Platform</div>
+          <div class="exp-period">2024 – Present</div>
+          <ul class="exp-points">
+            <li>Designed and deployed NLP pipelines for document understanding and entity extraction using BERT and GPT-4</li>
+            <li>Built end-to-end MLOps workflows with automated training, evaluation, and deployment on AWS</li>
+            <li>Reduced model inference latency by 40% through quantization and ONNX optimization</li>
+            <li>Developed REST APIs in FastAPI serving 100K+ daily predictions with 99.9% uptime</li>
+          </ul>
+          <div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">FastAPI</span><span class="tag">AWS</span><span class="tag">Docker</span><span class="tag">PostgreSQL</span></div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-dot" style="background:#9d80ff;box-shadow:0 0 10px #7c5cfc66;"></div>
+        <div class="exp-card">
+          <div class="exp-header"><span class="exp-role">Machine Learning Intern</span><span class="exp-badge badge-purple">Internship</span></div>
+          <div class="exp-company">DataSense Labs — ML Research &amp; Products</div>
+          <div class="exp-period">2023</div>
+          <ul class="exp-points">
+            <li>Trained and fine-tuned transformer models for sentiment analysis and text classification</li>
+            <li>Implemented computer vision pipeline for defect detection achieving 94% accuracy</li>
+            <li>Co-authored research paper on few-shot learning for low-resource NLP tasks</li>
+          </ul>
+          <div class="tags"><span class="tag">TensorFlow</span><span class="tag">Scikit-learn</span><span class="tag">OpenCV</span><span class="tag">Streamlit</span><span class="tag">Pandas</span></div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-dot" style="background:var(--amber);box-shadow:0 0 10px #ffa94d66;"></div>
+        <div class="exp-card">
+          <div class="exp-header"><span class="exp-role">Full-Stack Developer Intern</span><span class="exp-badge badge-amber">Internship</span></div>
+          <div class="exp-company">StartupHub — SaaS Product Studio</div>
+          <div class="exp-period">2022</div>
+          <ul class="exp-points">
+            <li>Built responsive React.js frontend with Tailwind CSS for a project management SaaS</li>
+            <li>Developed RESTful APIs with Node.js and Express, integrated with MongoDB</li>
+            <li>Improved page load performance by 35% through code splitting and lazy loading</li>
+          </ul>
+          <div class="tags"><span class="tag">React</span><span class="tag">JavaScript</span><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">CSS</span><span class="tag">HTML</span></div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-dot" style="background:#3a5470;"></div>
+        <div class="exp-card">
+          <div class="exp-header"><span class="exp-role">Open Source Contributor</span><span class="exp-badge" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);">Ongoing</span></div>
+          <div class="exp-company">GitHub — AI/ML &amp; Web Projects</div>
+          <div class="exp-period">Ongoing</div>
+          <ul class="exp-points">
+            <li>Contributed ML utilities and bug fixes to popular Python AI libraries</li>
+            <li>Active contributor to Hugging Face community with model uploads and datasets</li>
+          </ul>
+          <div class="tags"><span class="tag">Python</span><span class="tag">JavaScript</span><span class="tag">HTML/CSS</span><span class="tag">Open Source</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects">
+  <div class="container reveal">
+    <div class="eyebrow">Projects</div>
+    <h2 class="section-h2">Things I've <em>Built</em></h2>
+    <p class="section-sub">AI-powered systems solving real problems — from document intelligence to computer vision and NLP.</p>
+    <div class="projects-grid">
+      <div class="proj-card">
+        <div class="proj-head">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="proj-icon">📄</span>
+            <div><div class="proj-title">SmartDoc AI</div><div class="proj-sub">RAG-Powered Document Intelligence</div></div>
+          </div>
+          <div class="proj-status"><div class="proj-dot" style="background:#00d4aa;"></div><span class="proj-status-label" style="color:#00d4aa;">Live</span></div>
+        </div>
+        <p class="proj-desc">Upload PDFs, research papers, or legal docs and ask questions in natural language. Combines vector search with GPT-4 for precise, cited answers. Full-stack — React frontend, FastAPI backend, ChromaDB for embeddings.</p>
+        <div class="tags" style="margin-bottom:16px;"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">LangChain</span><span class="tag">ChromaDB</span><span class="tag">React</span><span class="tag">OpenAI API</span></div>
+        <div class="proj-links"><a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="proj-link"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> GitHub</a></div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-head">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="proj-icon">👁️</span>
+            <div><div class="proj-title">VisionGuard</div><div class="proj-sub">Real-Time Object Detection System</div></div>
+          </div>
+          <div class="proj-status"><div class="proj-dot" style="background:#00d4aa;"></div><span class="proj-status-label" style="color:#00d4aa;">Live</span></div>
+        </div>
+        <p class="proj-desc">Computer vision security system using YOLOv8 for real-time object and intrusion detection. Sends instant alerts via email and SMS. Deployed on edge devices with a React dashboard for live monitoring.</p>
+        <div class="tags" style="margin-bottom:16px;"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">YOLO</span><span class="tag">OpenCV</span><span class="tag">React</span><span class="tag">FastAPI</span></div>
+        <div class="proj-links"><a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="proj-link"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> GitHub</a></div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-head">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="proj-icon">💬</span>
+            <div><div class="proj-title">SentimentScope</div><div class="proj-sub">NLP Sentiment Analysis Dashboard</div></div>
+          </div>
+          <div class="proj-status"><div class="proj-dot" style="background:#9d80ff;"></div><span class="proj-status-label" style="color:#9d80ff;">Open Source</span></div>
+        </div>
+        <p class="proj-desc">Fine-tuned BERT model for multi-class sentiment analysis on product reviews and social media. Features an interactive React dashboard with real-time predictions and confidence scores.</p>
+        <div class="tags" style="margin-bottom:16px;"><span class="tag">Python</span><span class="tag">HuggingFace</span><span class="tag">TensorFlow</span><span class="tag">React</span><span class="tag">JavaScript</span><span class="tag">CSS</span></div>
+        <div class="proj-links"><a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="proj-link"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> GitHub</a></div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-head">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="proj-icon">🌐</span>
+            <div><div class="proj-title">DevPortal</div><div class="proj-sub">Full-Stack Developer Collaboration Hub</div></div>
+          </div>
+          <div class="proj-status"><div class="proj-dot" style="background:#00d4aa;"></div><span class="proj-status-label" style="color:#00d4aa;">Live</span></div>
+        </div>
+        <p class="proj-desc">GitHub-integrated developer portfolio and project showcase platform. Built with Next.js and Node.js backend, with real-time collaboration, markdown rendering, and project analytics.</p>
+        <div class="tags" style="margin-bottom:16px;"><span class="tag">Next.js</span><span class="tag">JavaScript</span><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">HTML</span><span class="tag">Tailwind CSS</span></div>
+        <div class="proj-links"><a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="proj-link"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> GitHub</a></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:36px;">
+      <a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="btn-ghost">View all projects on GitHub →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Achievements -->
+<section id="achievements">
+  <div class="container reveal">
+    <div class="eyebrow">Achievements &amp; Certs</div>
+    <h2 class="section-h2">Wins &amp; <em>Credentials</em></h2>
+    <p class="section-sub">Recognition, milestones, and certifications earned through hard work and a passion for AI.</p>
+    <div class="ach-grid">
+      <div class="ach-section">
+        <h3>🏅 Achievements</h3>
+        <div class="ach-list">
+          <div class="ach-item"><div class="ach-item-icon">🥇</div><div><div class="ach-item-title">Smart India Hackathon 2023 — Finalist</div><div class="ach-item-desc">Reached national finals with an AI-powered crop disease detection system, competing among 5,000+ teams across India.</div></div></div>
+          <div class="ach-item"><div class="ach-item-icon">🏆</div><div><div class="ach-item-title">Inter-College AI Hackathon — 1st Place</div><div class="ach-item-desc">Won the university-level AI hackathon by building a real-time sign language recognition system using deep learning and MediaPipe.</div></div></div>
+          <div class="ach-item"><div class="ach-item-icon">⭐</div><div><div class="ach-item-title">GitHub Star Contributor — 200+ Stars</div><div class="ach-item-desc">Open-source NLP toolkit repo earned 200+ GitHub stars for clean implementation of transformer fine-tuning utilities.</div></div></div>
+          <div class="ach-item"><div class="ach-item-icon">📝</div><div><div class="ach-item-title">Research Paper — IEEE Conference</div><div class="ach-item-desc">Co-authored "Efficient Few-Shot Learning for Low-Resource NLP" presented at an IEEE student branch conference.</div></div></div>
+          <div class="ach-item"><div class="ach-item-icon">🎓</div><div><div class="ach-item-title">University Gold Medal — AI Elective</div><div class="ach-item-desc">Highest GPA in the AI &amp; Machine Learning elective course across the CSE department, recognized at annual convocation.</div></div></div>
+        </div>
+      </div>
+      <div class="ach-section">
+        <h3>🎓 Certifications</h3>
+        <div class="cert-list">
+          <div class="cert-item"><div class="cert-icon" style="background:#6366f120;">🧠</div><div class="cert-info"><div class="cert-title">Deep Learning Specialization</div><div class="cert-issuer">Coursera — DeepLearning.AI</div><div class="tags"><span class="tag">Neural Nets</span><span class="tag">CNNs</span><span class="tag">Transformers</span></div></div><div class="cert-date">2024</div></div>
+          <div class="cert-item"><div class="cert-icon" style="background:#f9731620;">🤖</div><div class="cert-info"><div class="cert-title">TensorFlow Developer Certificate</div><div class="cert-issuer">Google — TensorFlow</div><div class="tags"><span class="tag">TF</span><span class="tag">Keras</span><span class="tag">CV</span><span class="tag">NLP</span></div></div><div class="cert-date">2023</div></div>
+          <div class="cert-item"><div class="cert-icon" style="background:#ffa94d20;">☁️</div><div class="cert-info"><div class="cert-title">AWS Certified Cloud Practitioner</div><div class="cert-issuer">Amazon Web Services</div><div class="tags"><span class="tag">EC2</span><span class="tag">S3</span><span class="tag">Lambda</span></div></div><div class="cert-date">2023</div></div>
+          <div class="cert-item"><div class="cert-icon" style="background:#3b82f620;">📊</div><div class="cert-info"><div class="cert-title">Machine Learning with Python</div><div class="cert-issuer">IBM — Coursera</div><div class="tags"><span class="tag">Scikit-learn</span><span class="tag">Pandas</span><span class="tag">SVM</span></div></div><div class="cert-date">2023</div></div>
+          <div class="cert-item"><div class="cert-icon" style="background:#10b98120;">🌐</div><div class="cert-info"><div class="cert-title">Full-Stack Web Development</div><div class="cert-issuer">freeCodeCamp</div><div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JS</span><span class="tag">React</span></div></div><div class="cert-date">2022</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" style="background:var(--bg2);">
+  <div class="container reveal">
+    <div class="contact-grid">
+      <div class="contact-text">
+        <div class="eyebrow">Contact</div>
+        <h2>Let's Build Something <em>Amazing</em></h2>
+        <p>Open to AI engineering roles, research collaborations, and exciting full-stack opportunities. Let's connect and make something extraordinary.</p>
+        <div class="avail"><span class="pulse"></span> Available for new opportunities</div>
+      </div>
+      <div class="contact-cards">
+        <a href="mailto:chandankumar@email.com" class="contact-card">
+          <div class="contact-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+          <div><div class="contact-card-label">Email</div><div class="contact-card-value">chandankumar@email.com</div></div>
+        </a>
+        <a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="contact-card">
+          <div class="contact-card-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>
+          <div><div class="contact-card-label">GitHub</div><div class="contact-card-value">chandan1909kumarck-dotcom</div></div>
+        </a>
+        <a href="https://linkedin.com/in/chandankumar" target="_blank" rel="noopener" class="contact-card">
+          <div class="contact-card-icon amber-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div>
+          <div><div class="contact-card-label">LinkedIn</div><div class="contact-card-value">linkedin.com/in/chandankumar</div></div>
+        </a>
+        <div style="margin-top:8px;">
+          <a href="mailto:chandankumar@email.com" class="btn-teal" style="width:100%;justify-content:center;padding:14px;">Send me a message →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">Chandan<span>Kumar</span></div>
+      <div class="footer-copy">© 2025 Chandan Kumar · AI Engineer · BTech CSE</div>
+      <div style="display:flex;gap:10px;">
+        <a href="https://github.com/chandan1909kumarck-dotcom" target="_blank" rel="noopener" class="btn-ghost" style="padding:6px 12px;font-size:.75rem;">GitHub</a>
+        <a href="mailto:chandankumar@email.com" class="btn-teal" style="padding:6px 14px;font-size:.75rem;">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Theme toggle ── */
+const themeBtn = document.getElementById('themeBtn');
+let theme = localStorage.getItem('theme') || 'dark';
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? '☀' : '☾';
+  try { localStorage.setItem('theme', t); } catch(e) {}
+}
+applyTheme(theme);
+themeBtn.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme); });
+
+/* ── Nav scroll ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40), { passive: true });
+
+/* ── Typewriter ── */
+const roles = ['AI Engineer', 'Machine Learning Engineer', 'Full-Stack Developer', 'Deep Learning Practitioner', 'BTech CSE Graduate'];
+let ri = 0, ci = 0, deleting = false;
+const el = document.getElementById('typed-text');
+function type() {
+  const cur = roles[ri];
+  if (!deleting) {
+    el.textContent = cur.slice(0, ci + 1);
+    ci++;
+    if (ci === cur.length) { setTimeout(() => { deleting = true; setTimeout(type, 28); }, 2000); return; }
+  } else {
+    el.textContent = cur.slice(0, ci - 1);
+    ci--;
+    if (ci === 0) { deleting = false; ri = (ri + 1) % roles.length; }
+  }
+  setTimeout(type, deleting ? 28 : 55);
+}
+type();
+
+/* ── Scroll reveal ── */
+const reveals = document.querySelectorAll('.reveal');
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '-40px' });
+reveals.forEach(r => ro.observe(r));
+
+/* ── Skill bars ── */
+const bars = document.querySelectorAll('.skill-bar-fill');
+const barObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.style.width = e.target.dataset.pct + '%'; barObs.unobserve(e.target); } });
+}, { threshold: 0.3 });
+bars.forEach(b => barObs.observe(b));
+
+/* ── Canvas particle dots ── */
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+let W, H, dots = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize, { passive: true });
+for (let i = 0; i < 60; i++) {
+  dots.push({ x: Math.random() * 1920, y: Math.random() * 1080, vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25, r: Math.random() * 1.5 + .5 });
+}
+function drawCanvas() {
+  ctx.clearRect(0, 0, W, H);
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const dotColor = isDark ? '0, 212, 170' : '0, 130, 105';
+  dots.forEach(d => {
+    d.x += d.vx; d.y += d.vy;
+    if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
+    if (d.y < 0) d.y = H; if (d.y > H) d.y = 0;
+    ctx.beginPath();
+    ctx.arc(d.x % W, d.y % H, d.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${dotColor}, 0.5)`;
+    ctx.fill();
+  });
+  // connections
+  for (let i = 0; i < dots.length; i++) {
+    for (let j = i + 1; j < dots.length; j++) {
+      const dx = dots[i].x - dots[j].x, dy = dots[i].y - dots[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(dots[i].x, dots[i].y);
+        ctx.lineTo(dots[j].x, dots[j].y);
+        ctx.strokeStyle = `rgba(${dotColor}, ${(1 - dist/120) * 0.12})`;
+        ctx.lineWidth = .5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawCanvas);
+}
+drawCanvas();
+</script>
