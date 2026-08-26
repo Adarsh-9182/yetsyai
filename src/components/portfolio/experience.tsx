@@ -4,62 +4,63 @@ import { motion, useInView } from "framer-motion";
 
 const experiences = [
   {
-    role: "Founder & AI Engineer",
-    company: "Paisa — AI CFO & Financial OS",
-    type: "Founder",
+    role: "AI Engineer",
+    company: "TechVision AI — Intelligent Automation Platform",
+    type: "Full-Time",
     period: "2024 – Present",
     color: "from-amber-500 to-orange-600",
     dot: "#f59e0b",
     highlights: [
-      "Architected autonomous AI agents for accounting, tax, investments, and financial planning",
-      "Integrated bank accounts with secure connectors for real-time transaction insights",
-      "Built financial modules: expense aggregation, UPI, SIPs, loans, investments, tax, documents",
-      "Developed scalable backend with AI/ML capabilities and cloud infrastructure",
+      "Designed and deployed NLP pipelines for document understanding and entity extraction using BERT and GPT-4",
+      "Built end-to-end MLOps workflows with automated training, evaluation, and deployment on AWS",
+      "Reduced model inference latency by 40% through quantization and ONNX optimization",
+      "Developed REST APIs in FastAPI serving 100K+ daily predictions with 99.9% uptime",
     ],
-    stack: ["Python", "FastAPI", "JavaScript", "AWS", "Docker", "Kubernetes"],
+    stack: ["Python", "PyTorch", "FastAPI", "AWS", "Docker", "PostgreSQL"],
   },
   {
-    role: "AI Engineering Intern",
-    company: "MCPfy.ai — MCP Infrastructure Platform",
+    role: "Machine Learning Intern",
+    company: "DataSense Labs — ML Research & Products",
     type: "Internship",
-    period: "2024",
+    period: "2023",
     color: "from-purple-500 to-indigo-600",
     dot: "#a855f7",
     highlights: [
-      "Contributed to AI agent and MCP-based developer tooling and workflows",
-      "Built and integrated APIs for AI automation and developer workflows",
-      "Debugged product features, improved reliability, and tested integrations",
-      "Collaborated on AI product development and developer experience improvements",
+      "Trained and fine-tuned transformer models for sentiment analysis and text classification",
+      "Implemented computer vision pipeline for defect detection achieving 94% accuracy",
+      "Collaborated on research paper on few-shot learning for low-resource NLP tasks",
+      "Built interactive dashboards with Streamlit to visualize model performance metrics",
     ],
-    stack: ["Python", "TypeScript", "MCP", "REST APIs", "Git"],
+    stack: ["Python", "TensorFlow", "Scikit-learn", "OpenCV", "Streamlit", "Pandas"],
   },
   {
-    role: "Senior AI Health Engineer",
-    company: "NutriScan AI — AI Nutrition & Health Platform",
-    type: "Engineering",
-    period: "2024",
+    role: "Full-Stack Developer Intern",
+    company: "StartupHub — SaaS Product Studio",
+    type: "Internship",
+    period: "2022",
     color: "from-cyan-500 to-blue-600",
     dot: "#06b6d4",
     highlights: [
-      "Built AI nutrition system to analyze food images for protein, calorie & meal insights",
-      "Designed personalized meal and diet plans using advanced AI models",
-      "Integrated OpenAI API and LangChain for intelligent nutritional analysis",
+      "Built responsive React.js frontend with Tailwind CSS for a project management SaaS",
+      "Developed RESTful APIs with Node.js and Express, integrated with MongoDB",
+      "Implemented JWT authentication and role-based access control",
+      "Improved page load performance by 35% through code splitting and lazy loading",
     ],
-    stack: ["Python", "FastAPI", "PyTorch", "OpenAI API", "LangChain", "PostgreSQL", "React", "Docker"],
+    stack: ["React", "JavaScript", "Node.js", "MongoDB", "CSS", "HTML", "Git"],
   },
   {
     role: "Open Source Contributor",
-    company: "GitHub, Hugging Face, LangChain",
+    company: "GitHub — AI/ML & Web Projects",
     type: "Open Source",
     period: "Ongoing",
     color: "from-emerald-500 to-teal-600",
     dot: "#10b981",
     highlights: [
-      "Developed features, fixed bugs, and improved documentation across AI/ML tools",
-      "Contributed to Python, JavaScript, and AI agent frameworks",
-      "Active on GitHub, Hugging Face, and LangChain open-source projects",
+      "Contributed ML utilities and bug fixes to popular Python AI libraries on GitHub",
+      "Developed open-source projects in computer vision, NLP, and web development",
+      "Active contributor to Hugging Face community with model uploads and datasets",
     ],
-    stack: ["Python", "JavaScript", "AI Agents", "Open Source"],
+    stack: ["Python", "JavaScript", "HTML/CSS", "Open Source"],
   },
 ];
 
@@ -90,7 +91,7 @@ export function Experience() {
             <span className="gradient-text">Built & Shipped</span>
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl">
-            From founding an AI fintech startup to contributing to open source — here's my journey.
+            From internships at AI product companies to full-time engineering — here's my journey.
           </p>
         </motion.div>
 

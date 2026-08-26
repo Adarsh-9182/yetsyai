@@ -4,17 +4,17 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Adarsh Bhardwaj — Software & AI Engineer",
+  title: "Chandan Kumar — AI Engineer",
   description:
-    "Portfolio of Adarsh Bhardwaj — Software & AI Engineer building production-grade AI applications, autonomous agents, RAG pipelines, and AI products. Founder of Paisa AI CFO.",
-  keywords: ["AI Engineer", "Software Engineer", "Machine Learning", "LangChain", "FastAPI", "React", "Python", "Adarsh Bhardwaj"],
-  authors: [{ name: "Adarsh Bhardwaj" }],
-  creator: "Adarsh Bhardwaj",
+    "Portfolio of Chandan Kumar — AI Engineer & BTech CSE graduate building intelligent applications, ML pipelines, and full-stack AI products.",
+  keywords: ["AI Engineer", "Machine Learning", "Python", "JavaScript", "React", "Deep Learning", "Chandan Kumar", "BTech CSE"],
+  authors: [{ name: "Chandan Kumar" }],
+  creator: "Chandan Kumar",
   openGraph: {
     type: "website",
-    title: "Adarsh Bhardwaj — Software & AI Engineer",
-    description: "Building production-grade AI applications, autonomous agents, and AI products.",
-    siteName: "Adarsh Bhardwaj Portfolio",
+    title: "Chandan Kumar — AI Engineer",
+    description: "Building intelligent AI applications, ML pipelines, and full-stack products.",
+    siteName: "Chandan Kumar Portfolio",
   },
 };
 

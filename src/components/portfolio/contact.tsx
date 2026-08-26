@@ -10,8 +10,8 @@ const contactItems = [
       </svg>
     ),
     label: "Email",
-    value: "adarshbhardwaj9182@gmail.com",
-    href: "mailto:adarshbhardwaj9182@gmail.com",
+    value: "chandankumar@email.com",
+    href: "mailto:chandankumar@email.com",
     color: "#6366f1",
   },
   {
@@ -32,7 +32,7 @@ const contactItems = [
       </svg>
     ),
     label: "LinkedIn",
-    value: "linkedin.com/in/adarshbhardwaj",
+    value: "linkedin.com/in/chandankumar",
     href: "https://linkedin.com",
     color: "#a855f7",
   },
@@ -43,8 +43,8 @@ const contactItems = [
       </svg>
     ),
     label: "GitHub",
-    value: "github.com/adarsh-9182",
-    href: "https://github.com/adarsh-9182",
+    value: "github.com/chandan1909kumarck-dotcom",
+    href: "https://github.com/chandan1909kumarck-dotcom",
     color: "#f59e0b",
   },
 ];
@@ -55,7 +55,7 @@ export function Contact() {
   const [copied, setCopied] = useState(false);
 
   const copyEmail = () => {
-    navigator.clipboard.writeText("adarshbhardwaj9182@gmail.com");
+    navigator.clipboard.writeText("chandankumar@email.com");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -77,7 +77,7 @@ export function Contact() {
         >
           <div className="flex items-center justify-center gap-4 mb-4">
             <div className="h-px w-16 bg-indigo-500/30" />
-            <span className="section-label">05 / Contact</span>
+            <span className="section-label">06 / Contact</span>
             <div className="h-px w-16 bg-indigo-500/30" />
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
@@ -147,7 +147,7 @@ export function Contact() {
 
               <div className="space-y-3">
                 <a
-                  href="mailto:adarshbhardwaj9182@gmail.com"
+                  href="mailto:chandankumar@email.com"
                   className="btn-primary w-full py-4 rounded-2xl text-white font-semibold text-sm flex items-center justify-center gap-2 relative z-10"
                 >
                   <svg className="w-4 h-4 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">

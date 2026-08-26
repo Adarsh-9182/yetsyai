@@ -6,6 +6,7 @@ import { About } from "@/components/portfolio/about";
 import { Skills } from "@/components/portfolio/skills";
 import { Experience } from "@/components/portfolio/experience";
 import { Projects } from "@/components/portfolio/projects";
+import { Achievements } from "@/components/portfolio/achievements";
 import { Contact } from "@/components/portfolio/contact";
 import { Footer } from "@/components/portfolio/footer";
 
@@ -26,6 +27,7 @@ export default function PortfolioPage() {
         <Skills />
         <Experience />
         <Projects />
+        <Achievements />
         <Contact />
       </main>
 

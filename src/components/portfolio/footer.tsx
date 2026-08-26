@@ -10,11 +10,11 @@ export function Footer() {
           {/* Brand */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-              A
+              C
             </div>
             <div>
-              <div className="text-white font-semibold">Adarsh Bhardwaj</div>
-              <div className="text-slate-500 text-xs">Software & AI Engineer</div>
+              <div className="text-white font-semibold">Chandan Kumar</div>
+              <div className="text-slate-500 text-xs">AI Engineer</div>
             </div>
           </div>
 
@@ -34,9 +34,9 @@ export function Footer() {
           {/* Social */}
           <div className="flex items-center gap-3">
             {[
-              { href: "https://github.com/adarsh-9182", icon: "github" },
-              { href: "https://linkedin.com", icon: "linkedin" },
-              { href: "mailto:adarshbhardwaj9182@gmail.com", icon: "mail" },
+              { href: "https://github.com/chandan1909kumarck-dotcom", icon: "github" },
+              { href: "https://linkedin.com/in/chandankumar", icon: "linkedin" },
+              { href: "mailto:chandankumar@email.com", icon: "mail" },
             ].map((s) => (
               <a
                 key={s.icon}
@@ -67,7 +67,7 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-slate-600 text-xs">
-            © 2025 Adarsh Bhardwaj. Built with Next.js & Framer Motion.
+            © 2025 Chandan Kumar. Built with Next.js & Framer Motion.
           </p>
           <p className="text-slate-600 text-xs flex items-center gap-1">
             Crafted with <span className="text-red-400">♥</span> and a lot of AI

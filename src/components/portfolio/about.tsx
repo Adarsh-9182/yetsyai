@@ -3,10 +3,10 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const traits = [
-  { icon: "🧠", title: "AI-First Mindset", desc: "Every product I build has intelligence at its core — from autonomous agents to RAG pipelines." },
-  { icon: "🚀", title: "Production-Grade", desc: "I ship things that scale. Cloud deployments, Docker, Kubernetes — built for real-world traffic." },
-  { icon: "💡", title: "Founder Mentality", desc: "Currently building Paisa, an AI CFO that empowers businesses and individuals with financial intelligence." },
-  { icon: "🔬", title: "Deep Research", desc: "Constantly exploring LLMs, multi-agent workflows, and cutting-edge AI architectures." },
+  { icon: "🧠", title: "AI-First Mindset", desc: "Every solution I engineer has intelligence at its core — from neural networks to LLM-powered applications." },
+  { icon: "🚀", title: "Full-Stack Capable", desc: "Comfortable across the entire stack — Python backends, React frontends, and cloud deployments." },
+  { icon: "💡", title: "Problem Solver", desc: "Love tackling hard engineering problems with creative AI-driven approaches and clean code." },
+  { icon: "🔬", title: "Continuous Learner", desc: "Constantly exploring deep learning, NLP, computer vision, and the latest AI research papers." },
 ];
 
 export function About() {
@@ -50,15 +50,15 @@ export function About() {
               </motion.h2>
 
               <motion.p variants={itemVar} className="text-slate-400 text-lg leading-relaxed mb-6">
-                I'm Adarsh Bhardwaj — a Software & AI Engineer obsessed with turning complex AI research into real products that solve real problems. My work spans autonomous AI agents, multi-agent orchestration, RAG pipelines, and cloud-native architectures.
+                I'm Chandan Kumar — an AI Engineer and BTech CSE graduate (25–29) passionate about building intelligent systems that solve real-world problems. My work spans machine learning, deep learning, NLP, computer vision, and full-stack AI product development.
               </motion.p>
 
               <motion.p variants={itemVar} className="text-slate-400 text-lg leading-relaxed mb-8">
-                Right now, I'm founding <span className="text-indigo-300 font-semibold">Paisa</span> — an AI CFO that gives SMEs and individuals an intelligent financial operating system. I believe AI should empower people, not replace them.
+                I bridge the gap between cutting-edge <span className="text-indigo-300 font-semibold">AI research</span> and production-ready software — crafting everything from model training pipelines to polished user-facing applications. I believe great AI is both powerful and accessible.
               </motion.p>
 
               <motion.div variants={itemVar} className="flex flex-wrap gap-3">
-                {["Python", "TypeScript", "FastAPI", "LangChain", "AWS", "Docker", "PyTorch", "React"].map((tech) => (
+                {["Python", "JavaScript", "HTML", "CSS", "TensorFlow", "PyTorch", "React", "FastAPI"].map((tech) => (
                   <span key={tech} className="px-3 py-1.5 rounded-full glass border border-white/10 text-slate-300 text-sm font-medium">
                     {tech}
                   </span>
@@ -67,7 +67,7 @@ export function About() {
 
               <motion.div variants={itemVar} className="mt-8 flex items-center gap-4">
                 <a
-                  href="mailto:adarshbhardwaj9182@gmail.com"
+                  href="mailto:chandankumar@email.com"
                   className="btn-primary px-6 py-3 rounded-full text-white text-sm font-semibold relative z-10 inline-flex items-center gap-2"
                 >
                   <span className="relative z-10">Let's Talk</span>
@@ -101,10 +101,10 @@ export function About() {
           {/* Quick facts bar */}
           <motion.div variants={itemVar} className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { num: "JEE", sub: "Advanced Appeared", color: "from-indigo-500 to-purple-600" },
-              { num: "MCPfy", sub: "AI Intern", color: "from-purple-500 to-pink-600" },
-              { num: "NutriScan", sub: "AI Health Engineer", color: "from-cyan-500 to-blue-600" },
-              { num: "Paisa", sub: "Founder & AI Engineer", color: "from-amber-500 to-orange-600" },
+              { num: "BTech", sub: "CSE Graduate", color: "from-indigo-500 to-purple-600" },
+              { num: "8+", sub: "Projects Shipped", color: "from-purple-500 to-pink-600" },
+              { num: "3+", sub: "AI Products Built", color: "from-cyan-500 to-blue-600" },
+              { num: "5+", sub: "Certifications", color: "from-amber-500 to-orange-600" },
             ].map((f) => (
               <div key={f.sub} className="glass border border-white/8 rounded-2xl p-4 text-center group hover:border-indigo-500/30 transition-all">
                 <div className={`text-lg font-black bg-gradient-to-r ${f.color} bg-clip-text text-transparent mb-1`}>{f.num}</div>

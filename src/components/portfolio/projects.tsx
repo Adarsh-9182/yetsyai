@@ -4,60 +4,60 @@ import { motion, useInView } from "framer-motion";
 
 const projects = [
   {
-    title: "Paisa — AI CFO",
-    subtitle: "Financial Operating System",
-    desc: "End-to-end AI financial management platform for SMEs and individuals. Autonomous agents handle accounting, tax, investments, and financial planning with real-time bank integrations.",
-    tags: ["Python", "FastAPI", "LangChain", "AWS", "Docker", "PostgreSQL"],
+    title: "SmartDoc AI",
+    subtitle: "Intelligent Document Q&A System",
+    desc: "Full-stack RAG-powered document intelligence platform. Upload PDFs, research papers, or legal docs and ask questions in natural language. Combines vector search with GPT-4 for precise, cited answers.",
+    tags: ["Python", "FastAPI", "LangChain", "ChromaDB", "React", "OpenAI API"],
     gradient: "from-amber-500/20 via-orange-600/10 to-transparent",
     border: "rgba(245,158,11,0.25)",
     glow: "rgba(245,158,11,0.15)",
-    icon: "💰",
+    icon: "📄",
     status: "Live",
     statusColor: "#10b981",
     featured: true,
-    links: { github: "#", live: "#" },
+    links: { github: "https://github.com/chandan1909kumarck-dotcom", live: "#" },
   },
   {
-    title: "NutriScan AI",
-    subtitle: "AI Nutrition & Health Platform",
-    desc: "AI nutrition scanner that analyzes food images to provide detailed nutrition facts, protein, calories, and personalized meal insights. Powered by computer vision and LLMs.",
-    tags: ["Python", "PyTorch", "OpenAI API", "React", "FastAPI", "Docker"],
+    title: "VisionGuard",
+    subtitle: "Real-Time Object Detection & Alert System",
+    desc: "Computer vision security system using YOLOv8 for real-time object and intrusion detection. Sends instant alerts via email and SMS. Deployed on edge devices with a React dashboard for live monitoring.",
+    tags: ["Python", "PyTorch", "YOLO", "OpenCV", "React", "FastAPI", "Docker"],
     gradient: "from-cyan-500/20 via-blue-600/10 to-transparent",
     border: "rgba(6,182,212,0.25)",
     glow: "rgba(6,182,212,0.15)",
-    icon: "🥗",
+    icon: "👁️",
     status: "Live",
     statusColor: "#10b981",
     featured: true,
-    links: { github: "#", live: "#" },
+    links: { github: "https://github.com/chandan1909kumarck-dotcom", live: null },
   },
   {
-    title: "AI Agent Framework",
-    subtitle: "Multi-Agent Orchestration System",
-    desc: "Production-grade multi-agent AI system for task automation, financial planning, and reporting. Features agent-to-agent communication and tool-use capabilities.",
-    tags: ["Python", "LangChain", "FastAPI", "Redis", "Celery"],
+    title: "SentimentScope",
+    subtitle: "NLP Sentiment Analysis Dashboard",
+    desc: "Fine-tuned BERT model for multi-class sentiment analysis on product reviews and social media. Features an interactive React dashboard with real-time predictions and confidence scores.",
+    tags: ["Python", "Hugging Face", "TensorFlow", "React", "JavaScript", "CSS"],
     gradient: "from-purple-500/20 via-indigo-600/10 to-transparent",
     border: "rgba(168,85,247,0.25)",
     glow: "rgba(168,85,247,0.15)",
-    icon: "🤖",
+    icon: "💬",
     status: "Open Source",
     statusColor: "#6366f1",
     featured: false,
-    links: { github: "#", live: null },
+    links: { github: "https://github.com/chandan1909kumarck-dotcom", live: null },
   },
   {
-    title: "RAG Financial Assistant",
-    subtitle: "Retrieval-Augmented Generation",
-    desc: "Intelligent Q&A system for finance using RAG pipeline. Retrieves relevant financial documents and generates accurate, context-aware answers using LLMs.",
-    tags: ["Python", "LangChain", "OpenAI", "PostgreSQL", "pgvector"],
+    title: "DevPortal",
+    subtitle: "Full-Stack Developer Collaboration Hub",
+    desc: "A GitHub-integrated developer portfolio and project showcase platform. Built with Next.js and a Node.js backend, with real-time collaboration features, markdown rendering, and project analytics.",
+    tags: ["Next.js", "JavaScript", "Node.js", "MongoDB", "HTML", "Tailwind CSS"],
     gradient: "from-emerald-500/20 via-teal-600/10 to-transparent",
     border: "rgba(16,185,129,0.25)",
     glow: "rgba(16,185,129,0.15)",
-    icon: "📊",
-    status: "Research",
-    statusColor: "#f59e0b",
+    icon: "🌐",
+    status: "Live",
+    statusColor: "#10b981",
     featured: false,
-    links: { github: "#", live: null },
+    links: { github: "https://github.com/chandan1909kumarck-dotcom", live: "#" },
   },
 ];
 
@@ -193,7 +193,7 @@ export function Projects() {
             <span className="gradient-text">Built</span>
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl">
-            Production AI systems that solve real problems — from financial intelligence to nutrition analysis.
+            AI-powered systems solving real problems — from document intelligence to computer vision and NLP.
           </p>
         </motion.div>
 
@@ -220,7 +220,7 @@ export function Projects() {
           className="mt-12 text-center"
         >
           <a
-            href="https://github.com/adarsh-9182"
+            href="https://github.com/chandan1909kumarck-dotcom"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm transition-colors"

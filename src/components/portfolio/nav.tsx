@@ -7,6 +7,7 @@ const links = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
+  { label: "Achievements", href: "#achievements" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -53,10 +54,10 @@ export function Nav() {
         {/* Logo */}
         <a href="#" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold group-hover:scale-110 transition-transform">
-            A
+            C
           </div>
           <span className="text-white font-semibold tracking-tight hidden sm:block">
-            Adarsh<span className="text-indigo-400">.</span>
+            Chandan<span className="text-indigo-400">.</span>
           </span>
         </a>
 
@@ -86,7 +87,7 @@ export function Nav() {
         {/* CTA + hamburger */}
         <div className="flex items-center gap-3">
           <a
-            href="mailto:adarshbhardwaj9182@gmail.com"
+            href="mailto:chandankumar@email.com"
             className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold btn-primary text-white relative z-10"
           >
             <span className="relative z-10">Hire Me</span>
@@ -126,7 +127,7 @@ export function Nav() {
                 </a>
               ))}
               <a
-                href="mailto:adarshbhardwaj9182@gmail.com"
+                href="mailto:chandankumar@email.com"
                 className="mt-3 py-3 text-center rounded-full btn-primary text-white font-semibold relative z-10"
               >
                 <span className="relative z-10">Hire Me</span>

@@ -3,20 +3,20 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const roles = [
-  "Software & AI Engineer",
-  "AI Product Builder",
-  "Founder of Paisa AI",
-  "Multi-Agent Systems Architect",
-  "RAG Pipeline Engineer",
+  "AI Engineer",
+  "Machine Learning Engineer",
+  "Full-Stack Developer",
+  "Deep Learning Practitioner",
+  "BTech CSE Graduate",
 ];
 
 const techOrbit = [
   { label: "Python", color: "#3b82f6", delay: "0s", speed: "18s", radius: 130 },
-  { label: "LangChain", color: "#a855f7", delay: "2s", speed: "22s", radius: 130 },
-  { label: "FastAPI", color: "#06b6d4", delay: "4s", speed: "20s", radius: 130 },
+  { label: "JavaScript", color: "#f59e0b", delay: "2s", speed: "22s", radius: 130 },
+  { label: "TensorFlow", color: "#06b6d4", delay: "4s", speed: "20s", radius: 130 },
   { label: "React", color: "#6366f1", delay: "6s", speed: "16s", radius: 130 },
-  { label: "PyTorch", color: "#f59e0b", delay: "8s", speed: "24s", radius: 130 },
-  { label: "Docker", color: "#22d3ee", delay: "1s", speed: "19s", radius: 130 },
+  { label: "PyTorch", color: "#a855f7", delay: "8s", speed: "24s", radius: 130 },
+  { label: "HTML/CSS", color: "#22d3ee", delay: "1s", speed: "19s", radius: 130 },
 ];
 
 export function Hero() {
@@ -92,7 +92,7 @@ export function Hero() {
               <span className="text-white">Hi, I'm</span>
             </h1>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-none mb-6 gradient-text text-glow">
-              Adarsh
+              Chandan
             </h1>
           </motion.div>
 
@@ -104,8 +104,8 @@ export function Hero() {
           </motion.div>
 
           <motion.p variants={itemVar} className="text-slate-400 text-base sm:text-lg leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0">
-            Building production-grade AI applications, autonomous agents, and end-to-end AI product systems.
-            Currently founding <span className="text-indigo-300 font-semibold">Paisa</span> — an AI CFO & Financial OS.
+            Building intelligent AI applications, ML-powered products, and full-stack solutions.
+            BTech CSE graduate passionate about turning cutting-edge AI research into real-world impact.
           </motion.p>
 
           <motion.div variants={itemVar} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -131,9 +131,9 @@ export function Hero() {
             <span className="text-slate-500 text-xs uppercase tracking-widest">Follow</span>
             <div className="h-px flex-1 max-w-12 bg-white/10" />
             {[
-              { icon: "github", href: "https://github.com/adarsh-9182", label: "GitHub" },
-              { icon: "linkedin", href: "https://linkedin.com/in/adarshbhardwaj", label: "LinkedIn" },
-              { icon: "mail", href: "mailto:adarshbhardwaj9182@gmail.com", label: "Email" },
+              { icon: "github", href: "https://github.com/chandan1909kumarck-dotcom", label: "GitHub" },
+              { icon: "linkedin", href: "https://linkedin.com/in/chandankumar", label: "LinkedIn" },
+              { icon: "mail", href: "mailto:chandankumar@email.com", label: "Email" },
             ].map((s) => (
               <a
                 key={s.icon}
@@ -257,9 +257,9 @@ export function Hero() {
       >
         <div className="glass border border-white/8 rounded-2xl px-6 py-4 flex flex-wrap gap-8 items-center justify-center">
           {[
-            { value: "4+", label: "Projects Built" },
-            { value: "3+", label: "AI Products" },
-            { value: "5+", label: "Tech Stacks" },
+            { value: "8+", label: "Projects Built" },
+            { value: "5+", label: "AI Models" },
+            { value: "10+", label: "Tech Stacks" },
             { value: "∞", label: "Lines of Code" },
           ].map((s) => (
             <div key={s.label} className="text-center">

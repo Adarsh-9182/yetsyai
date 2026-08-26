@@ -8,51 +8,51 @@ const categories = [
     title: "Languages",
     color: "from-yellow-500 to-orange-500",
     glow: "rgba(234,179,8,0.15)",
-    skills: ["Python", "TypeScript", "JavaScript", "Java", "C++", "SQL"],
+    skills: ["Python", "JavaScript", "TypeScript", "C++", "Java", "SQL", "HTML", "CSS"],
   },
   {
     icon: "🔷",
     title: "Frameworks & Libraries",
     color: "from-blue-500 to-indigo-600",
     glow: "rgba(59,130,246,0.15)",
-    skills: ["React", "Node.js", "FastAPI", "Django", "Express", "TensorFlow", "PyTorch"],
+    skills: ["React", "Next.js", "FastAPI", "Flask", "Django", "Node.js", "Express", "Tailwind CSS"],
   },
   {
     icon: "🗄️",
     title: "Databases",
     color: "from-emerald-500 to-teal-600",
     glow: "rgba(16,185,129,0.15)",
-    skills: ["PostgreSQL", "MongoDB", "Redis", "DynamoDB"],
-  },
-  {
-    icon: "☁️",
-    title: "Cloud & DevOps",
-    color: "from-cyan-500 to-blue-500",
-    glow: "rgba(6,182,212,0.15)",
-    skills: ["AWS", "GCP", "Lambda", "Docker", "Kubernetes", "GitHub Actions", "Jenkins"],
+    skills: ["PostgreSQL", "MongoDB", "MySQL", "Redis", "ChromaDB", "Pinecone"],
   },
   {
     icon: "🤖",
     title: "AI / ML",
     color: "from-purple-500 to-indigo-600",
     glow: "rgba(168,85,247,0.15)",
-    skills: ["LangChain", "OpenAI API", "Scikit-learn", "NumPy", "Pandas", "Streamlit", "LLMs"],
+    skills: ["TensorFlow", "PyTorch", "Scikit-learn", "OpenAI API", "LangChain", "Hugging Face", "NumPy", "Pandas", "YOLO", "OpenCV"],
+  },
+  {
+    icon: "☁️",
+    title: "Cloud & DevOps",
+    color: "from-cyan-500 to-blue-500",
+    glow: "rgba(6,182,212,0.15)",
+    skills: ["AWS", "GCP", "Docker", "GitHub Actions", "Vercel", "Netlify"],
   },
   {
     icon: "🛠️",
-    title: "Tools & APIs",
+    title: "Tools & Concepts",
     color: "from-rose-500 to-pink-600",
     glow: "rgba(244,63,94,0.15)",
-    skills: ["Git", "REST APIs", "GraphQL", "WebSockets", "Postman", "Jira", "VS Code"],
+    skills: ["Git", "REST APIs", "Jupyter", "Postman", "Linux", "Agile", "VS Code", "Figma"],
   },
 ];
 
 const coreSkills = [
-  { label: "AI/ML Engineering", pct: 95 },
-  { label: "Backend Development", pct: 90 },
-  { label: "Cloud Architecture", pct: 82 },
-  { label: "Frontend Development", pct: 78 },
-  { label: "System Design", pct: 85 },
+  { label: "Python & AI/ML", pct: 92 },
+  { label: "Deep Learning & NLP", pct: 88 },
+  { label: "JavaScript / React", pct: 85 },
+  { label: "Backend Development", pct: 83 },
+  { label: "HTML & CSS / UI", pct: 80 },
 ];
 
 export function Skills() {
@@ -133,7 +133,7 @@ export function Skills() {
               <div className="absolute inset-8 rounded-full border border-cyan-500/20" style={{ animation: "spin-slow 10s linear infinite" }} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-4xl font-black gradient-text">5+</div>
+                  <div className="text-4xl font-black gradient-text">4+</div>
                   <div className="text-slate-400 text-xs mt-1">Years of</div>
                   <div className="text-slate-400 text-xs">Coding</div>
                 </div>
