@@ -1,0 +1,10 @@
+.git
+.next
+.vercel
+node_modules
+.env
+.env.local
+.env.*.local
+prisma/*.db
+prisma/*.db-journal
+*.log
