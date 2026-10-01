@@ -1,0 +1,10 @@
+gradio>=5.49,<6
+spaces>=0.42
+torch>=2.8,<2.9
+diffusers>=0.35.2,<0.37
+transformers>=4.55,<5
+accelerate>=1.10,<2
+sentencepiece>=0.2
+ftfy>=6.3
+imageio-ffmpeg>=0.6
+requests>=2.32.4

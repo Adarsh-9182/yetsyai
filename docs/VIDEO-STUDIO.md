@@ -1,35 +1,58 @@
-# Yetsyai video studio
+# Studio architecture
 
-## Current flow
+## Request path
 
-1. Loading `/api/generations` creates an anonymous browser workspace with an HttpOnly cookie and returns its history.
-2. `POST /api/generations` validates the scene, settings, and optional reference image. It reserves one active render slot in a SQLite transaction.
-3. The server submits the request to fal's Kling 3.0 Standard text-to-video or image-to-video endpoint. `FAL_KEY` stays on the server.
-4. The client polls `/api/generations/:id` for queue updates. Status and the completed output URL are persisted; refreshing or reopening the app resumes unfinished jobs in the same browser workspace.
-5. Completed videos play in a dialog. `/api/generations/:id/download` streams the MP4 with an attachment header after verifying ownership and the provider CDN host.
+1. The browser loads capabilities and its account library. Public preview visitors
+   do not create database workspaces. Auth is verified by Supabase on the server.
+2. `POST /api/generations` checks origin, account, bounded input, owned reference
+   and actual image dimensions. PostgreSQL atomically reserves workspace/global
+   slots and daily quota before recording an idempotent request UUID.
+3. The provider adapter sends the scene to the owner's private ZeroGPU Gradio
+   Space. Paid fal/Kling is explicit opt-in. Keys never reach the browser.
+4. The browser polls with backoff. Gradio SSE results are cached by the Space;
+   status is persisted in PostgreSQL. A signed callback is the primary completion
+   path, so users can close the page during a render.
+5. Completed MP4s are copied to private Supabase storage before marking a free
+   job complete. UI links expire after an hour; authenticated routes issue fresh
+   signed links. Download/delete checks workspace ownership.
 
-Repeated submissions with the same request ID return the existing job. A per-workspace database lock prevents overlapping renders. Temporary polling errors retain the job and back off; confirmed failures free the active slot. An interrupted submission without a provider confirmation requires checking the fal dashboard before retrying, since an unconfirmed request could still have been accepted externally.
+Conditional terminal state updates release quota once, even when callback and
+polling race. Expired/missing provider events become failures. Temporary network
+errors retain work. Ambiguous submissions hold their slot for an hour, with no
+automatic inference retry. Daily maintenance and the next submission expire
+abandoned slots. The protocol does not guarantee exactly-once provider execution.
 
-## Storage and limits
+## Persistence
 
-- SQLite stores prompts, generation settings, statuses, and provider output URLs. It does not store reference images or output video bytes.
-- Browser workspace identity is local to its cookie. Clearing that cookie removes access to its history. This is not account authentication.
-- Reference images are JPG/PNG up to 3 MB. The browser validates dimensions before submission; video generation receives the data URI as the starting frame. References are kept for the current editing session.
-- The current UI supports 5 or 10 seconds, three text-video aspect ratios, an optional negative prompt, and optional audio. Image-video aspect ratio follows its starting frame.
-- Output URLs have provider-controlled retention. Download videos you want to keep; permanent asset storage is the next stage.
-- Vercel builds use the PostgreSQL schema and included migrations; local builds retain SQLite. Without a PostgreSQL URL, deployed API routes return a healthy setup state and reject rendering. No ephemeral SQLite database is created on Vercel.
-- Add account authentication, durable asset storage, spending limits and billing before exposing paid generation publicly. Keep the generation backend private while those are pending.
+- Account library and reference metadata: PostgreSQL on Vercel, SQLite locally.
+- Video/reference bytes: a private `studio-media` Supabase bucket.
+- Local drafts/storyboards: browser storage, explicitly limited to this device.
+- Space job/cache state: ephemeral; a restart can interrupt rendering.
 
-## Verification
+Default app allowance is two submissions/account/day, three globally/day and one
+active render. This is separate from provider GPU quotas. Failed/uncertain work
+consumes daily allowance. Storage caps are 50 videos and 20 references/account.
+Maintenance cleans old quota rows. The app uses owner credentials for migrations
+and server DB access; migrations deny public Supabase REST access to studio tables.
 
-`npm test` exercises the production API handlers with real temporary SQLite and a mocked fal HTTP boundary. It covers provider configuration, input validation, cross-origin requests, job idempotency, queue transitions, transient failures, ownership checks, and MP4 download. These tests make no paid calls.
+## Initial creative scope
 
-`npm run build` checks application compilation and TypeScript. A live render still needs a funded fal account and an actual key.
+Free profile: short silent text-to-video clips, three aspect ratios, negative
+prompt, seed, prompt camera presets. Image animation is disabled for the default
+backend. Presets describe intended motion; they do not implement exact camera
+trajectories. The storyboard plans individual shots and does not automatically
+generate or stitch a full film. Photo look templates are labeled as inspiration.
 
-## Provider references
+## Deployment and checks
 
-- [Kling Standard text-to-video schema](https://fal.ai/models/fal-ai/kling-video/v3/standard/text-to-video/api)
-- [Kling Standard image-to-video schema](https://fal.ai/models/fal-ai/kling-video/v3/standard/image-to-video/api)
-- [fal queue API](https://fal.ai/docs/documentation/model-apis/inference/queue)
+See [SETUP.md](SETUP.md) for credentials, bucket/auth configuration, limits and
+the required real integration checks. The build validates compilation, not GPU
+runtime or output quality. The original fal route regression harness is mocked
+and does not exercise Supabase auth/storage, PostgreSQL or ZeroGPU.
 
-The other original clinical documents and unused clinical components are legacy material from the repository's previous purpose.
+References: [Wan model](https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers),
+[ZeroGPU](https://huggingface.co/docs/hub/spaces-zerogpu),
+[Gradio HTTP/SSE API](https://gradio.app/4.44.1/guides/querying-gradio-apps-with-curl).
+
+Legacy nutrition modules/tables are retained without deleting old local data;
+the retired chat endpoint returns 410 and never calls Anthropic.

@@ -7,6 +7,8 @@ export function useStudio() {
   const [jobs, setJobs] = useState<Generation[]>([]);
   const [configured, setConfigured] = useState(false);
   const [storageConfigured, setStorageConfigured] = useState(true);
+  const [capabilities, setCapabilities] = useState({ model: "Wan 2.2 · Open model", provider: "huggingface", durations: [5], audio: false, image: false, authConfigured: false, signedIn: false, mediaConfigured: false });
+  const [usage, setUsage] = useState({ used: 0, limit: 2 });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +26,8 @@ export function useStudio() {
       setJobs(data.generations);
       setConfigured(data.configured);
       setStorageConfigured(data.storageConfigured !== false);
+      setCapabilities({ model: data.model, provider: data.provider, durations: data.durations || [5], audio: Boolean(data.audio), image: Boolean(data.image), authConfigured: Boolean(data.authConfigured), signedIn: Boolean(data.signedIn), mediaConfigured: Boolean(data.mediaConfigured) });
+      setUsage(data.usage || { used: 0, limit: 2 });
       setError("");
     } catch (reason) {
       if (!signal?.aborted) setError(reason instanceof Error ? reason.message : "Couldn't load your studio.");
@@ -89,6 +93,7 @@ export function useStudio() {
         throw new Error(data.error || "Couldn't submit your video.");
       }
       pendingRequest.current = null;
+      setUsage((current) => ({ ...current, used: current.used + 1 }));
       return true;
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : "Couldn't reach the studio. Check your library before trying again.";
@@ -99,5 +104,13 @@ export function useStudio() {
     } finally { submitLock.current = false; setSubmitting(false); }
   };
 
-  return { jobs, configured, storageConfigured, loading, submitting, error, pollError, generate, reload: load, clearError: () => setError("") };
+  const remove = async (id: string) => {
+    try {
+      const response = await fetch(`/api/generations/${id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Couldn't delete this video.");
+      setJobs((current) => current.filter((job) => job.id !== id));
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Couldn't delete this video."); }
+  };
+  return { jobs, configured, storageConfigured, capabilities, usage, loading, submitting, error, pollError, generate, remove, reload: load, clearError: () => setError("") };
 }

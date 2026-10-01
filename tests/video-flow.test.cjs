@@ -15,6 +15,12 @@ const root = path.resolve(__dirname, "..");
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), "yetsyai-tests-"));
 process.env.DATABASE_URL = `file:${path.join(temp, "workspace.db")}`;
 process.env.FAL_KEY = "test-key-not-a-real-credential";
+process.env.VIDEO_PROVIDER = "fal";
+process.env.ENABLE_PAID_GENERATION = "true";
+process.env.ALLOW_GUEST_GENERATION = "true";
+process.env.ACCOUNT_DAILY_RENDER_LIMIT = "100";
+process.env.GLOBAL_DAILY_RENDER_LIMIT = "1000";
+process.env.GLOBAL_CONCURRENT_RENDER_LIMIT = "20";
 let cookieStore = new Map();
 const originalLoad = Module._load;
 const originalResolve = Module._resolveFilename;
@@ -199,13 +205,13 @@ test("an interrupted submission recovers without automatically charging again", 
   const workspaceId = cookieStore.get("yetsyai_workspace");
   await db.videoGeneration.create({ data: {
     id, workspaceId, prompt: "Interrupted scene", model: "Kling 3.0 Standard",
-    aspectRatio: "16:9", duration: 5, createdAt: new Date(Date.now() - 130000),
+    aspectRatio: "16:9", duration: 5, createdAt: new Date(Date.now() - 3601000),
   } });
   await db.studioWorkspace.update({ where: { id: workspaceId }, data: { activeJobId: id } });
   const count = providerCalls.length;
   const recovered = (await (await status(id)).json()).generation;
   assert.equal(recovered.status, "failed");
-  assert.match(recovered.error, /Check your fal dashboard/);
+  assert.match(recovered.error, /one-hour limit/);
   assert.equal(providerCalls.length, count, "Never resubmit an unconfirmed paid request automatically");
   assert.equal((await db.studioWorkspace.findUnique({ where: { id: workspaceId } })).activeJobId, null);
 });
@@ -216,7 +222,10 @@ test("a Vercel deployment without persistent storage stays in setup mode", async
   try {
     const response = await routes.GET();
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { configured: false, storageConfigured: false, generations: [] });
+    const data = await response.json();
+    assert.equal(data.configured, false);
+    assert.equal(data.storageConfigured, false);
+    assert.deepEqual(data.generations, []);
     assert.equal((await routes.POST(request(input()))).status, 503);
   } finally {
     if (previous === undefined) delete process.env.VERCEL;

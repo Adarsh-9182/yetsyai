@@ -3,7 +3,7 @@ import { GenerationInput, MAX_REFERENCE_BYTES } from "./types";
 
 const QUEUE = "https://queue.fal.run";
 export class ProviderError extends Error {
-  constructor(message: string, public readonly status = 502) { super(message); }
+  constructor(message: string, public readonly status = 502, public readonly uncertain = false) { super(message); }
 }
 
 export function providerConfigured() {
@@ -49,15 +49,16 @@ async function falRequest(url: string, init: RequestInit = {}) {
       redirect: "error",
       signal: AbortSignal.timeout(20000),
     });
-  } catch { throw new ProviderError("Couldn't reach the video provider. The request may still be running; check your library before trying again."); }
+  } catch { throw new ProviderError("Couldn't reach the video provider. We'll keep checking before allowing another render.", 502, init.method === "POST"); }
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) throw new ProviderError("The video provider rejected the API key. Check FAL_KEY on the server.", 503);
     if (response.status === 402) throw new ProviderError("The video provider account needs a balance top-up.", 503);
     if (response.status === 422) throw new ProviderError("The provider couldn't process this scene or reference. Try a different prompt or image.", 422);
-    throw new ProviderError("The video provider is temporarily unavailable. Check your library for updates.");
+    if (response.status === 404 || response.status === 410) throw new ProviderError("This render expired at the provider. Please create a new scene.", 410);
+    throw new ProviderError("The video provider is temporarily unavailable. Check your library for updates.", 502, init.method === "POST" && response.status >= 500);
   }
   try { return await response.json(); }
-  catch { throw new ProviderError("The provider returned an unreadable response."); }
+  catch { throw new ProviderError("The provider returned an unreadable response.", 502, init.method === "POST"); }
 }
 
 const submitResponse = z.object({ request_id: z.string().min(1), status_url: z.string().url(), response_url: z.string().url() });
@@ -71,7 +72,7 @@ export async function submitVideo(input: GenerationInput) {
     ...(input.referenceImage ? { start_image_url: input.referenceImage } : { aspect_ratio: input.aspectRatio }),
   };
   const parsed = submitResponse.safeParse(await falRequest(`${QUEUE}/${endpoint}`, { method: "POST", body: JSON.stringify(body) }));
-  if (!parsed.success) throw new ProviderError("The provider didn't confirm the render. Check your fal dashboard before trying again.");
+  if (!parsed.success) throw new ProviderError("The provider didn't confirm the render. Wait before trying again.", 502, true);
   return { requestId: parsed.data.request_id, statusUrl: queueUrl(parsed.data.status_url), responseUrl: queueUrl(parsed.data.response_url) };
 }
 

@@ -4,21 +4,21 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Yetsyai — Make something unreal",
+  title: "Yetsyai — Your imagination, in motion",
   description: "An AI video studio for turning your ideas into cinematic videos.",
   keywords: ["AI video", "video generation", "creative studio", "Yetsyai"],
   applicationName: "Yetsyai",
   creator: "Yetsyai",
   openGraph: {
     type: "website",
-    title: "Yetsyai — Make something unreal",
-    description: "Dream it up. Direct every detail. Make it yours.",
+    title: "Yetsyai — Your imagination, in motion",
+    description: "You imagine. We make it move. An independent AI video studio for your next big idea.",
     siteName: "Yetsyai",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0c0e",
+  themeColor: "#101112",
   width: "device-width",
   initialScale: 1,
 };

@@ -7,8 +7,7 @@ export function apiError(error: unknown) {
   return NextResponse.json({ error: "The studio couldn't complete this request. Check the database setup and try again." }, { status: 503 });
 }
 
-export async function boundedJson(request: Request) {
-  const limit = 4 * 1024 * 1024 + 16384;
+export async function boundedJson(request: Request, limit = 4 * 1024 * 1024 + 16384) {
   if (!request.headers.get("content-type")?.includes("application/json")) throw new ProviderError("Send a JSON generation request.", 415);
   if (Number(request.headers.get("content-length")) > limit) throw new ProviderError("Your reference image is too large. Use a JPG or PNG under 3 MB.", 413);
   const reader = request.body?.getReader();

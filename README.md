@@ -1,46 +1,73 @@
 # Yetsyai
 
-Yetsyai is an AI video creation studio for turning prompts or reference images into cinematic clips. It connects to fal.ai's Kling 3.0 Standard queue API, saves render history in SQLite, and supports video playback and MP4 download.
+An independent AI video studio for short clips: a prompt composer, camera prompt
+presets, scene monitor, look templates, saved drafts, local storyboard, account
+library and MP4 downloads.
 
-## Run locally
+Live interface: [yetsyai.vercel.app](https://yetsyai.vercel.app).
 
-Requires Node.js 18.18 or newer.
+## Budget and generation
+
+The default backend is **your own private Hugging Face ZeroGPU Space**, using
+Apache-2.0 Wan 2.2 5B weights for short **text-to-video**. Free GPU capacity is
+quota-limited. The model weights being free does not make GPU hosting unlimited.
+The initial profile is approximately 5 seconds, reduced resolution, no audio.
+Image animation is disabled for this backend; stored references can be collected
+for future use. No public third-party demo API or fake render is used.
+
+Paid fal/Kling is available only with `VIDEO_PROVIDER=fal`, `FAL_KEY` and
+`ENABLE_PAID_GENERATION=true`. An old API key never activates paid mode implicitly.
+
+**Current deployment can be in preview mode.** Real generation, account email
+delivery, PostgreSQL and GPU output quality require credentials and integration
+checks. These are not validated by a successful frontend build.
+
+## Local development
+
+Node.js 22 or later:
 
 ```bash
 npm ci
-cp .env.example .env
-# Add your fal.ai key as FAL_KEY in .env (keep it server-only).
+cp .env.example .env.local
 npm run db:push
 npm run dev
 ```
 
-Open <http://localhost:3000>. Get a key from [fal.ai](https://fal.ai/dashboard/keys) and fund the provider account before submitting a live render. Without a key the studio shows setup instructions and does not simulate successful generation.
+SQLite is for local development with persistent disk. Vercel uses the PostgreSQL
+schema and additive migrations automatically. With no PostgreSQL URL, the public
+studio shows preview access and never attempts video generation.
 
-Choose Text to video, describe a scene, select the aspect ratio and duration, then Generate. For Image to video, add a JPG or PNG starting frame. Queue updates and completed videos appear in My videos. History survives refreshes in the same browser workspace.
+## Connect the free backend
 
-```bash
-npm test
-npm run build
-```
+Follow [the complete setup guide](docs/SETUP.md):
 
-Tests use a temporary database and mocked provider responses, with no paid calls.
+1. Supabase free project: PostgreSQL, email/password auth and a **private**
+   `studio-media` storage bucket.
+2. Your private ZeroGPU Space: upload the files in [spaces/wan-studio](spaces/wan-studio).
+3. Store credentials in Vercel/Space environment settings; never commit them.
+4. Redeploy, then check one real render, sign-in, second-device library,
+   webhook completion and MP4 download before inviting users.
 
-## Current scope
+## Reliability and controls
 
-- Generation supports 5/10-second videos, three text-video aspect ratios, optional audio and a negative prompt.
-- Starting-frame images are JPG/PNG, up to 3 MB; their aspect ratio determines the output.
-- Workspaces use an anonymous browser cookie; account login and billing are still pending.
-- Videos stay on the provider CDN. Permanent asset storage is pending; download outputs you want to keep.
-- Explore contains photo references from Unsplash and prompt templates, clearly separate from generated videos.
+- Server-verified accounts; HttpOnly sessions; account-owned workspaces.
+- Atomic database limits: 2 submissions/account/day, 3 globally/day, 1 active job.
+- Idempotent request UUIDs, conditional job state transitions, stale lock recovery.
+- Uncertain submissions held for an hour; inference is never blindly retried.
+- Signed completion callbacks archive videos even with the browser closed.
+- Private media with expiring signed URLs and ownership-checked downloads.
+- 50 videos/account, 20 references/account, bounded uploads and media downloads.
+- Daily maintenance with a secret; no credentials or prompts in worker logs.
 
-The studio can be deployed in setup mode before connecting its backend. Paid generation should stay private until account authentication and spending controls are in place. See [video architecture and limits](docs/VIDEO-STUDIO.md).
-
-## Vercel
-
-Deploy the repository as a Next.js project. `vercel.json` supplies the framework and build commands. The build automatically generates a PostgreSQL Prisma client on Vercel; local builds use SQLite.
-
-Without `DATABASE_URL`, the deployed studio opens in setup mode with generation disabled. To enable generation, connect a managed PostgreSQL database, add its PostgreSQL URL as `DATABASE_URL`, add your server-only `FAL_KEY`, and redeploy. The build applies the included additive studio migrations. Keep paid generation private until login and spending controls are implemented. Provider videos still need permanent object storage for long-term retention.
+Account videos/references sync across devices. **Drafts and storyboards are local
+to this device**. Camera presets append instructions to prompts, not exact camera
+trajectory controls. Free Space restarts and quota exhaustion remain real limits.
 
 ## Stack
 
-Next.js 14 · React · TypeScript · Tailwind CSS · Lucide · Prisma / SQLite · fal.ai
+Next.js 15.5 · React · TypeScript · Tailwind · Prisma · Supabase · Wan / ZeroGPU.
+
+`npm run build` generates the appropriate Prisma client and compiles the app.
+The existing route regression harness uses SQLite and mock fal responses; it is
+not evidence of real GPU inference or production database/auth integration.
+Some legacy nutrition modules remain unused; the old chat endpoint returns 410.

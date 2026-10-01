@@ -1,19 +1,37 @@
-// NutritiScan database schema.
-// Runs on SQLite locally (no server needed). To move to Postgres later, change
-// `provider` to "postgresql" and point DATABASE_URL at your database — the
-// models below are written to port cleanly. Enum-like fields use String because
-// SQLite has no native enums; allowed values are documented inline.
+// Local SQLite studio schema. Hosted studio tables have an additive PostgreSQL
+// migration in prisma/postgres. Legacy health tables are retained without dropping
+// historical local data; no active Yetsyai endpoint reads or writes them.
 
 generator client {
   provider = "prisma-client-js"
 }
 
-// Anonymous browser workspace for the local video MVP. Account login comes next.
+// Account-owned studio; anonymous workspaces are retained for local development.
 model StudioWorkspace {
   id          String @id
+  userId      String? @unique
   activeJobId String?
   createdAt   DateTime @default(now())
   generations VideoGeneration[]
+  assets      StudioAsset[]
+}
+
+model StudioQuota {
+  id        String @id
+  used      Int @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model StudioAsset {
+  id          String @id
+  workspaceId String
+  workspace   StudioWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  path        String @unique
+  width       Int
+  height      Int
+  createdAt   DateTime @default(now())
+  @@index([workspaceId, createdAt])
 }
 
 model VideoGeneration {
@@ -22,6 +40,10 @@ model VideoGeneration {
   workspace         StudioWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   prompt            String
   model             String
+  provider          String @default("fal")
+  seed              Int @default(0)
+  storagePath       String?
+  quotaReserved     Boolean @default(false)
   aspectRatio       String
   duration          Int
   status            String @default("submitting")
@@ -34,6 +56,7 @@ model VideoGeneration {
   updatedAt         DateTime @updatedAt
 
   @@index([workspaceId, createdAt])
+  @@index([status, createdAt])
 }
 
 datasource db {

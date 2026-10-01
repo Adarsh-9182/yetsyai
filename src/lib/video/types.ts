@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VIDEO_MODEL = "Kling 3.0 Standard";
+export const VIDEO_MODEL = "Wan 2.2 · Open model";
 export const MAX_REFERENCE_BYTES = 3 * 1024 * 1024;
 export const ACTIVE_STATUSES = ["submitting", "queued", "processing"] as const;
 
@@ -12,6 +12,8 @@ export const generationInput = z.object({
   generateAudio: z.boolean().default(false),
   negativePrompt: z.string().trim().max(500).default("blur, distort, and low quality"),
   referenceImage: z.string().max(Math.ceil(MAX_REFERENCE_BYTES / 3) * 4 + 64).optional(),
+  assetId: z.string().uuid().optional(),
+  seed: z.number().int().min(0).max(2147483647).default(42),
 });
 
 export type GenerationInput = z.infer<typeof generationInput>;
@@ -26,6 +28,7 @@ export type Generation = {
   videoUrl: string | null;
   error: string | null;
   createdAt: string;
+  seed: number;
 };
 
 export function isActive(status: string) {
