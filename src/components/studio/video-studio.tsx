@@ -6,6 +6,7 @@ import {
   CircleAlert, CircleHelp, Clapperboard, Clock3, Film, FolderOpen, Grid2X2,
   ImagePlus, Library, Menu, Play, Plus, RectangleHorizontal, RefreshCw,
   Search, Settings2, Sparkles, Square, WandSparkles, X, ArrowRight, Bookmark, Camera, ChevronRight, Trash2, LogIn,
+  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
 } from "lucide-react";
 import { Generation, isActive, MAX_REFERENCE_BYTES, VIDEO_MODEL } from "@/lib/video/types";
 import { useStudio } from "./use-studio";
@@ -64,6 +65,9 @@ export function VideoStudio() {
   const [notice, setNotice] = useState("");
   const [fileError, setFileError] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [navCollapsed, setNavCollapsed] = useState(false);
+  const [navSide, setNavSide] = useState<"left" | "right">("left");
+  const [navReady, setNavReady] = useState(false);
   const [activeNav, setActiveNav] = useState<NavPage>("Create");
   const [search, setSearch] = useState("");
   const [selectedJob, setSelectedJob] = useState<Generation | null>(null);
@@ -80,12 +84,68 @@ export function VideoStudio() {
   const fileRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const readVersion = useRef(0);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLButtonElement>(null);
   const busy = studio.submitting || studio.jobs.some((job) => isActive(job.status));
   const readyPrompt = !studio.loading && !busy && !readingReference && prompt.trim().length >= 3 && (mode === "text" || Boolean(reference));
   const canGenerate = studio.configured && studio.capabilities.signedIn && readyPrompt && studio.usage.used < studio.usage.limit;
   const filteredJobs = studio.jobs.filter((job) => job.prompt.toLowerCase().includes(search.toLowerCase()));
   const latestVideo = studio.jobs.find((job) => job.status === "completed" && job.videoUrl);
   const currentJob = studio.jobs.find((job) => isActive(job.status));
+
+  useEffect(() => {
+    try {
+      const preferences = JSON.parse(localStorage.getItem("yetsyai-navigation-v1") || "null");
+      if (typeof preferences?.collapsed === "boolean") setNavCollapsed(preferences.collapsed);
+      if (preferences?.side === "left" || preferences?.side === "right") setNavSide(preferences.side);
+    } catch { /* Navigation works even when browser storage is unavailable. */ }
+    setNavReady(true);
+    const viewport = window.matchMedia("(max-width: 620px)");
+    const resize = () => { if (!viewport.matches) setMobileMenu(false); };
+    viewport.addEventListener("change", resize);
+    return () => viewport.removeEventListener("change", resize);
+  }, []);
+
+  useEffect(() => {
+    if (!navReady) return;
+    try { localStorage.setItem("yetsyai-navigation-v1", JSON.stringify({ collapsed: navCollapsed, side: navSide })); } catch { /* Optional preference persistence. */ }
+  }, [navReady, navCollapsed, navSide]);
+
+  useEffect(() => {
+    const sidebar = sidebarRef.current;
+    const viewport = window.matchMedia("(max-width: 620px)");
+    const update = () => { if (sidebar) sidebar.inert = viewport.matches && !mobileMenu; };
+    update();
+    viewport.addEventListener("change", update);
+    return () => { viewport.removeEventListener("change", update); if (sidebar) sidebar.inert = false; };
+  }, [mobileMenu]);
+
+  useEffect(() => {
+    if (!mobileMenu) return;
+    const sidebar = sidebarRef.current;
+    const content = mainRef.current;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    if (content) content.inert = true;
+    sidebar?.querySelector<HTMLButtonElement>(".sidebar-mobile-close")?.focus();
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setMobileMenu(false); return; }
+      if (event.key !== "Tab" || !sidebar) return;
+      const focusable = Array.from(sidebar.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex='0']")).filter((element) => element.getClientRects().length > 0);
+      const first = focusable[0]; const last = focusable[focusable.length - 1];
+      if (!first) { event.preventDefault(); return; }
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", keyboard);
+    return () => {
+      document.body.style.overflow = overflow;
+      if (content) content.inert = false;
+      document.removeEventListener("keydown", keyboard);
+      menuRef.current?.focus({ preventScroll: true });
+    };
+  }, [mobileMenu]);
 
   useEffect(() => {
     try {
@@ -115,6 +175,7 @@ export function VideoStudio() {
   }, [notice]);
 
   const go = (page: NavPage) => { setActiveNav(page); setMobileMenu(false); setSearch(""); };
+  const openAccount = () => { setMobileMenu(false); setAccountOpen(true); };
   const generate = async () => {
     if (!canGenerate) return;
     const submitted = await studio.generate({
@@ -231,26 +292,28 @@ export function VideoStudio() {
   );
 
   return (
-    <main className="studio-shell" id="home">
-      {mobileMenu && <button className="mobile-scrim" aria-label="Close menu" onClick={() => setMobileMenu(false)} />}
-      <aside className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}>
-        <a href="#home" className="brand" onClick={() => go("Create")}><span className="brand-mark"><Aperture size={21} strokeWidth={2.2} /></span><span>yetsyai<span className="brand-period">.</span></span><span className="brand-beta">BETA</span></a>
+    <main className={`studio-shell nav-${navSide} ${navCollapsed ? "nav-collapsed" : ""}`} id="home">
+      {mobileMenu && <button className="mobile-scrim" aria-label="Close navigation" tabIndex={-1} onClick={() => setMobileMenu(false)} />}
+      <aside ref={sidebarRef} id="studio-navigation" className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`} role={mobileMenu ? "dialog" : undefined} aria-modal={mobileMenu ? true : undefined} aria-label="Studio navigation">
+        <div className="sidebar-heading"><a href="#home" className="brand" aria-label="Yetsyai home" onClick={() => go("Create")}><span className="brand-mark"><Aperture size={21} strokeWidth={2.2} /></span><span className="brand-wordmark">yetsyai<span className="brand-period">.</span></span><span className="brand-beta">BETA</span></a><button className="icon-button sidebar-mobile-close" aria-label="Close navigation" onClick={() => setMobileMenu(false)}><X size={19} /></button></div>
+        <div className="sidebar-controls"><button className="sidebar-collapse" onClick={() => setNavCollapsed((value) => !value)} aria-label={navCollapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!navCollapsed} title={navCollapsed ? "Expand navigation" : "Collapse navigation"}>{navSide === "left" ? navCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} /> : navCollapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}<span>Collapse</span></button><button className="sidebar-position" onClick={() => setNavSide((value) => value === "left" ? "right" : "left")} aria-label={`Move navigation to the ${navSide === "left" ? "right" : "left"}`} title={`Move navigation to the ${navSide === "left" ? "right" : "left"}`}>{navSide === "left" ? <PanelRightOpen size={17} /> : <PanelLeftOpen size={17} />}</button></div>
         <div className="workspace-switch"><span className="workspace-avatar">Y</span><span className="workspace-copy"><strong>Your studio</strong><small>Personal workspace</small></span></div>
         <div className="nav-label">WORKSPACE</div>
         <nav className="main-nav" aria-label="Main navigation">
-          {nav.map((item) => <button key={item.label} onClick={() => go(item.label)} className={`nav-item ${activeNav === item.label ? "nav-active" : ""}`} aria-current={activeNav === item.label ? "page" : undefined}>{item.icon}<span>{item.label}</span>{item.label === "My videos" && <span className="nav-count">{studio.jobs.length}</span>}</button>)}
+          {nav.map((item) => <button key={item.label} onClick={() => go(item.label)} className={`nav-item ${activeNav === item.label ? "nav-active" : ""}`} aria-label={item.label} title={item.label} aria-current={activeNav === item.label ? "page" : undefined}>{item.icon}<span>{item.label}</span>{item.label === "My videos" && <span className="nav-count">{studio.jobs.length}</span>}</button>)}
         </nav>
         <div className="sidebar-note"><span className="eyebrow">SMALL IDEAS. BIG FRAMES.</span><p>Your next great shot starts with a sentence.</p><button onClick={() => { go("Create"); setPrompt(looks[0].prompt); }}>Start a scene <ArrowUpRight size={14} /></button></div>
         <div className="sidebar-bottom">
           <div className="credit-card"><div className="credit-heading"><span>{studio.capabilities.provider === "fal" ? "Studio allowance" : "Free studio"}</span><span>{Math.max(0, studio.usage.limit - studio.usage.used)} / {studio.usage.limit} left</span></div><div className="credit-meter"><i style={{ width: `${Math.max(0, 100 - studio.usage.used / studio.usage.limit * 100)}%` }} /></div><p className="workspace-note">Short clips. Shared GPU. A little patience, a lot of possibility.</p><button onClick={() => void studio.reload()} className="upgrade-button"><RefreshCw size={13} /> Check availability</button></div>
-          <button className="bottom-link" onClick={() => setNotice("Describe one scene, pick a camera move and generate. Account videos are saved across devices. Free GPU capacity is shared and limited.")}><CircleHelp size={16} /> A quick studio tour</button>
-          <button className="profile-row" onClick={() => setAccountOpen(true)}><span className="profile-avatar">Y</span><span><strong>{studio.capabilities.signedIn ? "Your account" : "Make this space yours"}</strong><small>{studio.capabilities.signedIn ? "Manage account" : "Sign in to save your videos"}</small></span><ChevronRight size={16} /></button>
+          <button className="bottom-link" aria-label="A quick studio tour" title="A quick studio tour" onClick={() => setNotice("Describe one scene, pick a camera move and generate. Account videos are saved across devices. Free GPU capacity is shared and limited.")}><CircleHelp size={16} /><span>A quick studio tour</span></button>
+          <button className="profile-row" aria-label={studio.capabilities.signedIn ? "Manage account" : "Sign in"} title={studio.capabilities.signedIn ? "Manage account" : "Sign in"} onClick={openAccount}><span className="profile-avatar">Y</span><span><strong>{studio.capabilities.signedIn ? "Your account" : "Make this space yours"}</strong><small>{studio.capabilities.signedIn ? "Manage account" : "Sign in to save your videos"}</small></span><ChevronRight size={16} /></button>
         </div>
       </aside>
 
-      <section className="studio-main">
+      <section ref={mainRef} className="studio-main">
         <header className="topbar">
-          <button className="mobile-menu-button icon-button" onClick={() => setMobileMenu(true)} aria-label="Open menu"><Menu size={19} /></button>
+          <button ref={menuRef} className="mobile-menu-button icon-button" onClick={() => setMobileMenu(true)} aria-label="Open navigation" aria-expanded={mobileMenu} aria-controls="studio-navigation"><Menu size={19} /></button>
+          <button className="desktop-menu-button icon-button" onClick={() => setNavCollapsed((value) => !value)} aria-label={navCollapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!navCollapsed} aria-controls="studio-navigation">{navSide === "left" ? <PanelLeftOpen size={18} /> : <PanelRightOpen size={18} />}</button>
           <div className="breadcrumbs"><span>Workspace</span><span className="crumb-slash">/</span><strong>{activeNav}</strong></div>
           <div className="top-actions"><span className={`top-credit ${studio.configured ? "provider-connected" : "provider-offline"}`}><span className="credit-dot" />{studio.loading ? "Connecting…" : studio.configured ? "Studio online" : "Preview access"}</span><button className="icon-button" aria-label="Search your videos" onClick={() => { go("My videos"); setTimeout(() => searchRef.current?.focus(), 0); }}><Search size={18} /></button><button className="account-trigger" onClick={() => setAccountOpen(true)}>{studio.capabilities.signedIn ? <span className="top-avatar">Y</span> : <><LogIn size={14} /> Sign in</>}</button></div>
         </header>
@@ -297,7 +360,7 @@ export function VideoStudio() {
       </section>
       {selectedJob && <VideoPreview job={selectedJob} close={() => setSelectedJob(null)} download={(job) => void download(job)} />}
       {accountOpen && <AccountDialog close={() => setAccountOpen(false)} completed={() => void studio.reload()} configured={studio.capabilities.authConfigured} signedIn={studio.capabilities.signedIn} />}
-      {notice && <div className="toast" role="status"><span className="toast-check"><Check size={13} /></span>{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><X size={14} /></button></div>}
+      {notice && !mobileMenu && <div className="toast" role="status"><span className="toast-check"><Check size={13} /></span>{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><X size={14} /></button></div>}
     </main>
   );
 }

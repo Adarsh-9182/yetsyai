@@ -322,3 +322,58 @@ input:focus-visible,select:focus-visible{outline:2px solid var(--lime);outline-o
 @media(max-width:370px){.hero-content h1{font-size:40px}.mode-tabs button{font-size:9px;padding-inline:5px}.mode-tabs button .soon{display:none}.camera-presets button{font-size:9px}.look-caption h3{font-size:17px}.top-credit{display:none}}
 .job-actions button.delete-confirm{color:#eeb5a7}
 @media(max-width:620px){.top-credit{display:none}.account-trigger{white-space:nowrap}.control-row .ratio-control{order:1}.control-row .duration-select{order:2}.control-row .settings-button{order:3}.main-generate{order:4}}
+
+/* Personal navigation: dock on either side, or make room with an icon rail. */
+.studio-shell{--nav-width:218px}
+.sidebar{width:var(--nav-width);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#46503b transparent;transition:width .22s ease,transform .22s ease}
+.sidebar>*{flex-shrink:0}
+.studio-main{margin-left:var(--nav-width);transition:margin .22s ease}
+.nav-right .sidebar{left:auto;right:0;border-right:0;border-left:1px solid #2b2c2d}
+.nav-right .studio-main{margin-left:0;margin-right:var(--nav-width)}
+.sidebar-heading{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.sidebar-heading .brand{padding:0;gap:5px}
+.sidebar-mobile-close{display:none}
+.sidebar-controls{display:flex;gap:6px;margin:21px 0 0;padding:0 3px}
+.sidebar-controls button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:32px;border:1px solid #3b4136;border-radius:6px;padding:7px;background:#1c2019;color:#abb89a;font-size:10px}
+.sidebar-controls button:hover{border-color:#8b9e6e;color:#e2efce}
+.sidebar-collapse{flex:1}
+.sidebar-position{width:34px;flex:none}
+.sidebar .workspace-switch{margin-top:17px}
+.desktop-menu-button{display:grid;margin-right:14px;flex:none}
+.topbar .breadcrumbs{margin-right:auto}
+@media(min-width:621px){
+  .nav-collapsed{--nav-width:76px}
+  .nav-collapsed .sidebar{padding:24px 13px 18px}
+  .nav-collapsed .sidebar-heading{justify-content:center}
+  .nav-collapsed .brand-wordmark,.nav-collapsed .brand-beta,.nav-collapsed .workspace-switch,.nav-collapsed .nav-label,.nav-collapsed .sidebar-note,.nav-collapsed .credit-card{display:none}
+  .nav-collapsed .brand{padding:0}
+  .nav-collapsed .brand-mark{width:36px;height:36px}
+  .nav-collapsed .sidebar-controls{flex-direction:column;padding:0;gap:6px;margin:23px 4px 25px}
+  .nav-collapsed .sidebar-controls button{width:100%;min-height:33px;flex:none}
+  .nav-collapsed .sidebar-collapse span{display:none}
+  .nav-collapsed .main-nav{gap:9px}
+  .nav-collapsed .nav-item{justify-content:center;padding:0;min-height:45px;width:48px}
+  .nav-collapsed .nav-item>span{display:none}
+  .nav-collapsed .nav-item>svg{width:19px;height:19px}
+  .nav-collapsed .bottom-link{justify-content:center;padding:10px 0}
+  .nav-collapsed .bottom-link>span,.nav-collapsed .profile-row>span:nth-child(2),.nav-collapsed .profile-row>svg{display:none}
+  .nav-collapsed .profile-row{justify-content:center;padding-top:18px}
+  .nav-collapsed .profile-avatar{width:33px;height:33px}
+}
+@media(min-width:721px) and (max-width:1180px){.studio-shell:not(.nav-collapsed){--nav-width:194px}}
+@media(min-width:621px) and (max-width:720px){.studio-shell:not(.nav-collapsed){--nav-width:180px}.brand-beta{display:none}}
+@media(max-width:620px){
+  .studio-shell{--nav-width:min(285px,calc(100vw - 48px))}
+  .sidebar{padding:25px 18px 22px;width:var(--nav-width);transform:translateX(-100%)}
+  .nav-right .sidebar{transform:translateX(100%)}
+  .sidebar.sidebar-open,.nav-right .sidebar.sidebar-open{transform:translateX(0)}
+  .studio-main,.nav-right .studio-main{margin-left:0;margin-right:0}
+  .sidebar-mobile-close{display:grid;flex:none;width:32px;height:32px}
+  .desktop-menu-button,.sidebar-collapse{display:none}
+  .sidebar-controls{margin-top:19px;justify-content:flex-end}
+  .sidebar-position{width:auto!important;min-height:36px!important}
+  .sidebar .workspace-switch{margin-top:13px}
+  .sidebar .nav-label{margin-top:24px}
+  .sidebar-heading .brand{font-size:24px}
+  .sidebar-note{margin-top:26px;margin-bottom:22px;padding-top:22px}
+}
