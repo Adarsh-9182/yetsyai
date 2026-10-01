@@ -21,6 +21,9 @@ process.env.ALLOW_GUEST_GENERATION = "true";
 process.env.ACCOUNT_DAILY_RENDER_LIMIT = "100";
 process.env.GLOBAL_DAILY_RENDER_LIMIT = "1000";
 process.env.GLOBAL_CONCURRENT_RENDER_LIMIT = "20";
+process.env.NEXT_PUBLIC_SUPABASE_URL = "";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "";
+process.env.SUPABASE_SERVICE_ROLE_KEY = "";
 let cookieStore = new Map();
 const originalLoad = Module._load;
 const originalResolve = Module._resolveFilename;
@@ -145,7 +148,7 @@ test("text render preserves settings, rejects duplicate renders, resumes and dow
 test("reference images use the image endpoint and a failed render releases the workspace", async () => {
   await newWorkspace();
   providerStatus = "IN_QUEUE";
-  const bytes = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  const bytes = await require("sharp")({ create: { width: 320, height: 320, channels: 3, background: "#abcdef" } }).png().toBuffer();
   const referenceImage = `data:image/png;base64,${bytes.toString("base64")}`;
   const created = await routes.POST(request(input({ referenceImage, duration: 10, generateAudio: true })));
   assert.equal(created.status, 202);
