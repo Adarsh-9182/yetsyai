@@ -21,3 +21,6 @@ shot.mjs
 # OS / editor noise
 .DS_Store
 *.log
+.vercel
+.env*
+!.env.example

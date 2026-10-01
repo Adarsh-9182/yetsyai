@@ -209,3 +209,17 @@ test("an interrupted submission recovers without automatically charging again", 
   assert.equal(providerCalls.length, count, "Never resubmit an unconfirmed paid request automatically");
   assert.equal((await db.studioWorkspace.findUnique({ where: { id: workspaceId } })).activeJobId, null);
 });
+
+test("a Vercel deployment without persistent storage stays in setup mode", async () => {
+  const previous = process.env.VERCEL;
+  process.env.VERCEL = "1";
+  try {
+    const response = await routes.GET();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { configured: false, storageConfigured: false, generations: [] });
+    assert.equal((await routes.POST(request(input()))).status, 503);
+  } finally {
+    if (previous === undefined) delete process.env.VERCEL;
+    else process.env.VERCEL = previous;
+  }
+});

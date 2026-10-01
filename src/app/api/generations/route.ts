@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/video/db";
+import { db, databaseConfigured } from "@/lib/video/db";
 import { ProviderError, providerConfigured, submitVideo, validReferenceImage } from "@/lib/video/fal";
 import { apiError, boundedJson } from "@/lib/video/http";
 import { publicGeneration } from "@/lib/video/jobs";
@@ -11,15 +11,17 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    if (!databaseConfigured()) return NextResponse.json({ configured: false, storageConfigured: false, generations: [] }, { headers: { "Cache-Control": "private, no-store" } });
     const workspace = (await getWorkspace(true))!;
     const jobs = await db.videoGeneration.findMany({ where: { workspaceId: workspace.id }, orderBy: { createdAt: "desc" }, take: 100 });
-    return NextResponse.json({ configured: providerConfigured(), generations: jobs.map(publicGeneration) }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ configured: providerConfigured(), storageConfigured: true, generations: jobs.map(publicGeneration) }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return apiError(error); }
 }
 
 export async function POST(request: Request) {
   try {
     if (!isSameOrigin(request)) throw new ProviderError("Submit generations from your studio workspace.", 403);
+    if (!databaseConfigured()) throw new ProviderError("Connect a PostgreSQL database before creating a video.", 503);
     const workspace = await getWorkspace();
     if (!workspace) throw new ProviderError("Load the studio before creating a video.", 401);
     const parsed = generationInput.safeParse(await boundedJson(request));

@@ -6,6 +6,7 @@ import { Generation, GenerationInput, isActive } from "@/lib/video/types";
 export function useStudio() {
   const [jobs, setJobs] = useState<Generation[]>([]);
   const [configured, setConfigured] = useState(false);
+  const [storageConfigured, setStorageConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +23,7 @@ export function useStudio() {
       if (signal?.aborted) return;
       setJobs(data.generations);
       setConfigured(data.configured);
+      setStorageConfigured(data.storageConfigured !== false);
       setError("");
     } catch (reason) {
       if (!signal?.aborted) setError(reason instanceof Error ? reason.message : "Couldn't load your studio.");
@@ -97,5 +99,5 @@ export function useStudio() {
     } finally { submitLock.current = false; setSubmitting(false); }
   };
 
-  return { jobs, configured, loading, submitting, error, pollError, generate, reload: load, clearError: () => setError("") };
+  return { jobs, configured, storageConfigured, loading, submitting, error, pollError, generate, reload: load, clearError: () => setError("") };
 }

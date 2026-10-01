@@ -17,7 +17,8 @@ Repeated submissions with the same request ID return the existing job. A per-wor
 - Reference images are JPG/PNG up to 3 MB. The browser validates dimensions before submission; video generation receives the data URI as the starting frame. References are kept for the current editing session.
 - The current UI supports 5 or 10 seconds, three text-video aspect ratios, an optional negative prompt, and optional audio. Image-video aspect ratio follows its starting frame.
 - Output URLs have provider-controlled retention. Download videos you want to keep; permanent asset storage is the next stage.
-- This MVP is intended for a private development workspace. Add account authentication, durable asset storage, spending limits and billing before exposing paid generation publicly. SQLite needs a persistent disk; an ephemeral Vercel filesystem is not a production database.
+- Vercel builds use the PostgreSQL schema and included migrations; local builds retain SQLite. Without a PostgreSQL URL, deployed API routes return a healthy setup state and reject rendering. No ephemeral SQLite database is created on Vercel.
+- Add account authentication, durable asset storage, spending limits and billing before exposing paid generation publicly. Keep the generation backend private while those are pending.
 
 ## Verification
 

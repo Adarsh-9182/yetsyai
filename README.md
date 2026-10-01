@@ -33,7 +33,13 @@ Tests use a temporary database and mocked provider responses, with no paid calls
 - Videos stay on the provider CDN. Permanent asset storage is pending; download outputs you want to keep.
 - Explore contains photo references from Unsplash and prompt templates, clearly separate from generated videos.
 
-This is a private development MVP. Public deployment needs account authentication, spending controls, and durable storage. See [video architecture and limits](docs/VIDEO-STUDIO.md).
+The studio can be deployed in setup mode before connecting its backend. Paid generation should stay private until account authentication and spending controls are in place. See [video architecture and limits](docs/VIDEO-STUDIO.md).
+
+## Vercel
+
+Deploy the repository as a Next.js project. `vercel.json` supplies the framework and build commands. The build automatically generates a PostgreSQL Prisma client on Vercel; local builds use SQLite.
+
+Without `DATABASE_URL`, the deployed studio opens in setup mode with generation disabled. To enable generation, connect a managed PostgreSQL database, add its PostgreSQL URL as `DATABASE_URL`, add your server-only `FAL_KEY`, and redeploy. The build applies the included additive studio migrations. Keep paid generation private until login and spending controls are implemented. Provider videos still need permanent object storage for long-term retention.
 
 ## Stack
 
