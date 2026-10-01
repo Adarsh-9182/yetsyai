@@ -1,72 +1,40 @@
-# NutritiScan
+# Yetsyai
 
-**Your intelligent health companion** — an AI-powered health & nutrition product
-that helps you understand symptoms, understand nutrition, and make better
-decisions. Built to be more sophisticated, trustworthy, and useful than a
-generic symptom checker.
+Yetsyai is an AI video creation studio for turning prompts or reference images into cinematic clips. It connects to fal.ai's Kling 3.0 Standard queue API, saves render history in SQLite, and supports video playback and MP4 download.
 
-> ⚠️ NutritiScan provides evidence-informed guidance for educational purposes
-> only. It is not a medical device and is not a substitute for professional
-> medical advice, diagnosis, or treatment. In an emergency, call your local
-> emergency number.
+## Run locally
 
-## Stack
-
-Next.js 14 (App Router) · React · TypeScript · Tailwind · Prisma (SQLite → Postgres)
-· provider-agnostic AI (Anthropic today). See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
-[`docs/SAFETY.md`](docs/SAFETY.md), and [`docs/ROADMAP.md`](docs/ROADMAP.md).
-
-## Run it locally
-
-You need [Node.js](https://nodejs.org) 18.18+.
+Requires Node.js 18.18 or newer.
 
 ```bash
-# 1. Install dependencies
-npm install
-
-# 2. Configure environment
+npm ci
 cp .env.example .env
-#   then open .env and paste your Claude API key:
-#   ANTHROPIC_API_KEY=sk-ant-...   (get one at https://console.anthropic.com)
-
-# 3. Create the local database (SQLite file — no server needed)
+# Add your fal.ai key as FAL_KEY in .env (keep it server-only).
 npm run db:push
-
-# 4. Start the app
 npm run dev
 ```
 
-Open <http://localhost:3000>. The AI companion lives at `/ask`.
-(Without an API key the site still runs; the companion returns a clear
-"AI isn't configured yet" message instead of answering.)
+Open <http://localhost:3000>. Get a key from [fal.ai](https://fal.ai/dashboard/keys) and fund the provider account before submitting a live render. Without a key the studio shows setup instructions and does not simulate successful generation.
 
-## Deploy to Vercel
+Choose Text to video, describe a scene, select the aspect ratio and duration, then Generate. For Image to video, add a JPG or PNG starting frame. Queue updates and completed videos appear in My videos. History survives refreshes in the same browser workspace.
 
-The app is deploy-ready and needs only `ANTHROPIC_API_KEY` (no database at this
-stage). Fastest path: sign in to [vercel.com](https://vercel.com) with GitHub →
-import this repo → add the `ANTHROPIC_API_KEY` env var → Deploy. Full
-step-by-step (dashboard + CLI, and the responsible-launch note) is in
-[`docs/DEPLOY.md`](docs/DEPLOY.md).
-
-## Project layout
-
-```
-src/
-  app/            routes: / (landing), /ask (AI doctor), /api/chat
-  components/
-    ui/           design-system primitives (Button, Card, Badge)
-    landing/      landing page sections
-    companion/    AI-doctor rendering (emergency banner, structured message)
-  lib/
-    ai/           provider abstraction, agents, orchestrator, types
-    safety/       deterministic emergency red-flag detection
-prisma/schema.prisma   full data model (SQLite locally)
-docs/                  architecture, safety, roadmap
+```bash
+npm test
+npm run build
 ```
 
-## Switching to production infra later
+Tests use a temporary database and mocked provider responses, with no paid calls.
 
-- **Postgres:** change `provider` in `prisma/schema.prisma` to `postgresql` and
-  point `DATABASE_URL` at your database, then `npm run db:push`.
-- **A different AI model:** set `NUTRITISCAN_MODEL`, or implement a new provider
-  in `src/lib/ai/` — no feature code changes.
+## Current scope
+
+- Generation supports 5/10-second videos, three text-video aspect ratios, optional audio and a negative prompt.
+- Starting-frame images are JPG/PNG, up to 3 MB; their aspect ratio determines the output.
+- Workspaces use an anonymous browser cookie; account login and billing are still pending.
+- Videos stay on the provider CDN. Permanent asset storage is pending; download outputs you want to keep.
+- Explore contains photo references from Unsplash and prompt templates, clearly separate from generated videos.
+
+This is a private development MVP. Public deployment needs account authentication, spending controls, and durable storage. See [video architecture and limits](docs/VIDEO-STUDIO.md).
+
+## Stack
+
+Next.js 14 · React · TypeScript · Tailwind CSS · Lucide · Prisma / SQLite · fal.ai

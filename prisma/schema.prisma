@@ -8,6 +8,34 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Anonymous browser workspace for the local video MVP. Account login comes next.
+model StudioWorkspace {
+  id          String @id
+  activeJobId String?
+  createdAt   DateTime @default(now())
+  generations VideoGeneration[]
+}
+
+model VideoGeneration {
+  id                String @id
+  workspaceId       String
+  workspace         StudioWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  prompt            String
+  model             String
+  aspectRatio       String
+  duration          Int
+  status            String @default("submitting")
+  providerRequestId String?
+  statusUrl         String?
+  responseUrl       String?
+  videoUrl          String?
+  error             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([workspaceId, createdAt])
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
