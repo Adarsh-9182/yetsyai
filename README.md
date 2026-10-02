@@ -1,7 +1,8 @@
 # Yetsyai
 
 An independent AI video studio for short clips: a prompt composer, camera prompt
-presets, scene monitor, look templates, saved drafts, local storyboard, account
+and visual treatment presets, an exact shot-prompt preview, scene monitor, look
+templates, saved drafts, a reorderable local storyboard with JSON import/export, account
 library and MP4 downloads.
 
 Live interface: [yetsyai.vercel.app](https://yetsyai.vercel.app).
@@ -53,6 +54,8 @@ Follow [the complete setup guide](docs/SETUP.md):
 - Server-verified accounts; HttpOnly sessions; account-owned workspaces.
 - Atomic database limits: 2 submissions/account/day, 3 globally/day, 1 active job.
 - Idempotent request UUIDs, conditional job state transitions, stale lock recovery.
+- A database poll lease shares provider checks across tabs and server instances.
+- Batch media signing for library pages and renewal after long-lived tabs resume.
 - Uncertain submissions held for an hour; inference is never blindly retried.
 - Signed completion callbacks archive videos even with the browser closed.
 - Private media with expiring signed URLs and ownership-checked downloads.
@@ -68,6 +71,9 @@ trajectory controls. Free Space restarts and quota exhaustion remain real limits
 Next.js 15.5 · React · TypeScript · Tailwind · Prisma · Supabase · Wan / ZeroGPU.
 
 `npm run build` generates the appropriate Prisma client and compiles the app.
-The existing route regression harness uses SQLite and mock fal responses; it is
-not evidence of real GPU inference or production database/auth integration.
+`npm test` covers route flows with SQLite, mocked providers and storage, including
+quota/concurrency races and malformed SSE results. `python3 tests/wan-worker.test.py`
+checks worker validation, attempt deduplication and output retention with inference
+stubbed. These checks do not validate real GPU inference, Supabase auth/storage
+or PostgreSQL integration. See [the product roadmap](docs/ROADMAP.md) for launch gates.
 Some legacy nutrition modules remain unused; the old chat endpoint returns 410.

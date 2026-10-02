@@ -9,6 +9,7 @@
 /.next/
 /out/
 next-env.d.ts
+*.tsbuildinfo
 
 # Prisma local database
 /prisma/*.db

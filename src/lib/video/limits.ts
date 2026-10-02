@@ -10,8 +10,12 @@ export const globalLimit = () => positive(process.env.GLOBAL_DAILY_RENDER_LIMIT,
 export const activeLimit = () => positive(process.env.GLOBAL_CONCURRENT_RENDER_LIMIT, 1, 20);
 const today = () => new Date().toISOString().slice(0, 10);
 export async function usage(workspaceId: string) {
-  const quota = await db.studioQuota.findUnique({ where: { id: `account:${workspaceId}:${today()}` } });
-  return { used: quota?.used || 0, limit: dailyLimit(), resetsAt: `${new Date(Date.now() + 86400000).toISOString().slice(0, 10)}T00:00:00Z` };
+  const day = today();
+  const [quota, global] = await Promise.all([
+    db.studioQuota.findUnique({ where: { id: `account:${workspaceId}:${day}` } }),
+    db.studioQuota.findUnique({ where: { id: `global:${day}` } }),
+  ]);
+  return { used: quota?.used || 0, limit: dailyLimit(), globalRemaining: Math.max(0, globalLimit() - (global?.used || 0)), resetsAt: new Date(Date.parse(`${day}T00:00:00Z`) + 86400000).toISOString() };
 }
 async function reserve(tx: Prisma.TransactionClient, id: string, limit: number, message: string) {
   await tx.studioQuota.upsert({ where: { id }, create: { id }, update: {} });
@@ -19,9 +23,10 @@ async function reserve(tx: Prisma.TransactionClient, id: string, limit: number, 
   if (!result.count) throw new ProviderError(message, 429);
 }
 export async function reserveRender(tx: Prisma.TransactionClient, workspaceId: string) {
+  const day = today();
   // These counters are database-backed and atomic across all Vercel instances.
-  await reserve(tx, `global:${today()}`, globalLimit(), "Today's shared free GPU allowance is used up. Come back tomorrow.");
-  await reserve(tx, `account:${workspaceId}:${today()}`, dailyLimit(), "You've used today's video allowance. Come back tomorrow.");
+  await reserve(tx, `global:${day}`, globalLimit(), "Today's shared free GPU allowance is used up. Come back tomorrow.");
+  await reserve(tx, `account:${workspaceId}:${day}`, dailyLimit(), "You've used today's video allowance. Come back tomorrow.");
   await reserve(tx, "active", activeLimit(), "The studio's GPU is busy. Please wait for the current render to finish.");
 }
 export async function releaseRender(tx: Prisma.TransactionClient) {

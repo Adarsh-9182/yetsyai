@@ -12,7 +12,7 @@ function spaceUrl() {
 }
 export function providerConfigured() {
   if (providerName() === "fal") return process.env.ENABLE_PAID_GENERATION === "true" && falConfigured();
-  try { spaceUrl(); return Boolean(process.env.HF_SPACE_URL && process.env.HF_TOKEN && process.env.HF_STUDIO_SECRET); } catch { return false; }
+  try { spaceUrl(); return Boolean(process.env.HF_SPACE_URL && process.env.HF_TOKEN && (process.env.HF_STUDIO_SECRET?.length || 0) >= 32); } catch { return false; }
 }
 export function validVideoUrl(value: string) {
   if (falVideoUrl(value)) return true;
@@ -68,7 +68,9 @@ export async function checkGeneration(provider: string, statusUrl: string, respo
         const raw = block.split("\n").filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trim()).join("\n");
         if (event === "error") return { status: "failed" as const, error: "The free GPU couldn't complete this scene. Its quota may be exhausted; try later or simplify your prompt." };
         if (event === "complete") {
-          const output = z.array(z.object({ video: z.object({ url: z.string().url().refine(validVideoUrl) }) })).safeParse(JSON.parse(raw));
+          let payload: unknown;
+          try { payload = JSON.parse(raw); } catch { throw new ProviderError("The GPU returned an unreadable result.", 410); }
+          const output = z.array(z.object({ video: z.object({ url: z.string().url().refine(validVideoUrl) }) })).min(1).safeParse(payload);
           if (!output.success) throw new ProviderError("The GPU finished without a playable video.", 410);
           return { status: "completed" as const, videoUrl: output.data[0].video.url };
         }

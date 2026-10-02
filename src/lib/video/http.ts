@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { ProviderError } from "./fal";
+import { randomUUID } from "node:crypto";
+import { ZodError } from "zod";
 
 export function apiError(error: unknown) {
-  if (error instanceof ProviderError) return NextResponse.json({ error: error.message }, { status: error.status });
-  console.error("Studio request failed", error instanceof Error ? error.name : "Unknown error");
-  return NextResponse.json({ error: "The studio couldn't complete this request. Check the database setup and try again." }, { status: 503 });
+  const requestId = randomUUID();
+  const headers = { "Cache-Control": "private, no-store", "X-Request-Id": requestId };
+  if (error instanceof ProviderError) return NextResponse.json({ error: error.message, requestId }, { status: error.status, headers });
+  if (error instanceof ZodError) return NextResponse.json({ error: "Check the request details and try again.", requestId }, { status: 400, headers });
+  // Correlate failures without recording prompts, credentials or upstream bodies.
+  console.error(JSON.stringify({ event: "studio.request_failed", requestId, kind: error instanceof Error ? error.name : "Unknown" }));
+  return NextResponse.json({ error: "The studio couldn't complete this request. Please retry shortly.", requestId }, { status: 503, headers });
 }
 
 export async function boundedJson(request: Request, limit = 4 * 1024 * 1024 + 16384) {

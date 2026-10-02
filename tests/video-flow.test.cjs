@@ -51,6 +51,7 @@ let providerStatus = "IN_QUEUE";
 let providerFailure = false;
 let providerUnavailable = false;
 let submitFailure = 0;
+let completeDuringSubmission = false;
 
 before(async () => {
   execFileSync(process.execPath, [path.join(root, "node_modules/prisma/build/index.js"), "db", "push", "--skip-generate"], { cwd: root, env: process.env, stdio: "pipe" });
@@ -66,6 +67,11 @@ before(async () => {
     assert.equal(init.headers.Authorization, "Key test-key-not-a-real-credential");
     if (init.method === "POST") {
       if (submitFailure) return new Response("Rejected", { status: submitFailure });
+      if (completeDuringSubmission) {
+        const job = await db.videoGeneration.findFirst({ where: { prompt: "Early completion race" } });
+        await require("../src/lib/video/jobs.ts").finishGeneration(job, { status: "completed", videoUrl: "https://v3.fal.media/files/test/output.mp4" });
+        return new Response("Interrupted confirmation");
+      }
       const id = randomUUID();
       return Response.json({ request_id: id, status_url: `https://queue.fal.run/fal-ai/kling-video/requests/${id}/status`, response_url: `https://queue.fal.run/fal-ai/kling-video/requests/${id}` });
     }
@@ -87,7 +93,11 @@ after(async () => {
 async function newWorkspace() { cookieStore = new Map(); const response = await routes.GET(); assert.equal(response.status, 200); return response.json(); }
 function input(extra = {}) { return { requestId: randomUUID(), prompt: "Cinematic sunset over the ocean", aspectRatio: "9:16", duration: 5, generateAudio: false, negativePrompt: "blur", ...extra }; }
 function request(body, origin = "http://localhost:3000") { return new Request("http://localhost:3000/api/generations", { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) }); }
-async function status(id) { return detail.GET(new Request(`http://localhost:3000/api/generations/${id}`), { params: { id } }); }
+async function status(id) {
+  // Advance the provider poll window without slowing the regression suite.
+  await db.videoGeneration.update({ where: { id }, data: { pollAfter: null } });
+  return detail.GET(new Request(`http://localhost:3000/api/generations/${id}`), { params: { id } });
+}
 
 test("missing provider key and invalid inputs do not create a render", async () => {
   await newWorkspace();
@@ -126,6 +136,9 @@ test("text render preserves settings, rejects duplicate renders, resumes and dow
   assert.equal((await download.GET(new Request("http://localhost:3000"), { params: { id: job.id } })).status, 409);
   providerStatus = "IN_PROGRESS";
   assert.equal((await (await status(job.id)).json()).generation.status, "processing");
+  const stale = { ...(await db.videoGeneration.findUnique({ where: { id: job.id } })), status: "queued" };
+  await db.videoGeneration.update({ where: { id: job.id }, data: { pollAfter: null } });
+  assert.equal((await require("../src/lib/video/jobs.ts").refreshGeneration(stale)).status, "processing", "A stale snapshot must not regress the database's newer state");
   providerUnavailable = true;
   assert.equal((await status(job.id)).status, 502);
   assert.equal((await (await routes.GET()).json()).generations[0].status, "processing", "Transient polling errors must not discard a running job");
@@ -234,4 +247,71 @@ test("a Vercel deployment without persistent storage stays in setup mode", async
     if (previous === undefined) delete process.env.VERCEL;
     else process.env.VERCEL = previous;
   }
+});
+
+test("shot direction preserves the original scene and settings for another take", async () => {
+  await newWorkspace();
+  const scene = input({ camera: "push", style: "cinema", negativePrompt: "no text" });
+  const response = await routes.POST(request(scene));
+  const data = await response.json();
+  assert.equal(response.status, 202);
+  assert.equal(data.generation.prompt, scene.prompt);
+  assert.deepEqual(data.generation.settings, { camera: "push", style: "cinema", negativePrompt: "no text", generateAudio: false });
+  assert.equal(data.usage.used, 1);
+  const sent = JSON.parse(providerCalls.filter((call) => call.init.method === "POST").at(-1).init.body);
+  assert.match(sent.prompt, /camera push in/);
+  assert.match(sent.prompt, /Cinematic composition/);
+  const before = providerCalls.length;
+  assert.equal((await routes.POST(request(input({ prompt: "a".repeat(2500), camera: "orbit" })))).status, 400);
+  assert.equal(providerCalls.length, before, "Never silently truncate a directed shot");
+});
+
+test("concurrent polls share one provider check and do not move processing back to queued", async () => {
+  await newWorkspace(); providerStatus = "IN_PROGRESS";
+  const created = await (await routes.POST(request(input()))).json();
+  const job = created.generation;
+  const before = providerCalls.length;
+  const check = () => detail.GET(new Request(`http://localhost:3000/api/generations/${job.id}`), { params: { id: job.id } });
+  const responses = await Promise.all([check(), check(), check()]);
+  assert.ok(responses.every((response) => response.status === 200));
+  assert.equal(providerCalls.length - before, 1);
+  assert.equal((await db.videoGeneration.findUnique({ where: { id: job.id } })).status, "processing");
+  providerStatus = "IN_QUEUE";
+  assert.equal((await (await status(job.id)).json()).generation.status, "processing");
+});
+
+test("quota exhaustion rolls back reservations and never submits another render", async () => {
+  await newWorkspace(); process.env.ACCOUNT_DAILY_RENDER_LIMIT = "1";
+  try {
+    providerStatus = "COMPLETED"; providerFailure = true;
+    const job = (await (await routes.POST(request(input()))).json()).generation;
+    await status(job.id); providerFailure = false;
+    const before = providerCalls.length;
+    const globalBefore = (await db.studioQuota.findUnique({ where: { id: `global:${new Date().toISOString().slice(0, 10)}` } })).used;
+    assert.equal((await routes.POST(request(input()))).status, 429);
+    assert.equal(providerCalls.length, before);
+    assert.equal((await db.studioQuota.findUnique({ where: { id: `global:${new Date().toISOString().slice(0, 10)}` } })).used, globalBefore);
+  } finally { process.env.ACCOUNT_DAILY_RENDER_LIMIT = "100"; providerFailure = false; providerStatus = "IN_QUEUE"; }
+});
+
+test("early completion survives an interrupted submission confirmation", async () => {
+  await newWorkspace(); completeDuringSubmission = true;
+  try {
+    const response = await routes.POST(request(input({ prompt: "Early completion race" })));
+    const data = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(data.generation.status, "completed");
+    assert.equal(data.generation.error, null);
+  } finally { completeDuringSubmission = false; }
+});
+
+test("late completion clears an earlier submission warning and releases its slot once", async () => {
+  await newWorkspace();
+  const created = (await (await routes.POST(request(input()))).json()).generation;
+  const job = await db.videoGeneration.update({ where: { id: created.id }, data: { error: "Holding an unconfirmed submission" } });
+  const { finishGeneration } = require("../src/lib/video/jobs.ts");
+  const before = (await db.studioQuota.findUnique({ where: { id: "active" } })).used;
+  const results = await Promise.all([finishGeneration(job, { status: "completed", videoUrl: "https://v3.fal.media/files/test/output.mp4" }), finishGeneration(job, { status: "completed", videoUrl: "https://v3.fal.media/files/test/output.mp4" })]);
+  assert.ok(results.every((result) => result.status === "completed" && result.error === null));
+  assert.equal((await db.studioQuota.findUnique({ where: { id: "active" } })).used, before - 1);
 });

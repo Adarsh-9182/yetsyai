@@ -14,6 +14,8 @@ export const generationInput = z.object({
   referenceImage: z.string().max(Math.ceil(MAX_REFERENCE_BYTES / 3) * 4 + 64).optional(),
   assetId: z.string().uuid().optional(),
   seed: z.number().int().min(0).max(2147483647).default(42),
+  camera: z.enum(["auto", "static", "push", "orbit", "handheld"]).default("auto"),
+  style: z.enum(["original", "cinema", "product", "dream"]).default("original"),
 });
 
 export type GenerationInput = z.infer<typeof generationInput>;
@@ -29,6 +31,7 @@ export type Generation = {
   error: string | null;
   createdAt: string;
   seed: number;
+  settings?: { camera: z.infer<typeof generationInput>["camera"]; style: z.infer<typeof generationInput>["style"]; negativePrompt: string; generateAudio: boolean };
 };
 
 export function isActive(status: string) {

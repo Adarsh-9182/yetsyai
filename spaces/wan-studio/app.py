@@ -33,6 +33,23 @@ pipe = WanPipeline.from_pretrained(MODEL, vae=vae, torch_dtype=torch.bfloat16)
 pipe.to("cuda")
 pipe.vae.enable_tiling()
 completed = OrderedDict()
+STEPS = int(os.environ.get("WAN_STEPS", "30"))
+GPU_SECONDS = int(os.environ.get("WAN_GPU_SECONDS", "180"))
+if not 20 <= STEPS <= 40 or not 60 <= GPU_SECONDS <= 180:
+    raise RuntimeError("Use WAN_STEPS between 20 and 40 and WAN_GPU_SECONDS between 60 and 180.")
+
+
+def remember(request_id, fingerprint, path):
+    """Cache terminal attempts, including failures, so the same UUID is not rerun."""
+    completed[request_id] = {"fingerprint": fingerprint, "path": path}
+    while len(completed) > 128:
+        _, old = completed.popitem(last=False)
+        if old["path"]:
+            Path(old["path"]).unlink(missing_ok=True)
+    files = [entry for entry in completed.values() if entry["path"]]
+    for entry in files[:-24]:
+        Path(entry["path"]).unlink(missing_ok=True)
+        entry["path"] = None
 
 
 def notify(payload):
@@ -52,11 +69,11 @@ def notify(payload):
     print("Completion delivery deferred; client polling can recover the result.")
 
 
-@spaces.GPU(duration=180)
+@spaces.GPU(duration=GPU_SECONDS)
 def render(prompt, negative_prompt, ratio, seed):
     width, height = {"16:9": (832, 480), "9:16": (480, 832), "1:1": (640, 640)}[ratio]
     frames = pipe(prompt=prompt, negative_prompt=negative_prompt, width=width, height=height,
-                  num_frames=81, num_inference_steps=30, guidance_scale=5.0,
+                  num_frames=81, num_inference_steps=STEPS, guidance_scale=5.0,
                   generator=torch.Generator(device="cuda").manual_seed(seed)).frames[0]
     path = OUTPUTS / f"{uuid.uuid4()}.mp4"
     export_to_video(frames, str(path), fps=16)
@@ -75,18 +92,21 @@ def generate(secret, request_id, prompt, negative_prompt, ratio, seed, reference
         raise gr.Error("Describe one scene in 3–2500 characters.")
     if ratio not in ("16:9", "9:16", "1:1") or not 0 <= seed <= 2147483647 or reference:
         raise gr.Error("Choose a supported ratio and seed. This backend uses text prompts only.")
-    if request_id in completed and Path(completed[request_id]).exists():
-        return completed[request_id]
+    fingerprint = hashlib.sha256(json.dumps([prompt.strip(), negative_prompt, ratio, seed]).encode()).hexdigest()
+    previous = completed.get(request_id)
+    if previous:
+        if previous["fingerprint"] != fingerprint:
+            raise gr.Error("This request ID belongs to a different scene.")
+        if previous["path"] and Path(previous["path"]).exists():
+            return previous["path"]
+        raise gr.Error("This request already ended. Create a new scene to try again.")
     try:
         path = render(prompt.strip(), negative_prompt, ratio, seed)
     except Exception:
+        remember(request_id, fingerprint, None)
         threading.Thread(target=notify, args=({"id": request_id, "status": "failed"},), daemon=True).start()
         raise gr.Error("The GPU couldn't finish this scene. Check your quota and retry later.")
-    completed[request_id] = path
-    # Delete evicted output files after they have been archived by the studio.
-    while len(completed) > 24:
-        _, old_path = completed.popitem(last=False)
-        Path(old_path).unlink(missing_ok=True)
+    remember(request_id, fingerprint, path)
     host = os.environ.get("SPACE_HOST", "")
     if host.endswith(".hf.space"):
         url = f"https://{host}/gradio_api/file={quote(path)}"

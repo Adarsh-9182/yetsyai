@@ -9,12 +9,16 @@
    slots and daily quota before recording an idempotent request UUID.
 3. The provider adapter sends the scene to the owner's private ZeroGPU Gradio
    Space. Paid fal/Kling is explicit opt-in. Keys never reach the browser.
-4. The browser polls with backoff. Gradio SSE results are cached by the Space;
+4. The browser polls with backoff. A 45-second database lease allows one provider
+   check per render across tabs/devices/instances. Processing cannot regress to
+   queued, and terminal completion clears earlier submission warnings.
+   Gradio SSE results are cached by the Space;
    status is persisted in PostgreSQL. A signed callback is the primary completion
    path, so users can close the page during a render.
 5. Completed MP4s are copied to private Supabase storage before marking a free
    job complete. UI links expire after an hour; authenticated routes issue fresh
-   signed links. Download/delete checks workspace ownership.
+   signed links in one batch for a library page. Browser focus and periodic renewal
+   refresh links in long-lived tabs. Download/delete checks workspace ownership.
 
 Conditional terminal state updates release quota once, even when callback and
 polling race. Expired/missing provider events become failures. Temporary network
@@ -42,6 +46,12 @@ prompt, seed, prompt camera presets. Image animation is disabled for the default
 backend. Presets describe intended motion; they do not implement exact camera
 trajectories. The storyboard plans individual shots and does not automatically
 generate or stitch a full film. Photo look templates are labeled as inspiration.
+Camera/style instructions are compiled on the server; the original user prompt
+and render settings remain separate for reuse. The browser shows the exact
+compiled shot prompt before submission and preserves all text-shot settings in
+drafts and storyboards. JSON exports carry up to 12 ordered shots and import uses
+schema validation, a 128 KB file limit and UUID deduplication. Shot advice is
+deterministic and makes no LLM API calls.
 
 ## Deployment and checks
 

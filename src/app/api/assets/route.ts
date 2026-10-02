@@ -7,7 +7,7 @@ import { requireAccount } from "@/lib/video/auth";
 import { ProviderError, validReferenceImage } from "@/lib/video/fal";
 import { apiError, boundedJson } from "@/lib/video/http";
 import { getWorkspace, isSameOrigin } from "@/lib/video/session";
-import { mediaConfigured, signedMedia, uploadMedia, removeMedia } from "@/lib/video/storage";
+import { mediaConfigured, signedMedia, signedMediaBatch, uploadMedia, removeMedia } from "@/lib/video/storage";
 
 export const dynamic = "force-dynamic";
 export async function GET() {
@@ -15,7 +15,8 @@ export async function GET() {
     if (!databaseConfigured() || !mediaConfigured()) return NextResponse.json({ assets: [] });
     const workspace = await getWorkspace();
     const assets = workspace ? await db.studioAsset.findMany({ where: { workspaceId: workspace.id }, orderBy: { createdAt: "desc" }, take: 20 }) : [];
-    return NextResponse.json({ assets: await Promise.all(assets.map(async ({ path, workspaceId: _, ...asset }) => ({ ...asset, url: await signedMedia(path) }))) }, { headers: { "Cache-Control": "private, no-store" } });
+    const urls = await signedMediaBatch(assets.map((asset) => asset.path));
+    return NextResponse.json({ assets: assets.map(({ path, workspaceId: _, ...asset }) => ({ ...asset, url: urls.get(path)! })) }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return apiError(error); }
 }
 export async function POST(request: Request) {

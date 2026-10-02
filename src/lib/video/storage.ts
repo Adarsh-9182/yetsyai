@@ -18,6 +18,18 @@ export async function signedMedia(path: string) {
   if (error || !data) throw new ProviderError("Couldn't open this saved file. Please retry.", 503);
   return data.signedUrl;
 }
+export async function signedMediaBatch(paths: string[]) {
+  const unique = [...new Set(paths)];
+  if (!unique.length) return new Map<string, string>();
+  const { data, error } = await storage().from(BUCKET).createSignedUrls(unique, 3600);
+  if (error || !data) throw new ProviderError("Couldn't open your saved library. Please retry.", 503);
+  const urls = new Map<string, string>();
+  for (const item of data) {
+    if (!item.error && item.path && item.signedUrl) urls.set(item.path, item.signedUrl);
+  }
+  if (unique.some((path) => !urls.has(path))) throw new ProviderError("One of your saved files couldn't be opened. Please retry.", 503);
+  return urls;
+}
 export async function readAsset(path: string) {
   const { data, error } = await storage().from(BUCKET).download(path);
   if (error || !data || data.size > 3 * 1024 * 1024) throw new ProviderError("Couldn't load the saved reference image.", 410);

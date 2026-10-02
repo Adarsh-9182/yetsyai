@@ -25,8 +25,16 @@ The initial profile is 832×480, 81 frames at 16 fps (approximately 5 seconds),
 an initial quality/latency profile, not a measured benchmark. Real GPU execution
 and quota compatibility must be checked before opening generation publicly.
 
-The shared secret is checked *before* reserving a GPU. Completed jobs are reused
-by UUID, and a signed completion webhook saves the result to the app's private
+Space variables `WAN_STEPS` (20–40, default 30) and `WAN_GPU_SECONDS` (60–180,
+default 180) allow tuning after a real benchmark. Reducing steps can reduce
+render time and quality; GPU duration is a reservation ceiling, not a guaranteed
+render time. Do not change these values until you measure your first clip.
+
+The shared secret is checked *before* reserving a GPU. Up to 128 terminal attempts
+are remembered by UUID, including failures; up to 24 MP4 files are retained.
+Reusing a remembered UUID with a different scene is rejected. Missing or expired
+files never trigger another inference for that remembered UUID. A signed
+completion webhook saves the result to the app's private
 storage even if the user closes the browser. In-memory cache is not persistent:
 a Space restart can interrupt queued work; the app has a one-hour recovery bound.
 

@@ -52,6 +52,8 @@ model VideoGeneration {
   responseUrl       String?
   videoUrl          String?
   error             String?
+  settings          String?
+  pollAfter         DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

@@ -6,9 +6,22 @@ All four must be connected before calling this a working generation product.
 Never paste credentials into GitHub, PRs or chat; put them in `.env.local` and
 Vercel/Space environment settings.
 
+## Current checkpoint (October 1, 2026)
+
+The Vercel project is linked, but its production environment has no variables
+configured yet. The public site is therefore still in preview mode; generation
+has not been connected or validated against real accounts and a GPU. Follow the
+steps below in order, then complete the acceptance checks before inviting users.
+
 ## 1. Supabase project (free tier)
 
 Create one project. It supplies PostgreSQL, email/password accounts and storage.
+The Free Plan currently includes two projects, with usage quotas. Free projects
+can be paused after a week of low database activity, so this is suitable for a
+prototype but does not provide an always-on service. Review the current
+[Supabase billing and pausing rules](https://supabase.com/docs/guides/platform/billing-on-supabase)
+before creating the project; keep the organization on Free unless you explicitly
+choose to spend money.
 
 - Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel.
   The anon/publishable key is intentionally public; database access is protected
@@ -43,6 +56,9 @@ Use **your own** private Space; do not rely on someone else's public demo API.
 Upload `spaces/wan-studio/{README.md,app.py,requirements.txt}`. Select ZeroGPU,
 provided your account is eligible. Free quota and hosting eligibility can change;
 check [official ZeroGPU documentation](https://huggingface.co/docs/hub/spaces-zerogpu).
+At the time of this checkpoint, a free personal account needs a verified email
+and to be at least 30 days old to host up to two ZeroGPU Spaces; its included
+inference quota is limited, so measure actual render time before sharing access.
 If not eligible, do not select paid hardware accidentally. A GPU you already own
 can run the same model after adapting the `spaces.GPU` decorator and HTTPS hosting.
 
