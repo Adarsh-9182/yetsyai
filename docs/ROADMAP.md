@@ -8,6 +8,7 @@ accounts, PostgreSQL, private media storage and the owner's GPU Space are connec
 - Responsive studio, movable/collapsible navigation, prompt composer and photo looks.
 - Camera and visual treatment presets, exact shot prompt preview, practical shot advice.
 - Full text-shot draft settings, storyboard ordering and validated JSON import/export.
+- Named storyboard shots, duplicate shots with preserved settings, planned sequence timing.
 - Account routes, owned library/assets, signed downloads and completion callbacks.
 - Atomic app quotas, request IDs, conditional completion and abandoned lock recovery.
 - Database provider-poll leases, monotonic status updates and batch library media signing.

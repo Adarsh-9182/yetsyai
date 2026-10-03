@@ -6,7 +6,7 @@ import {
   CircleAlert, CircleHelp, Clapperboard, Clock3, Film, FolderOpen, Grid2X2,
   ImagePlus, Library, Menu, Play, Plus, RectangleHorizontal, RefreshCw,
   Search, Settings2, Sparkles, Square, WandSparkles, X, ArrowRight, Bookmark, Camera, ChevronRight, Trash2, LogIn,
-  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, ArrowUp, ArrowDown, Upload,
+  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, ArrowUp, ArrowDown, Upload, Copy,
 } from "lucide-react";
 import { Generation, isActive, MAX_REFERENCE_BYTES, VIDEO_MODEL } from "@/lib/video/types";
 import { useStudio } from "./use-studio";
@@ -26,6 +26,10 @@ type Reference = { name: string; data: string; width: number; height: number; as
 type Asset = { id: string; name: string; width: number; height: number; url: string };
 type Scene = SavedScene;
 const cameras = cameraDirections;
+
+function sequenceTime(seconds: number) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
 function Thumbnail({ image, title }: { image: string; title: string }) {
   return <div role="img" aria-label={title} className="thumb" style={{ backgroundImage: `linear-gradient(180deg, transparent 40%, rgba(8,8,11,.35)), url(https://images.unsplash.com/${image}?auto=format&fit=crop&w=1000&q=85)` }} />;
@@ -103,6 +107,12 @@ export function VideoStudio() {
   const filteredJobs = studio.jobs.filter((job) => job.prompt.toLowerCase().includes(search.toLowerCase()));
   const latestVideo = studio.jobs.find((job) => job.status === "completed" && job.videoUrl);
   const currentJob = studio.jobs.find((job) => isActive(job.status));
+  const shotTimings: number[] = [];
+  let plannedDuration = 0;
+  for (const scene of scenes) {
+    shotTimings.push(plannedDuration);
+    plannedDuration += scene.duration;
+  }
 
   useEffect(() => {
     try {
@@ -213,6 +223,19 @@ export function VideoStudio() {
       const next = [...current]; [next[index], next[target]] = [next[target], next[index]]; return next;
     });
   };
+  const duplicateScene = (id: string) => {
+    if (scenes.length >= 12) { setNotice("Your storyboard holds 12 scenes. Remove one to make room."); return; }
+    const copyId = crypto.randomUUID();
+    setScenes((current) => {
+      if (current.length >= 12) return current;
+      const index = current.findIndex((scene) => scene.id === id);
+      if (index < 0) return current;
+      const source = current[index];
+      const copy = { ...source, id: copyId, title: source.title ? `${source.title.slice(0, 73)} (copy)` : "" };
+      return [...current.slice(0, index + 1), copy, ...current.slice(index + 1)];
+    });
+    setNotice("Shot duplicated with its prompt and all settings.");
+  };
   const exportBoard = () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify({ version: 1, scenes }, null, 2)], { type: "application/json" }));
     const link = document.createElement("a"); link.href = url; link.download = "yetsyai-storyboard.json"; document.body.appendChild(link); link.click(); link.remove();
@@ -278,7 +301,7 @@ export function VideoStudio() {
     if (prompt.trim().length < 3) { setNotice("Describe your scene first."); return; }
     if (mode === "reference") { setNotice("Storyboard saves text shots. Save the image in Assets for your reference clip."); return; }
     if (scenes.length >= 12) { setNotice("Your storyboard holds 12 scenes. Remove one to make room."); return; }
-    setScenes((current) => [...current, { id: crypto.randomUUID(), prompt: prompt.trim(), ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt }]);
+    setScenes((current) => [...current, { id: crypto.randomUUID(), title: "", prompt: prompt.trim(), ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt }]);
     setNotice("Scene saved to your storyboard on this device.");
   };
   const saveReference = async () => {
@@ -416,7 +439,24 @@ export function VideoStudio() {
 
           {activeNav === "Assets" && <section className="asset-section">{!studio.capabilities.image && <div className="studio-message"><ImagePlus size={18} /><div>Collect references for your next scene. Image animation will open when a compatible backend is connected.</div></div>}{reference ? <div className="asset-card"><div role="img" aria-label={reference.name} className="asset-image" style={{ backgroundImage: `url(${reference.data})` }} /><h2>{reference.name}</h2><p>{reference.width} × {reference.height} · {reference.assetId ? "Saved to your account" : "Selected on this device"}</p><div>{studio.capabilities.image && <button className="generate-button" onClick={() => { setMode("reference"); go("Create"); }}><Film size={15} /> Animate image</button>}{!reference.assetId && <button className="generate-button" disabled={savingAsset || !studio.capabilities.mediaConfigured} onClick={() => void saveReference()}><Bookmark size={15} />{savingAsset ? "Saving…" : "Save reference"}</button>}<button className="library-button" onClick={removeReference}><X size={15} /> Clear selection</button></div></div> : <div className="empty-state"><ImagePlus size={30} /><h3>Your next starting point.</h3><p>Collect a face, a place or a product. Sign in to save references across devices.</p><button className="generate-button" disabled={readingReference} onClick={() => fileRef.current?.click()}><Plus size={15} />{readingReference ? "Reading…" : "Choose image"}</button>{fileError && <p className="inline-error" role="alert">{fileError}</p>}</div>}{assets.length > 0 && <div className="creation-grid assets-grid">{assets.map((asset) => <article className="creation-card" key={asset.id}><button className="creation-image" onClick={() => setReference({ name: asset.name, data: asset.url, width: asset.width, height: asset.height, assetId: asset.id })}><div className="thumb" role="img" aria-label={asset.name} style={{ backgroundImage: `url(${asset.url})` }} /></button><div className="creation-info"><div><h3>{asset.name}</h3><p>{asset.width} × {asset.height}</p></div><button className="icon-button" onClick={() => void deleteAsset(asset.id)} aria-label={`Remove ${asset.name}`}><Trash2 size={14} /></button></div></article>)}</div>}</section>}
 
-          {activeNav === "Storyboard" && <section className="storyboard-section"><div className="storyboard-intro"><div><span className="eyebrow">{scenes.length} / 12 SCENES</span><p>A plan for your next film. Generate each shot separately when you&apos;re ready.</p></div><div className="board-tools"><button className="library-button" onClick={() => boardFileRef.current?.click()}><Upload size={14} /> Import</button><button className="library-button" disabled={!scenes.length} onClick={exportBoard}><ArrowDownToLine size={14} /> Export</button><button className="library-button" onClick={() => go("Create")}><Plus size={15} /> Write a scene</button></div></div>{scenes.length ? <div className="storyboard-grid">{scenes.map((scene, index) => <article className="storyboard-card" key={scene.id}><div className="storyboard-card-heading"><span>SCENE {String(index + 1).padStart(2, "0")}</span><div className="scene-order"><button className="icon-button" disabled={index === 0} onClick={() => moveScene(index, -1)} aria-label={`Move scene ${index + 1} up`}><ArrowUp size={13} /></button><button className="icon-button" disabled={index === scenes.length - 1} onClick={() => moveScene(index, 1)} aria-label={`Move scene ${index + 1} down`}><ArrowDown size={13} /></button></div><button className="icon-button" onClick={() => setScenes((current) => current.filter((item) => item.id !== scene.id))} aria-label={`Remove scene ${index + 1}`}><Trash2 size={14} /></button></div><p>{scene.prompt}</p><div className="storyboard-card-footer"><span>{scene.ratio} · {scene.duration}s · {visualStyles.find((item) => item.id === scene.style)?.name} · Seed {scene.seed}</span><button onClick={() => openScene(scene)}>Open scene <ArrowUpRight size={15} /></button></div></article>)}</div> : <div className="empty-state"><Clapperboard size={32} /><h3>Give your story a first scene.</h3><p>Write a prompt in Create, then choose Save scene. Your storyboard stays on this device.</p><button className="generate-button" onClick={() => go("Create")}>Start writing <ArrowRight size={16} /></button></div>}</section>}
+          {activeNav === "Storyboard" && <section className="storyboard-section">
+            <div className="storyboard-intro">
+              <div><span className="eyebrow">{scenes.length} / 12 SCENES</span><p>A plan for your next film. Generate each shot separately when you&apos;re ready.</p></div>
+              <div className="board-tools"><button className="library-button" onClick={() => boardFileRef.current?.click()}><Upload size={14} /> Import</button><button className="library-button" disabled={!scenes.length} onClick={exportBoard}><ArrowDownToLine size={14} /> Export</button><button className="library-button" onClick={() => go("Create")}><Plus size={15} /> Write a scene</button></div>
+            </div>
+            {scenes.length > 0 && <div className="sequence-summary" aria-label="Planned sequence duration"><span><Clock3 size={15} />{sequenceTime(plannedDuration)} planned runtime</span><p>Name your shots and arrange the sequence. This is a shot plan; clips are rendered separately.</p></div>}
+            {scenes.length ? <div className="storyboard-grid">{scenes.map((scene, index) => <article className="storyboard-card" key={scene.id}>
+              <div className="storyboard-card-heading">
+                <span>SCENE {String(index + 1).padStart(2, "0")}</span>
+                <div className="scene-order"><button className="icon-button" disabled={index === 0} onClick={() => moveScene(index, -1)} aria-label={`Move scene ${index + 1} up`}><ArrowUp size={13} /></button><button className="icon-button" disabled={index === scenes.length - 1} onClick={() => moveScene(index, 1)} aria-label={`Move scene ${index + 1} down`}><ArrowDown size={13} /></button></div>
+                <button className="icon-button" onClick={() => setScenes((current) => current.filter((item) => item.id !== scene.id))} aria-label={`Remove scene ${index + 1}`}><Trash2 size={14} /></button>
+              </div>
+              <label className="shot-name"><span>SHOT NAME</span><input type="text" maxLength={80} value={scene.title} placeholder={`Scene ${String(index + 1).padStart(2, "0")}`} aria-label={`Name scene ${index + 1}`} onChange={(event) => { const title = event.target.value; setScenes((current) => current.map((item) => item.id === scene.id ? { ...item, title } : item)); }} /></label>
+              <div className="shot-timing"><Clock3 size={12} /><span>{sequenceTime(shotTimings[index])} – {sequenceTime(shotTimings[index] + scene.duration)}</span><span>{scene.duration}s shot</span></div>
+              <p>{scene.prompt}</p>
+              <div className="storyboard-card-footer"><span>{scene.ratio} · {visualStyles.find((item) => item.id === scene.style)?.name} · Seed {scene.seed}</span><div className="shot-actions"><button disabled={scenes.length >= 12} onClick={() => duplicateScene(scene.id)} aria-label={`Duplicate scene ${index + 1}`}><Copy size={13} /> Duplicate</button><button onClick={() => openScene(scene)}>Open scene <ArrowUpRight size={15} /></button></div></div>
+            </article>)}</div> : <div className="empty-state"><Clapperboard size={32} /><h3>Give your story a first scene.</h3><p>Write a prompt in Create, then choose Save scene. Your storyboard stays on this device.</p><button className="generate-button" onClick={() => go("Create")}>Start writing <ArrowRight size={16} /></button></div>}
+          </section>}
 
           <footer className="studio-footer"><span>yetsyai. <span>Made for your next big idea.</span></span><span>INDEPENDENT SPIRIT. OPEN POSSIBILITIES. <Aperture size={15} /></span></footer>
         </div>

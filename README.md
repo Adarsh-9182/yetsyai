@@ -2,7 +2,8 @@
 
 An independent AI video studio for short clips: a prompt composer, camera prompt
 and visual treatment presets, an exact shot-prompt preview, scene monitor, look
-templates, saved drafts, a reorderable local storyboard with JSON import/export, account
+templates, saved drafts, a reorderable local storyboard with shot names, duplication,
+planned sequence timing and JSON import/export, account
 library and MP4 downloads.
 
 Live interface: [yetsyai.vercel.app](https://yetsyai.vercel.app).

@@ -53,6 +53,13 @@ drafts and storyboards. JSON exports carry up to 12 ordered shots and import use
 schema validation, a 128 KB file limit and UUID deduplication. Shot advice is
 deterministic and makes no LLM API calls.
 
+Storyboard shots have optional names (up to 80 characters). Duplicating a shot
+inserts a new UUID immediately after it and retains all generation settings.
+The sequence shows each shot's planned start/end and total runtime, recalculated
+after reordering or removal. These timings describe the plan, not an assembled
+video. Names persist in local storage and JSON exports; older version-1 files
+without names remain compatible.
+
 ## Deployment and checks
 
 See [SETUP.md](SETUP.md) for credentials, bucket/auth configuration, limits and
