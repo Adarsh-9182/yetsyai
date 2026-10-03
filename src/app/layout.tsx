@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import "./studio-design.css";
 
 export const metadata: Metadata = {
   title: "Yetsyai — Your imagination, in motion",
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#101112",
+  themeColor: "#0b0c0e",
   width: "device-width",
   initialScale: 1,
 };

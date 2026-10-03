@@ -6,6 +6,11 @@ templates, saved drafts, a reorderable local storyboard with shot names, duplica
 planned sequence timing and JSON import/export, account
 library and MP4 downloads.
 
+The studio includes a photographic showcase, shortcuts for directing and planning,
+and a lookbook filtered by cinematic, product, nature and portrait treatments.
+Selecting a look applies its prompt and relevant visual treatment. Inspiration
+photos are labeled separately from generated videos.
+
 Live interface: [yetsyai.vercel.app](https://yetsyai.vercel.app).
 
 ## Budget and generation
