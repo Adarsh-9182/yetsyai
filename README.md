@@ -55,6 +55,11 @@ Follow [the complete setup guide](docs/SETUP.md):
 4. Redeploy, then check one real render, sign-in, second-device library,
    webhook completion and MP4 download before inviting users.
 
+`npm run setup:check -- --env-file .env.production.local` checks production
+configuration without printing secrets. `npm run setup:storage` with the same
+file option creates or checks the private media bucket. See the setup guide for
+what these commands verify and the remaining integration checks.
+
 ## Reliability and controls
 
 - Server-verified accounts; HttpOnly sessions; account-owned workspaces.

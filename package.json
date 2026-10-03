@@ -11,7 +11,9 @@
     "test": "node --test tests/*.test.cjs",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "db:push": "node scripts/init-local.cjs"
+    "db:push": "node scripts/init-local.cjs",
+    "setup:check": "node scripts/setup-production.cjs",
+    "setup:storage": "node scripts/setup-production.cjs --storage"
   },
   "overrides": { "postcss": "$postcss" },
   "engines": {

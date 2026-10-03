@@ -6,7 +6,7 @@ colorTo: gray
 sdk: gradio
 sdk_version: 5.49.1
 app_file: app.py
-python_version: "3.11"
+python_version: "3.12.12"
 pinned: false
 ---
 
@@ -18,6 +18,9 @@ Set Space secrets `HF_STUDIO_SECRET` (a randomly generated 32-byte secret) and
 `STUDIO_WEBHOOK_URL=https://yetsyai.vercel.app/api/provider-events`.
 Set the same secret, a token with access to this private Space, and the Space URL
 on the Yetsyai server. See `docs/SETUP.md` in the main repository.
+
+Python is pinned to 3.12.12, one of the runtimes currently listed in the
+[ZeroGPU compatibility documentation](https://huggingface.co/docs/hub/spaces-zerogpu#supported-versions).
 
 This backend uses Apache-2.0 Wan 2.2 TI2V 5B weights for **text-to-video only**.
 The initial profile is 832×480, 81 frames at 16 fps (approximately 5 seconds),

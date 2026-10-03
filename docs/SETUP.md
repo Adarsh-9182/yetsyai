@@ -6,12 +6,32 @@ All four must be connected before calling this a working generation product.
 Never paste credentials into GitHub, PRs or chat; put them in `.env.local` and
 Vercel/Space environment settings.
 
-## Current checkpoint (October 1, 2026)
+## Current checkpoint (October 4, 2026)
 
 The Vercel project is linked, but its production environment has no variables
 configured yet. The public site is therefore still in preview mode; generation
 has not been connected or validated against real accounts and a GPU. Follow the
 steps below in order, then complete the acceptance checks before inviting users.
+
+### Local setup commands
+
+Put production credentials in an ignored `.env.production.local` file, using
+`.env.example` as the list of variable names. Replace the SQLite URL with the
+project's PostgreSQL URL. Never paste credentials into chat or commit the file.
+Existing shell variables take precedence over values in the selected file.
+
+```bash
+npm run setup:check -- --env-file .env.production.local
+npm run setup:storage -- --env-file .env.production.local
+```
+
+The first command checks configuration syntax without sending network requests
+or printing values. The storage command needs only the Supabase URL and server
+key, so it can run before the GPU Space is connected. It creates the private
+`studio-media` bucket with the limits below, or checks an existing bucket. It
+does not change an existing bucket, apply SQL, configure auth or inspect object
+policies. Review existing policies if reusing a project. Credentials, migrations,
+email delivery and real GPU execution still need the acceptance checks below.
 
 ## 1. Supabase project (free tier)
 
