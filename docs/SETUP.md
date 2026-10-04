@@ -8,10 +8,12 @@ Vercel/Space environment settings.
 
 ## Current checkpoint (October 4, 2026)
 
-The Vercel project is linked, but its production environment has no variables
-configured yet. The public site is therefore still in preview mode; generation
-has not been connected or validated against real accounts and a GPU. Follow the
-steps below in order, then complete the acceptance checks before inviting users.
+The Vercel project is linked. Production now has `VIDEO_PROVIDER=huggingface`,
+paid/guest generation disabled and render limits of 2 per account/day, 3 globally
+per day and 1 concurrent job. Supabase, PostgreSQL and private GPU credentials
+are still missing, so the public site remains in preview mode. Real accounts and
+GPU generation have not been connected or validated. Follow the steps below in
+order, then complete the acceptance checks before inviting users.
 
 ### Local setup commands
 
