@@ -8,12 +8,19 @@ Vercel/Space environment settings.
 
 ## Current checkpoint (October 4, 2026)
 
-The Vercel project is linked. Production now has `VIDEO_PROVIDER=huggingface`,
-paid/guest generation disabled and render limits of 2 per account/day, 3 globally
-per day and 1 concurrent job. Supabase, PostgreSQL and private GPU credentials
-are still missing, so the public site remains in preview mode. Real accounts and
-GPU generation have not been connected or validated. Follow the steps below in
-order, then complete the acceptance checks before inviting users.
+The owner's Free Supabase project has been created. All three PostgreSQL
+migrations have been applied, and the private `studio-media` bucket has been
+created with the limits below. Supabase keys, the session-pooler URL, maintenance
+secret and shared worker secret are configured in production Vercel settings.
+The auth Site URL and confirmation/recovery redirects have been saved.
+
+Production uses `VIDEO_PROVIDER=huggingface`, paid/guest generation disabled and
+render limits of 2 per account/day, 3 globally per day and 1 concurrent job.
+The private GPU Space URL/token are still missing. Account email delivery,
+cross-device access and a real video render have not been validated. The default
+Supabase email service remains in use; the dashboard currently requires custom
+SMTP before editing confirmation/recovery templates. Complete the remaining
+setup and acceptance checks before inviting users.
 
 ### Local setup commands
 
@@ -53,6 +60,8 @@ choose to spend money.
   project owner (`postgres`) credentials and `sslmode=require`. Keep connection
   count small, e.g. `connection_limit=1&pool_timeout=20`. Transaction poolers on
   port 6543 need special migration handling; use the session pooler here.
+  The provisioned project also uses `connect_timeout=30` to allow the initial
+  pooler connection to complete.
 - Create a **private** bucket named `studio-media`; set max file size 40 MiB and
   allowed MIME types `video/mp4`, `image/jpeg`, `image/png`. Add no public bucket
   or object read policies. All URLs are signed by the server after ownership checks.
