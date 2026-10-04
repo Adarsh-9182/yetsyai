@@ -1,14 +1,18 @@
 # Yetsyai product roadmap
 
-Updated October 2, 2026. The current release is a preview studio until real
-accounts, PostgreSQL, private media storage and the owner's GPU Space are connected.
+Updated October 4, 2026. Supabase accounts, PostgreSQL migrations and private
+media storage are configured. The owner's GPU Space and first real render remain
+pending; account email delivery and complete user workflows still need validation.
 
-## Implemented and locally checked
+## Implemented
 
 - Responsive studio, movable/collapsible navigation, prompt composer and photo looks.
 - Camera and visual treatment presets, exact shot prompt preview, practical shot advice.
 - Full text-shot draft settings, storyboard ordering and validated JSON import/export.
 - Named storyboard shots, duplicate shots with preserved settings, planned sequence timing.
+- Named account projects with explicit save/open, up to 20 per account, 12 shots
+  per project, optimistic revisions and Save as new for alternate versions.
+- Project ownership checks, private database tables and conservative creation limits.
 - Photo-led studio showcase, creative shortcuts, filtered lookbook and responsive charcoal styling.
 - Account routes, owned library/assets, signed downloads and completion callbacks.
 - Atomic app quotas, request IDs, conditional completion and abandoned lock recovery.
@@ -19,7 +23,7 @@ accounts, PostgreSQL, private media storage and the owner's GPU Space are connec
 
 ## Next gate: one real clip
 
-1. Connect a Supabase Free project and private storage; apply PostgreSQL migrations.
+1. Supabase Free project, private media bucket and initial PostgreSQL migrations are configured.
 2. Configure account confirmation/recovery and appropriate email delivery.
 3. Deploy the private Wan Space on eligible ZeroGPU hardware and connect Vercel secrets.
 4. Confirm one account, render one short clip, and record duration, runtime and GPU quota.
@@ -42,7 +46,7 @@ free account. Model quality has not been benchmarked. Setup instructions are in
 
 ## Later improvements, once generation works
 
-- Account-synced storyboards, automatic shot-to-render associations and comparison takes.
+- Automatic shot-to-render associations and comparison takes.
 - Image-to-video after a compatible model path passes real integration checks.
 - Clip trimming, sequence assembly and soundtrack editing without more inference.
 - A durable worker queue when measured demand exceeds the one-active-render prototype.

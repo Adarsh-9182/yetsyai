@@ -6,6 +6,11 @@ templates, saved drafts, a reorderable local storyboard with shot names, duplica
 planned sequence timing and JSON import/export, account
 library and MP4 downloads.
 
+Storyboard includes a named project library: save up to 20 projects to your
+account and open their shots on another device. Saves are explicit; revision
+checks prevent an older device from overwriting newer changes. Save as new keeps
+an alternate version, and removing a project keeps existing rendered videos.
+
 The studio includes a photographic showcase, shortcuts for directing and planning,
 and a lookbook filtered by cinematic, product, nature and portrait treatments.
 Selecting a look applies its prompt and relevant visual treatment. Inspiration
@@ -73,8 +78,10 @@ what these commands verify and the remaining integration checks.
 - 50 videos/account, 20 references/account, bounded uploads and media downloads.
 - Daily maintenance with a secret; no credentials or prompts in worker logs.
 
-Account videos/references sync across devices. **Drafts and storyboards are local
-to this device**. Camera presets append instructions to prompts, not exact camera
+Account videos/references and **saved projects** sync across devices. The current
+composer draft and unsaved storyboard edits remain local until you save a project.
+Projects store storyboard shots and their settings; they do not store an unsaved
+composer prompt, attached reference files or assembled video. Camera presets append instructions to prompts, not exact camera
 trajectory controls. Free Space restarts and quota exhaustion remain real limits.
 
 ## Stack

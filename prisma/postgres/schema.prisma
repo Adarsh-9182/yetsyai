@@ -14,6 +14,20 @@ model StudioWorkspace {
   createdAt   DateTime @default(now())
   generations VideoGeneration[]
   assets      StudioAsset[]
+  projects    StudioProject[]
+}
+
+model StudioProject {
+  id          String @id
+  workspaceId String
+  workspace   StudioWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  title       String
+  scenes      String
+  sceneCount  Int @default(0)
+  revision    Int @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([workspaceId, updatedAt])
 }
 
 model StudioQuota {

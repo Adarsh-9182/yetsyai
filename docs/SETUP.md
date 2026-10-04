@@ -134,7 +134,11 @@ production GPU SLA. Paid fal mode remains explicit opt-in.
 
 Set random `CRON_SECRET` in Vercel to enable the daily maintenance endpoint. It
 expires abandoned locks, refreshes a bounded number of jobs and removes old
-quota rows. Check provider event delivery failures and storage usage in your
+quota rows. Each account can also save 20 named storyboard projects, with up to
+12 shots in each. Save/open actions require a confirmed account; explicit saves
+use revision checks so an older device cannot overwrite a newer version. An
+additive project migration enables RLS and denies public REST access. The current
+composer draft stays local. Check provider event delivery failures and storage usage in your
 platform logs. No prompts or credentials are logged by the callback worker.
 
 ## 4. Acceptance before inviting users

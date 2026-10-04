@@ -11,6 +11,7 @@ import {
 import { Generation, isActive, MAX_REFERENCE_BYTES, VIDEO_MODEL } from "@/lib/video/types";
 import { useStudio } from "./use-studio";
 import { AccountDialog } from "./account-dialog";
+import { ProjectLibrary } from "./project-library";
 import { cameraDirections, visualStyles, compileScene, sceneAdvice } from "@/lib/video/direction";
 import { editableDraft, savedScene, storyboardFile, SavedScene } from "@/lib/video/drafts";
 
@@ -470,6 +471,7 @@ export function VideoStudio() {
 
           {activeNav === "Assets" && <section className="asset-section">{!studio.capabilities.image && <div className="studio-message"><ImagePlus size={18} /><div>Collect references for your next scene. Image animation will open when a compatible backend is connected.</div></div>}{reference ? <div className="asset-card"><div role="img" aria-label={reference.name} className="asset-image" style={{ backgroundImage: `url(${reference.data})` }} /><h2>{reference.name}</h2><p>{reference.width} × {reference.height} · {reference.assetId ? "Saved to your account" : "Selected on this device"}</p><div>{studio.capabilities.image && <button className="generate-button" onClick={() => { setMode("reference"); go("Create"); }}><Film size={15} /> Animate image</button>}{!reference.assetId && <button className="generate-button" disabled={savingAsset || !studio.capabilities.mediaConfigured} onClick={() => void saveReference()}><Bookmark size={15} />{savingAsset ? "Saving…" : "Save reference"}</button>}<button className="library-button" onClick={removeReference}><X size={15} /> Clear selection</button></div></div> : <div className="empty-state"><ImagePlus size={30} /><h3>Your next starting point.</h3><p>Collect a face, a place or a product. Sign in to save references across devices.</p><button className="generate-button" disabled={readingReference} onClick={() => fileRef.current?.click()}><Plus size={15} />{readingReference ? "Reading…" : "Choose image"}</button>{fileError && <p className="inline-error" role="alert">{fileError}</p>}</div>}{assets.length > 0 && <div className="creation-grid assets-grid">{assets.map((asset) => <article className="creation-card" key={asset.id}><button className="creation-image" onClick={() => setReference({ name: asset.name, data: asset.url, width: asset.width, height: asset.height, assetId: asset.id })}><div className="thumb" role="img" aria-label={asset.name} style={{ backgroundImage: `url(${asset.url})` }} /></button><div className="creation-info"><div><h3>{asset.name}</h3><p>{asset.width} × {asset.height}</p></div><button className="icon-button" onClick={() => void deleteAsset(asset.id)} aria-label={`Remove ${asset.name}`}><Trash2 size={14} /></button></div></article>)}</div>}</section>}
 
+          <ProjectLibrary scenes={scenes} replaceScenes={setScenes} enabled={studio.capabilities.signedIn && studio.capabilities.configuration.database} hidden={activeNav !== "Storyboard"} signIn={() => setAccountOpen(true)} />
           {activeNav === "Storyboard" && <section className="storyboard-section">
             <div className="storyboard-intro">
               <div><span className="eyebrow">{scenes.length} / 12 SCENES</span><p>A plan for your next film. Generate each shot separately when you&apos;re ready.</p></div>
@@ -486,7 +488,7 @@ export function VideoStudio() {
               <div className="shot-timing"><Clock3 size={12} /><span>{sequenceTime(shotTimings[index])} – {sequenceTime(shotTimings[index] + scene.duration)}</span><span>{scene.duration}s shot</span></div>
               <p>{scene.prompt}</p>
               <div className="storyboard-card-footer"><span>{scene.ratio} · {visualStyles.find((item) => item.id === scene.style)?.name} · Seed {scene.seed}</span><div className="shot-actions"><button disabled={scenes.length >= 12} onClick={() => duplicateScene(scene.id)} aria-label={`Duplicate scene ${index + 1}`}><Copy size={13} /> Duplicate</button><button onClick={() => openScene(scene)}>Open scene <ArrowUpRight size={15} /></button></div></div>
-            </article>)}</div> : <div className="empty-state"><Clapperboard size={32} /><h3>Give your story a first scene.</h3><p>Write a prompt in Create, then choose Save scene. Your storyboard stays on this device.</p><button className="generate-button" onClick={() => go("Create")}>Start writing <ArrowRight size={16} /></button></div>}
+            </article>)}</div> : <div className="empty-state"><Clapperboard size={32} /><h3>Give your story a first scene.</h3><p>Write a prompt in Create, then choose Save scene. Save your project above to open its shots on another device.</p><button className="generate-button" onClick={() => go("Create")}>Start writing <ArrowRight size={16} /></button></div>}
           </section>}
 
           <footer className="studio-footer"><span>yetsyai. <span>Made for your next big idea.</span></span><span>INDEPENDENT SPIRIT. OPEN POSSIBILITIES. <Aperture size={15} /></span></footer>

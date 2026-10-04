@@ -13,9 +13,9 @@ export function apiError(error: unknown) {
   return NextResponse.json({ error: "The studio couldn't complete this request. Please retry shortly.", requestId }, { status: 503, headers });
 }
 
-export async function boundedJson(request: Request, limit = 4 * 1024 * 1024 + 16384) {
+export async function boundedJson(request: Request, limit = 4 * 1024 * 1024 + 16384, sizeMessage = "Your reference image is too large. Use a JPG or PNG under 3 MB.") {
   if (!request.headers.get("content-type")?.includes("application/json")) throw new ProviderError("Send a JSON generation request.", 415);
-  if (Number(request.headers.get("content-length")) > limit) throw new ProviderError("Your reference image is too large. Use a JPG or PNG under 3 MB.", 413);
+  if (Number(request.headers.get("content-length")) > limit) throw new ProviderError(sizeMessage, 413);
   const reader = request.body?.getReader();
   if (!reader) throw new ProviderError("The request body is empty.", 400);
   const chunks: Uint8Array[] = [];
@@ -24,7 +24,7 @@ export async function boundedJson(request: Request, limit = 4 * 1024 * 1024 + 16
     const { done, value } = await reader.read();
     if (done) break;
     length += value.byteLength;
-    if (length > limit) { await reader.cancel(); throw new ProviderError("Your reference image is too large. Use a JPG or PNG under 3 MB.", 413); }
+    if (length > limit) { await reader.cancel(); throw new ProviderError(sizeMessage, 413); }
     chunks.push(value);
   }
   try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
