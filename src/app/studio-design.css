@@ -336,3 +336,47 @@ html[data-theme="light"] :is(.account-brand,.shot-brief summary,.shot-actions bu
 html[data-theme="light"] :is(.advanced-settings label,.audio-setting small,.project-empty) { color:#65705f; }
 html[data-theme="light"] .look-caption { color:#fff8eb; }
 html[data-theme="light"] .account-dialog::backdrop,html[data-theme="light"] .preview-dialog::backdrop { background:#25301c66; }
+
+/* Keep storyboard context with a render, then review actual saved takes. */
+.linked-shot { display:flex; align-items:center; gap:11px; margin:20px 0 8px; padding:13px; border:1px solid var(--line); border-radius:9px; background:var(--panel-2); color:var(--lime); }
+.linked-shot>div { flex:1; min-width:0; }
+.linked-shot strong,.linked-shot small { display:block; overflow-wrap:anywhere; }
+.linked-shot strong { font-size:12px; }
+.linked-shot small { margin-top:4px; font-size:11px; line-height:1.5; color:var(--muted); }
+.take-shot-label { display:flex; align-items:center; gap:6px; margin:0 16px 12px; font-size:11px; color:var(--muted); overflow-wrap:anywhere; }
+.take-select { display:flex; align-items:center; gap:7px; margin:0 16px 13px; min-height:34px; padding:7px 10px; border:1px solid var(--line); border-radius:7px; background:var(--panel-2); color:var(--white); font-size:11px; }
+.take-select[aria-pressed="true"] { border-color:var(--lime); background:var(--lime); color:var(--bg); }
+.comparison-tray { display:flex; align-items:center; justify-content:space-between; gap:18px; margin:25px 0; padding:19px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+.comparison-tray>div:first-child { display:flex; align-items:center; gap:13px; min-width:0; }
+.comparison-tray>div:first-child>svg { flex:none; color:var(--lime); }
+.comparison-tray strong { display:block; font-size:13px; color:var(--white); }
+.comparison-tray small { display:block; margin-top:5px; font-size:12px; line-height:1.5; color:var(--muted); }
+.comparison-tray-actions { display:flex; flex:none; gap:10px; }
+.shot-library-filter,.shot-takes { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:12px 0; font-size:12px; color:var(--muted); }
+.shot-library-filter { border-bottom:1px solid var(--line); margin-bottom:15px; }
+.shot-library-filter>span,.shot-takes>span { display:flex; align-items:center; gap:7px; overflow-wrap:anywhere; }
+.shot-takes { border-top:1px solid var(--line); margin-top:15px; }
+.shot-takes .library-button { padding:7px; font-size:11px; }
+.comparison-dialog { width:min(1120px,calc(100% - 32px)); max-width:none; max-height:calc(100dvh - 32px); padding:26px; color:var(--white); }
+.comparison-dialog .preview-heading { align-items:flex-start; }
+.comparison-dialog h2 { margin-top:9px; }
+.comparison-controls { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:20px 0; }
+.comparison-controls .generate-button { order:0; }
+.comparison-controls p { flex-basis:100%; margin:0; font-size:12px; line-height:1.5; color:var(--muted); }
+.comparison-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.comparison-take { min-width:0; padding:15px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; }
+.comparison-take-heading { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin-bottom:12px; font-size:11px; letter-spacing:.7px; }
+.comparison-take-heading strong { color:var(--lime); }
+.comparison-take-heading>span { color:var(--muted); }
+.comparison-take video { display:block; width:100%; aspect-ratio:16/9; max-height:45dvh; object-fit:contain; border-radius:5px; background:#08090b; }
+.comparison-prompt { max-height:8em; overflow:auto; margin:16px 0; color:var(--white); font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.comparison-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px 16px; margin:18px 0; }
+.comparison-settings dt { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; }
+.comparison-settings dd { margin:5px 0 0; font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+.comparison-avoid { font-size:11px; line-height:1.6; color:var(--muted); overflow-wrap:anywhere; }
+@media(max-width:720px) {
+  .comparison-grid { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .comparison-dialog { padding:18px; }
+  .comparison-tray { align-items:stretch; flex-direction:column; padding:16px; }
+  .comparison-tray-actions { justify-content:flex-end; }
+}

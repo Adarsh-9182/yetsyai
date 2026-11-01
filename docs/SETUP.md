@@ -6,9 +6,9 @@ All four must be connected before calling this a working generation product.
 Never paste credentials into GitHub, PRs or chat; put them in `.env.local` and
 Vercel/Space environment settings.
 
-## Current checkpoint (October 4, 2026)
+## Current checkpoint (November 1, 2026)
 
-The owner's Free Supabase project has been created. All three PostgreSQL
+The owner's Free Supabase project has been created. All five PostgreSQL
 migrations have been applied, and the private `studio-media` bucket has been
 created with the limits below. Supabase keys, the session-pooler URL, maintenance
 secret and shared worker secret are configured in production Vercel settings.
@@ -16,8 +16,10 @@ The auth Site URL and confirmation/recovery redirects have been saved.
 
 Production uses `VIDEO_PROVIDER=huggingface`, paid/guest generation disabled and
 render limits of 2 per account/day, 3 globally per day and 1 concurrent job.
-The private GPU Space URL/token are still missing. Account email delivery,
-cross-device access and a real video render have not been validated. The default
+The private GPU Space URL/token are still missing. Disposable-account checks
+validate login, fresh-session recovery, owned projects, private references,
+fixture MP4 downloads/deletion and missing-object isolation. Actual email delivery,
+real-device access and a real video render have not been validated. The default
 Supabase email service remains in use; the dashboard currently requires custom
 SMTP before editing confirmation/recovery templates. Complete the remaining
 setup and acceptance checks before inviting users.
@@ -143,7 +145,9 @@ platform logs. No prompts or credentials are logged by the callback worker.
 
 ## 4. Acceptance before inviting users
 
-Credentials are required for these checks; they have not been performed yet:
+The following acceptance checks include the remaining real-service launch gates.
+Fixture-based checks are recorded separately and do not prove GPU execution or
+email delivery:
 
 1. Create and confirm an account, sign out/in, reset a password.
 2. Run one real landscape clip and check output quality/runtime/quota.

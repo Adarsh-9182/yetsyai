@@ -13,6 +13,7 @@ export const generationInput = z.object({
   negativePrompt: z.string().trim().max(500).default("blur, distort, and low quality"),
   referenceImage: z.string().max(Math.ceil(MAX_REFERENCE_BYTES / 3) * 4 + 64).optional(),
   assetId: z.string().uuid().optional(),
+  sceneId: z.string().uuid().optional(),
   seed: z.number().int().min(0).max(2147483647).default(42),
   camera: z.enum(["auto", "static", "push", "orbit", "handheld"]).default("auto"),
   style: z.enum(["original", "cinema", "product", "dream"]).default("original"),
@@ -32,6 +33,7 @@ export type Generation = {
   error: string | null;
   createdAt: string;
   seed: number;
+  sceneId?: string;
   settings?: { camera: z.infer<typeof generationInput>["camera"]; style: z.infer<typeof generationInput>["style"]; negativePrompt: string; generateAudio: boolean };
 };
 

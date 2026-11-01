@@ -85,7 +85,7 @@ export async function POST(request: Request) {
       if (await tx.videoGeneration.count({ where: { workspaceId: workspace.id } }) >= 50) throw new ProviderError("Your library holds 50 videos. Delete an older video to make room.", 429);
       return tx.videoGeneration.create({ data: {
         id: input.requestId, workspaceId: workspace.id, prompt: input.prompt, model: modelName(), provider: providerName(), seed: input.seed, quotaReserved: true, requestFingerprint,
-        settings: JSON.stringify({ camera: input.camera, style: input.style, negativePrompt: input.negativePrompt, generateAudio: input.generateAudio }),
+        settings: JSON.stringify({ camera: input.camera, style: input.style, negativePrompt: input.negativePrompt, generateAudio: input.generateAudio, sceneId: input.sceneId }),
         duration: input.duration, aspectRatio: input.referenceImage ? "Reference image" : input.aspectRatio,
       } });
     }); } catch (error) {

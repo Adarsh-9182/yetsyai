@@ -89,10 +89,14 @@ async function main() {
     assert.ok(bytes.length >= 12 && bytes.length <= 40 * 1024 * 1024 && bytes.toString("ascii", 4, 8) === "ftyp", "Provide a valid MP4 fixture under 40 MiB");
     const workspace = await db.studioWorkspace.findUniqueOrThrow({ where: { userId: users[0] } });
     const id = randomUUID(); const storagePath = `${workspace.id}/videos/${id}.mp4`;
-    await db.videoGeneration.create({ data: { id, workspaceId: workspace.id, prompt: "DISPOSABLE TEST FIXTURE — NOT AI GENERATED", model: "Download test fixture", provider: "huggingface", status: "completed", storagePath, duration: 5, aspectRatio: "16:9" } });
+    await db.videoGeneration.create({ data: { id, workspaceId: workspace.id, prompt: "DISPOSABLE TEST FIXTURE — NOT AI GENERATED", model: "Download test fixture", provider: "huggingface", status: "completed", storagePath, duration: 5, aspectRatio: "16:9", settings: JSON.stringify({ camera: "push", style: "cinema", negativePrompt: "blur", generateAudio: false, sceneId: scene.id }) } });
     assert.ok(!(await client.storage.from("studio-media").upload(storagePath, bytes, { contentType: "video/mp4" })).error);
     const library = await request(owner, "/api/generations");
     assert.equal(library.data.generations[0].id, id);
+    assert.equal(library.data.generations[0].sceneId, scene.id);
+    assert.equal(library.data.generations[0].settings.camera, "push");
+    assert.equal((await request(owner, `/api/generations/${id}`)).data.generation.sceneId, scene.id);
+    assert.equal((await request(other, `/api/generations/${id}`)).status, 404);
     phase = "isolate deliberately missing fixture media";
     const missingId = randomUUID(), missingAssetId = randomUUID();
     await db.videoGeneration.create({ data: { id: missingId, workspaceId: workspace.id, prompt: "DISPOSABLE MISSING-MEDIA FIXTURE", model: "Missing-file test", provider: "huggingface", status: "completed", storagePath: `${workspace.id}/videos/${missingId}.mp4`, duration: 5, aspectRatio: "16:9" } });

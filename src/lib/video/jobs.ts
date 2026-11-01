@@ -8,10 +8,11 @@ import { Generation, isActive, generationInput } from "./types";
 
 export async function publicGeneration(job: VideoGeneration, signedUrl?: string | null): Promise<Generation> {
   let settings: Generation["settings"];
+  let sceneId: string | undefined;
   try {
     if (job.settings) {
-      const parsed = generationInput.pick({ camera: true, style: true, negativePrompt: true, generateAudio: true }).safeParse(JSON.parse(job.settings));
-      if (parsed.success) settings = parsed.data;
+      const parsed = generationInput.pick({ camera: true, style: true, negativePrompt: true, generateAudio: true, sceneId: true }).safeParse(JSON.parse(job.settings));
+      if (parsed.success) { const { sceneId: source, ...renderSettings } = parsed.data; settings = renderSettings; sceneId = source; }
     }
   } catch { /* Older records remain usable without render settings. */ }
   // Undefined means this single-record request has not signed media yet. Null
@@ -24,6 +25,7 @@ export async function publicGeneration(job: VideoGeneration, signedUrl?: string 
     id: job.id, prompt: job.prompt, model: job.model, aspectRatio: job.aspectRatio,
     duration: job.duration, status: job.status as Generation["status"],
     videoUrl, error: job.error, createdAt: job.createdAt.toISOString(), seed: job.seed,
+    ...(sceneId ? { sceneId } : {}),
     ...(job.status === "completed" && !videoUrl ? { mediaUnavailable: true } : {}),
     ...(settings ? { settings } : {}),
   };

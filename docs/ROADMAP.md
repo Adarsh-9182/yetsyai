@@ -10,7 +10,10 @@ Live recovery checks also pass: fresh-session callback, password update,
 old-password rejection and consumed-link rejection. These generate a link through
 the admin API without sending mail. Desktop Safari inspection covered the dark
 and light creation layouts; follow-up fixes keep status text readable on pale
-surfaces and photo captions light in both themes. Mobile visual QA remains open.
+surfaces and photo captions light in both themes. Local Chromium browser checks
+cover the storyboard/take workflow and both themes at 1440px and 390px widths,
+including real fixture playback and no horizontal overflow. Real-device mobile
+and production-inference QA remain open.
 
 ## Implemented
 
@@ -30,6 +33,13 @@ surfaces and photo captions light in both themes. Mobile visual QA remains open.
 - Account routes, owned library/assets, signed downloads and completion callbacks.
 - Atomic app quotas, request IDs, conditional completion and abandoned lock recovery.
 - Database provider-poll leases, monotonic status updates and batch library media signing.
+- Canonical request fingerprints, changed-payload conflict detection and bounded
+  late-result recovery for timed-out renders, without resubmitting inference.
+- Individual missing-media isolation, retained scene metadata and safe deletion retries.
+- Stable storyboard shot IDs on renders, per-shot take review and an explicit
+  linked-shot composer with update/detach controls. Duplicate shots start without takes.
+- Two-take comparison with common start/pause controls, individual players and
+  recorded prompt/camera/look/seed/model settings; stacks vertically on mobile.
 - Worker attempt cache, bounded outputs, failed-attempt deduplication and profile controls.
 - Regression checks use SQLite and mocked external services. Opt-in live checks
   cover auth, PostgreSQL and private media with disposable accounts. Production
@@ -60,7 +70,6 @@ free account. Model quality has not been benchmarked. Setup instructions are in
 
 ## Later improvements, once generation works
 
-- Automatic shot-to-render associations and comparison takes.
 - Image-to-video after a compatible model path passes real integration checks.
 - Clip trimming, sequence assembly and soundtrack editing without more inference.
 - A durable worker queue when measured demand exceeds the one-active-render prototype.

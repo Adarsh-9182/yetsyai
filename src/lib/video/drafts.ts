@@ -9,6 +9,6 @@ export const savedScene = sceneDraft.extend({
   id: z.string().uuid(),
   title: z.string().trim().max(80).default(""),
 });
-export const editableDraft = sceneDraft.extend({ prompt: z.string().max(2500) });
+export const editableDraft = sceneDraft.extend({ prompt: z.string().max(2500), sceneId: z.string().uuid().optional() });
 export const storyboardFile = z.object({ version: z.literal(1), scenes: z.array(savedScene).max(12) });
 export type SavedScene = z.infer<typeof savedScene>;

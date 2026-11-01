@@ -6,7 +6,7 @@ import {
   CircleAlert, CircleHelp, Clapperboard, Clock3, Film, FolderOpen, Grid2X2,
   ImagePlus, Library, Menu, Play, Plus, RectangleHorizontal, RefreshCw,
   Search, Settings2, Sparkles, Square, WandSparkles, X, ArrowRight, Bookmark, Camera, ChevronRight, Trash2, LogIn,
-  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, ArrowUp, ArrowDown, Upload, Copy,
+  PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, ArrowUp, ArrowDown, Upload, Copy, Columns2,
 } from "lucide-react";
 import { Generation, isActive, MAX_REFERENCE_BYTES, VIDEO_MODEL } from "@/lib/video/types";
 import { useStudio } from "./use-studio";
@@ -14,6 +14,7 @@ import { AccountDialog } from "./account-dialog";
 import { ProjectLibrary } from "./project-library";
 import { ThemeToggle } from "./theme-toggle";
 import { StudioGuide } from "./studio-guide";
+import { TakeComparison } from "./take-comparison";
 import { cameraDirections, visualStyles, compileScene, sceneAdvice } from "@/lib/video/direction";
 import { editableDraft, savedScene, storyboardFile, SavedScene } from "@/lib/video/drafts";
 
@@ -84,6 +85,9 @@ export function VideoStudio() {
   const [activeNav, setActiveNav] = useState<NavPage>("Create");
   const [search, setSearch] = useState("");
   const [selectedJob, setSelectedJob] = useState<Generation | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [sceneFilter, setSceneFilter] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountIssue, setAccountIssue] = useState("");
@@ -97,6 +101,7 @@ export function VideoStudio() {
   const boardFileRef = useRef<HTMLInputElement>(null);
   const [seed, setSeed] = useState(42);
   const [scenes, setScenes] = useState<Scene[]>([]);
+  const [sceneId, setSceneId] = useState<string | undefined>();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [draftReady, setDraftReady] = useState(false);
   const [savingAsset, setSavingAsset] = useState(false);
@@ -112,7 +117,10 @@ export function VideoStudio() {
   const shotPrompt = compileScene(prompt, cameras[camera].id, visualStyles[style].id);
   const advice = sceneAdvice(prompt);
   const canGenerate = studio.configured && studio.capabilities.signedIn && readyPrompt && studio.usage.used < studio.usage.limit && (studio.usage.globalRemaining === null || studio.usage.globalRemaining > 0) && shotPrompt.length <= 2500;
-  const filteredJobs = studio.jobs.filter((job) => job.prompt.toLowerCase().includes(search.toLowerCase()) && (activeNav !== "My videos" || libraryFilter === "all" || (libraryFilter === "active" ? isActive(job.status) : job.status === libraryFilter)));
+  const linkedScene = scenes.find(scene => scene.id === sceneId);
+  const scopedJobs = studio.jobs.filter(job => activeNav !== "My videos" || !sceneFilter || job.sceneId === sceneFilter);
+  const filteredJobs = scopedJobs.filter((job) => job.prompt.toLowerCase().includes(search.toLowerCase()) && (activeNav !== "My videos" || libraryFilter === "all" || (libraryFilter === "active" ? isActive(job.status) : job.status === libraryFilter)));
+  const comparedJobs = compareIds.flatMap(id => { const job = studio.jobs.find(job => job.id === id && job.status === "completed" && job.videoUrl); return job ? [job] : []; });
   const latestVideo = studio.jobs.find((job) => job.status === "completed" && job.videoUrl);
   const currentJob = studio.jobs.find((job) => isActive(job.status));
   const monitorRatio = currentJob?.aspectRatio || latestVideo?.aspectRatio || ratio;
@@ -180,7 +188,7 @@ export function VideoStudio() {
     try {
       const draft = JSON.parse(localStorage.getItem("yetsyai-draft-v1") || "null");
       const parsed = editableDraft.safeParse(draft);
-      if (parsed.success) { const d = parsed.data; setPrompt(d.prompt); setRatio(d.ratio); setSeed(d.seed); setDuration(d.duration); setAudio(d.generateAudio); setNegativePrompt(d.negativePrompt); setCamera(cameras.findIndex((item) => item.id === d.camera)); setStyle(visualStyles.findIndex((item) => item.id === d.style)); }
+      if (parsed.success) { const d = parsed.data; setPrompt(d.prompt); setRatio(d.ratio); setSeed(d.seed); setDuration(d.duration); setAudio(d.generateAudio); setNegativePrompt(d.negativePrompt); setCamera(cameras.findIndex((item) => item.id === d.camera)); setStyle(visualStyles.findIndex((item) => item.id === d.style)); setSceneId(d.sceneId); }
       const board = JSON.parse(localStorage.getItem("yetsyai-board-v1") || "[]");
       if (Array.isArray(board)) setScenes(board.slice(0, 12).flatMap((item) => { const parsed = savedScene.safeParse(item); return parsed.success ? [parsed.data] : []; }));
     } catch { /* A disabled browser store should not prevent creation. */ }
@@ -195,11 +203,14 @@ export function VideoStudio() {
     if (!draftReady) return;
     setDraftStatus("Saving draft…");
     const timer = setTimeout(() => {
-      try { localStorage.setItem("yetsyai-draft-v1", JSON.stringify({ prompt, ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt })); localStorage.setItem("yetsyai-board-v1", JSON.stringify(scenes)); setDraftStatus("Draft saved on this device"); }
+      try { localStorage.setItem("yetsyai-draft-v1", JSON.stringify({ prompt, ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt, sceneId })); localStorage.setItem("yetsyai-board-v1", JSON.stringify(scenes)); setDraftStatus("Draft saved on this device"); }
       catch { setDraftStatus("Storage unavailable · export your storyboard"); }
     }, 400);
     return () => clearTimeout(timer);
-  }, [prompt, ratio, seed, camera, style, duration, audio, negativePrompt, scenes, draftReady]);
+  }, [prompt, ratio, seed, camera, style, duration, audio, negativePrompt, scenes, sceneId, draftReady]);
+  useEffect(() => { if (draftReady && sceneId && !linkedScene) setSceneId(undefined); }, [draftReady, sceneId, linkedScene]);
+  useEffect(() => { setCompareIds(ids => ids.filter(id => studio.jobs.some(job => job.id === id && job.status === "completed" && job.videoUrl))); }, [studio.jobs]);
+  useEffect(() => { if (comparedJobs.length !== 2) setComparisonOpen(false); }, [comparedJobs.length]);
   useEffect(() => {
     setAssets([]);
     if (!studio.capabilities.signedIn) { setReference(null); setSelectedJob(null); return; }
@@ -229,14 +240,15 @@ export function VideoStudio() {
 
   const applyLook = (index: number) => {
     const look = looks[index];
-    setPrompt(look.prompt); setActiveLook(index); setMode("text");
+    setPrompt(look.prompt); setActiveLook(index); setMode("text"); setSceneId(undefined);
     setStyle(look.tag === "PRODUCT" ? 2 : look.tag === "CINEMATIC" || look.tag === "PORTRAIT" ? 1 : 0);
     setCamera(0); go("Create");
     setTimeout(() => document.getElementById("video-prompt")?.focus(), 50);
   };
-  const go = (page: NavPage) => { setActiveNav(page); setMobileMenu(false); setSearch(""); };
+  const go = (page: NavPage) => { setActiveNav(page); setMobileMenu(false); setSearch(""); setSceneFilter(null); };
   const openAccount = () => { setMobileMenu(false); setAccountOpen(true); };
   const openScene = (scene: Scene) => {
+    setSceneId(scenes.some(item => item.id === scene.id) ? scene.id : undefined);
     setPrompt(scene.prompt); setRatio(scene.ratio); setSeed(scene.seed); setMode("text");
     setCamera(cameras.findIndex((item) => item.id === scene.camera)); setStyle(visualStyles.findIndex((item) => item.id === scene.style));
     setDuration(studio.capabilities.durations.includes(scene.duration) ? scene.duration : 5);
@@ -244,8 +256,13 @@ export function VideoStudio() {
     go("Create");
   };
   const reuseScene = (job: Generation) => {
-    openScene(savedScene.parse({ id: job.id, prompt: job.prompt, ratio: ["16:9", "9:16", "1:1"].includes(job.aspectRatio) ? job.aspectRatio : "16:9", seed: job.seed, duration: job.duration, ...job.settings }));
+    openScene(savedScene.parse({ id: job.sceneId ?? job.id, prompt: job.prompt, ratio: ["16:9", "9:16", "1:1"].includes(job.aspectRatio) ? job.aspectRatio : "16:9", seed: job.seed, duration: job.duration, ...job.settings }));
     if (job.aspectRatio === "Reference image") setNotice("Prompt restored. Choose the original reference again to reproduce this image clip.");
+  };
+  const viewTakes = (id: string) => { go("My videos"); setSceneFilter(id); setLibraryFilter("all"); };
+  const toggleCompare = (id: string) => {
+    if (!compareIds.includes(id) && compareIds.length >= 2) { setNotice("Two takes are selected. Remove one before choosing another."); return; }
+    setCompareIds(ids => ids.includes(id) ? ids.filter(item => item !== id) : [...ids, id].slice(0, 2));
   };
   const moveScene = (index: number, direction: number) => {
     setScenes((current) => {
@@ -289,7 +306,7 @@ export function VideoStudio() {
     if (!canGenerate) return;
     const submitted = await studio.generate({
       prompt: prompt.trim(), camera: cameras[camera].id, style: visualStyles[style].id, aspectRatio: ratio, duration, generateAudio: audio, seed,
-      negativePrompt, ...(mode === "reference" && reference ? reference.assetId ? { assetId: reference.assetId } : { referenceImage: reference.data } : {}),
+      negativePrompt, ...(mode === "text" && linkedScene ? { sceneId: linkedScene.id } : {}), ...(mode === "reference" && reference ? reference.assetId ? { assetId: reference.assetId } : { referenceImage: reference.data } : {}),
     });
     if (submitted) setNotice("Your scene is in the render queue. Your draft is kept for the next take.");
   };
@@ -331,9 +348,11 @@ export function VideoStudio() {
   const saveScene = () => {
     if (prompt.trim().length < 3) { setNotice("Describe your scene first."); return; }
     if (mode === "reference") { setNotice("Storyboard saves text shots. Save the image in Assets for your reference clip."); return; }
-    if (scenes.length >= 12) { setNotice("Your storyboard holds 12 scenes. Remove one to make room."); return; }
-    setScenes((current) => [...current, { id: crypto.randomUUID(), title: "", prompt: prompt.trim(), ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt }]);
-    setNotice("Scene saved to your storyboard on this device.");
+    if (!linkedScene && scenes.length >= 12) { setNotice("Your storyboard holds 12 scenes. Remove one to make room."); return; }
+    const shot = { id: linkedScene?.id ?? crypto.randomUUID(), title: linkedScene?.title ?? "", prompt: prompt.trim(), ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt };
+    setScenes(current => linkedScene ? current.map(scene => scene.id === linkedScene.id ? shot : scene) : [...current, shot]);
+    setSceneId(shot.id);
+    setNotice(linkedScene ? "Shot updated on this device. Save your project to sync the changes." : "Scene saved to your storyboard. New renders will be linked to this shot.");
   };
   const saveReference = async () => {
     if (!reference || savingAsset) return;
@@ -394,6 +413,8 @@ export function VideoStudio() {
             <span className="image-duration">{job.duration}s</span>
           </button>
           <div className="creation-info"><div><h3 title={job.prompt}>{job.prompt}</h3><p>{job.model} · {job.aspectRatio}</p></div>{job.videoUrl && <button className="card-more" disabled={Boolean(downloading)} aria-label="Download video" onClick={() => download(job)}>{downloading === job.id ? <span className="spinner" /> : <ArrowDownToLine size={17} />}</button>}</div>
+          {job.sceneId && <p className="take-shot-label"><Clapperboard size={12} />{scenes.find(scene => scene.id === job.sceneId)?.title || "Storyboard shot"}</p>}
+          {job.status === "completed" && job.videoUrl && <button className="take-select" aria-pressed={compareIds.includes(job.id)} aria-label={`${compareIds.includes(job.id) ? "Remove from" : "Select for"} comparison: ${job.prompt}`} onClick={() => toggleCompare(job.id)}>{compareIds.includes(job.id) ? <Check size={13} /> : <Columns2 size={13} />}{compareIds.includes(job.id) ? `Selected · Take ${compareIds.indexOf(job.id) === 0 ? "A" : "B"}` : "Compare take"}</button>}
           {job.error && <p className="job-error">{job.error}<button onClick={() => reuseScene(job)}>Edit prompt</button></p>}
           {!isActive(job.status) && <div className="job-actions">{deletePending === job.id ? <><button onClick={() => setDeletePending(null)}>Keep video</button><button className="delete-confirm" onClick={() => { void studio.remove(job.id); setDeletePending(null); }}><Trash2 size={12} /> Delete permanently</button></> : <><button onClick={() => reuseScene(job)}><RefreshCw size={12} /> Reuse scene</button><button onClick={() => setDeletePending(job.id)} aria-label={`Delete video: ${job.prompt}`}><Trash2 size={13} /></button></>}</div>}
         </article>
@@ -432,7 +453,7 @@ export function VideoStudio() {
           {activeNav === "Create" ? <section className="desk-welcome" aria-labelledby="studio-title">
             <div className="desk-welcome-copy"><div className="eyebrow"><span className="live-spark" />YOUR INDEPENDENT FILM STUDIO</div><h1 id="studio-title">A thought. <span>A first take.</span></h1><p>Write the scene you can’t stop imagining. Let’s see it move.</p><div className="desk-specs"><span><Film size={13} /> 5-second takes</span><span><Aperture size={13} /> Open video model</span><button onClick={() => setGuideOpen(true)}>First time here? <ArrowUpRight size={13} /></button></div></div>
             <button className="desk-inspiration" onClick={() => applyLook(2)} aria-label="Use Desert, at first light prompt"><Thumbnail image={looks[2].image} title="Desert dunes photo inspiration" /><span className="desk-inspiration-label">THE LOCATION EDIT <ArrowUpRight size={16} /></span><strong>Chase the first light.</strong><small>Photo inspiration · Use this look</small></button>
-          </section> : <section className="welcome-row"><div><div className="eyebrow"><span className="eyebrow-line" />YOUR CREATIVE STUDIO</div><h1>{activeNav === "Explore" ? <>Find your next <span>frame.</span></> : activeNav === "Assets" ? <>Every great scene<br />starts <span>somewhere.</span></> : activeNav === "Storyboard" ? <>One idea.<br /><span>A whole story.</span></> : <>Your ideas,<br /><span>in motion.</span></>}</h1><p>{activeNav === "Explore" ? "A collection of looks to make your own." : activeNav === "Assets" ? "Your references, ready for the next shot." : activeNav === "Storyboard" ? "Plan your sequence. Keep your scenes together. Saved on this device." : "Your scenes, all in one place."}</p></div><button className="library-button" onClick={() => go("Create")}><Plus size={16} /> New scene</button></section>}
+          </section> : <section className="welcome-row"><div><div className="eyebrow"><span className="eyebrow-line" />YOUR CREATIVE STUDIO</div><h1>{activeNav === "Explore" ? <>Find your next <span>frame.</span></> : activeNav === "Assets" ? <>Every great scene<br />starts <span>somewhere.</span></> : activeNav === "Storyboard" ? <>One idea.<br /><span>A whole story.</span></> : <>Your ideas,<br /><span>in motion.</span></>}</h1><p>{activeNav === "Explore" ? "A collection of looks to make your own." : activeNav === "Assets" ? "Your references, ready for the next shot." : activeNav === "Storyboard" ? "Plan your sequence. Keep your scenes together. Saved on this device." : "Your scenes, all in one place."}</p></div><button className="library-button" onClick={() => { setSceneId(undefined); go("Create"); }}><Plus size={16} /> New scene</button></section>}
 
           {studio.error && <div className="studio-message message-error" role="alert"><CircleAlert size={17} /><div>{studio.error}</div><button onClick={() => void studio.reload()}>Retry</button></div>}
           {currentJob && activeNav === "Create" && <RenderProgress job={currentJob} />}
@@ -441,9 +462,10 @@ export function VideoStudio() {
 
           {activeNav === "Create" && <><div className="section-heading composer-heading"><div><div className="eyebrow">THE DIRECTOR&apos;S DESK</div><h2>Make something worth watching.</h2></div><span className="draft-status"><span /> {draftStatus}</span></div><div className="director-layout"><section className="creator-card" aria-label="Create a video">
             <div className="creator-top"><div className="mode-tabs"><button className={mode === "text" ? "mode-selected" : ""} onClick={() => setMode("text")} aria-pressed={mode === "text"}><Film size={16} /> Text to video</button><button disabled={!studio.capabilities.image} title={studio.capabilities.image ? "Animate your image" : "The free model currently supports text prompts"} className={mode === "reference" ? "mode-selected" : ""} onClick={() => setMode("reference")} aria-pressed={mode === "reference"}><ImagePlus size={16} /> Image to video{!studio.capabilities.image && <span className="soon">SOON</span>}</button></div><button className="prompt-helper" aria-label="Try a random scene" onClick={() => { const index = Math.floor(Math.random() * looks.length); applyLook(index); }}><WandSparkles size={16} /></button></div>
+            {linkedScene && mode === "text" && <div className="linked-shot"><Clapperboard size={16} /><div><strong>{linkedScene.title || `Scene ${String(scenes.findIndex(scene => scene.id === linkedScene.id) + 1).padStart(2, "0")}`}</strong><small>New takes will stay with this storyboard shot.</small></div><button className="icon-button" onClick={() => setSceneId(undefined)} aria-label="Detach from storyboard shot" title="Work on a new scene"><X size={15} /></button></div>}
             <label className="prompt-label" htmlFor="video-prompt">DESCRIBE YOUR SCENE</label>
             <textarea id="video-prompt" value={prompt} maxLength={2500} onChange={(event) => { setPrompt(event.target.value); studio.clearError(); }} onKeyDown={(event) => { if ((event.metaKey || event.ctrlKey) && event.key === "Enter") { event.preventDefault(); void generate(); } }} placeholder={mode === "text" ? "A cinematic shot of... Describe your scene, subject, movement, lighting, and mood" : "Describe how your image should move. Camera direction, lighting, and mood..."} rows={3} />
-            <div className="suggestion-row"><span>TRY</span>{suggestions.map((item) => <button key={item} onClick={() => setPrompt(item)}>{item}</button>)}</div>
+            <div className="suggestion-row"><span>TRY</span>{suggestions.map((item) => <button key={item} onClick={() => { setPrompt(item); setSceneId(undefined); }}>{item}</button>)}</div>
             {mode === "reference" && <div className="reference-area">{reference ? <><div className="reference-thumb" role="img" aria-label={reference.name} style={{ backgroundImage: `url(${reference.data})` }} /><div><strong>{reference.name}</strong><small>{reference.width} × {reference.height} · Video follows this image&apos;s aspect ratio</small></div><button className="icon-button" onClick={removeReference} aria-label="Remove reference"><X size={15} /></button></> : <button className="reference-upload" disabled={readingReference} onClick={() => fileRef.current?.click()}><ImagePlus size={20} /><span>{readingReference ? "Reading image…" : "Choose a starting image"}<small>JPG or PNG · Up to 3 MB · At least 300 × 300 px</small></span></button>}</div>}
             {fileError && <p className="inline-error" role="alert">{fileError}</p>}
             <div className="camera-heading"><span className="prompt-label">CAMERA MOVEMENT</span><span>One move per shot</span></div><div className="camera-presets">{cameras.map((item, index) => <button key={item.name} onClick={() => setCamera(index)} className={camera === index ? "camera-selected" : ""} aria-pressed={camera === index}><Camera size={15} />{item.name}</button>)}</div>
@@ -461,12 +483,15 @@ export function VideoStudio() {
               <button className="generate-button main-generate" disabled={studio.capabilities.signedIn ? !canGenerate : !readyPrompt || !studio.capabilities.authConfigured} onClick={() => studio.capabilities.signedIn ? void generate() : setAccountOpen(true)}>{studio.submitting ? <><span className="spinner" /> Submitting scene</> : busy ? <><span className="spinner" /> Creating your scene</> : <><Sparkles size={17} />{!studio.capabilities.signedIn && studio.capabilities.authConfigured ? "Sign in to generate" : !studio.configured ? "Rendering unavailable" : studio.usage.globalRemaining === 0 ? "Shared allowance used" : studio.usage.used >= studio.usage.limit ? "Daily allowance used" : "Generate video"}<ArrowRight size={16} /></>}</button>
             </div>
             {settingsOpen && <div className="advanced-settings"><label className="audio-setting"><input type="checkbox" checked={audio} disabled={!studio.capabilities.audio} onChange={(event) => setAudio(event.target.checked)} /><span>Generate audio <small>{studio.capabilities.audio ? "Add sound to your scene" : "The free model creates silent clips"}</small></span></label><label htmlFor="negative-prompt">Avoid in the video</label><input id="negative-prompt" type="text" maxLength={500} value={negativePrompt} onChange={(event) => setNegativePrompt(event.target.value)} /><label htmlFor="render-seed">Seed · reuse to compare variations</label><input id="render-seed" type="number" min={0} max={2147483647} value={seed} onChange={(event) => setSeed(Math.max(0, Math.min(2147483647, Math.floor(Number(event.target.value)))))} /></div>}
-            <div className="composer-foot"><button onClick={saveScene}><Bookmark size={14} />Save scene</button><span>{prompt.length}/2500 <kbd>⌘</kbd><kbd>↵</kbd></span></div>
+            <div className="composer-foot"><button onClick={saveScene}><Bookmark size={14} />{linkedScene && mode === "text" ? "Update shot" : "Save scene"}</button><span>{prompt.length}/2500 <kbd>⌘</kbd><kbd>↵</kbd></span></div>
           </section><aside className="scene-monitor"><div className="monitor-heading"><span><span className="monitor-dot" />{currentJob ? "RENDER IN PROGRESS" : latestVideo ? "LATEST TAKE" : "SCENE INSPIRATION"}</span><span>{monitorRatio} <RectangleHorizontal size={13} /></span></div><div className={`monitor-canvas ${monitorRatio === "9:16" ? "monitor-portrait" : monitorRatio === "1:1" ? "monitor-square" : ""}`}>{latestVideo && !currentJob ? <video src={latestVideo.videoUrl!} controls muted playsInline preload="metadata" /> : <><Thumbnail image={looks[activeLook].image} title={looks[activeLook].title} /><div className="monitor-shade" />{currentJob ? <div className="monitor-render"><span className="spinner" /><h3>{currentJob.status === "submitting" ? "Holding your place." : currentJob.status === "queued" ? "Your scene is in line." : "A little movie magic."}</h3><p>You can leave this page. We&apos;ll keep your render.</p></div> : <div className="monitor-overlay"><span>VISUAL MOODBOARD</span><h3>{looks[activeLook].title}</h3><p>Photo inspiration · Your generated video appears here.</p></div>}</>}<span className="frame-corner corner-tl" /><span className="frame-corner corner-tr" /><span className="frame-corner corner-bl" /><span className="frame-corner corner-br" /></div><div className="monitor-footer"><span><Film size={14} />{currentJob?.duration || latestVideo?.duration || duration}s · {studio.capabilities.audio && audio ? "Sound on" : "Silent clip"}</span><span>TAKE {String(studio.jobs.length + 1).padStart(2, "0")}</span></div><div className="director-tip"><span>DIRECTOR&apos;S NOTES</span>{advice.length ? advice.map((tip) => <p key={tip}>{tip}</p>) : <p>Your scene has a lighting cue. Keep one subject, one action and one camera move for the first take.</p>}</div></aside></div></>}
           <input ref={fileRef} type="file" accept="image/jpeg,image/png" hidden onChange={(event) => void chooseReference(event)} />
           <input ref={boardFileRef} type="file" accept="application/json,.json" hidden aria-label="Import storyboard" onChange={(event) => void importBoard(event)} />
 
-          {(activeNav === "My videos" || (activeNav === "Create" && studio.jobs.length > 0)) && <section className="inspiration-section library-section"><div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" />YOUR CREATIONS</div><h2>{activeNav === "My videos" ? "Every scene, saved." : "From idea to motion."}</h2></div>{activeNav === "Create" && <button className="view-all" onClick={() => go("My videos")}>View library <ArrowUpRight size={15} /></button>}</div>{activeNav === "My videos" && <div className="library-toolbar"><div className="library-filters" aria-label="Filter videos">{([{ id: "all", label: "All takes" }, { id: "completed", label: "Ready" }, { id: "active", label: "In progress" }, { id: "failed", label: "Failed" }] as const).map(filter => <button key={filter.id} aria-pressed={libraryFilter === filter.id} onClick={() => setLibraryFilter(filter.id)}>{filter.label}<span>{studio.jobs.filter(job => filter.id === "all" || (filter.id === "active" ? isActive(job.status) : job.status === filter.id)).length}</span></button>)}</div><label className="library-search"><Search size={16} /><input ref={searchRef} type="search" placeholder="Search your videos by prompt..." value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>}{studio.loading ? <div className="empty-state"><span className="spinner" />Loading your library…</div> : filteredJobs.length ? jobCards(activeNav === "Create" ? filteredJobs.slice(0, 4) : filteredJobs) : <div className="empty-state"><Film size={28} /><h3>{!studio.capabilities.signedIn ? "Your studio travels with you." : search || libraryFilter !== "all" ? "No matching videos" : "Your first scene starts here"}</h3><p>{!studio.capabilities.signedIn ? "Sign in to open your private video library across devices." : search || libraryFilter !== "all" ? "Try another filter or search for a different part of your prompt." : "Create a video and it will appear in this workspace."}</p><button className="library-button" onClick={() => studio.capabilities.signedIn ? go("Create") : setAccountOpen(true)}>{studio.capabilities.signedIn ? <><Plus size={15} /> Create a video</> : <><LogIn size={15} /> Sign in to your library</>}</button></div>}</section>}
+          {(activeNav === "Create" || activeNav === "My videos") && comparedJobs.length > 0 && <section className="comparison-tray" aria-label="Selected takes"><div><Columns2 size={19} /><div><strong>{comparedJobs.length} of 2 takes selected</strong><small>{comparedJobs.length === 1 ? "Choose one more completed video to compare." : "Review the motion, camera and settings side by side."}</small></div></div><div className="comparison-tray-actions"><button className="library-button" onClick={() => setCompareIds([])}>Clear</button><button className="generate-button" disabled={comparedJobs.length !== 2} onClick={() => setComparisonOpen(true)}><Columns2 size={14} /> Compare takes</button></div></section>}
+          {activeNav === "My videos" && sceneFilter && <div className="shot-library-filter"><span><Clapperboard size={14} />Takes for {scenes.find(scene => scene.id === sceneFilter)?.title || "this storyboard shot"}</span><button className="library-button" onClick={() => setSceneFilter(null)}>Show all videos <X size={13} /></button></div>}
+
+          {(activeNav === "My videos" || (activeNav === "Create" && studio.jobs.length > 0)) && <section className="inspiration-section library-section"><div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" />YOUR CREATIONS</div><h2>{activeNav === "My videos" ? "Every scene, saved." : "From idea to motion."}</h2></div>{activeNav === "Create" && <button className="view-all" onClick={() => go("My videos")}>View library <ArrowUpRight size={15} /></button>}</div>{activeNav === "My videos" && <div className="library-toolbar"><div className="library-filters" aria-label="Filter videos">{([{ id: "all", label: "All takes" }, { id: "completed", label: "Ready" }, { id: "active", label: "In progress" }, { id: "failed", label: "Failed" }] as const).map(filter => <button key={filter.id} aria-pressed={libraryFilter === filter.id} onClick={() => setLibraryFilter(filter.id)}>{filter.label}<span>{scopedJobs.filter(job => filter.id === "all" || (filter.id === "active" ? isActive(job.status) : job.status === filter.id)).length}</span></button>)}</div><label className="library-search"><Search size={16} /><input ref={searchRef} type="search" placeholder="Search your videos by prompt..." value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>}{studio.loading ? <div className="empty-state"><span className="spinner" />Loading your library…</div> : filteredJobs.length ? jobCards(activeNav === "Create" ? filteredJobs.slice(0, 4) : filteredJobs) : <div className="empty-state"><Film size={28} /><h3>{!studio.capabilities.signedIn ? "Your studio travels with you." : search || sceneFilter || libraryFilter !== "all" ? "No matching videos" : "Your first scene starts here"}</h3><p>{!studio.capabilities.signedIn ? "Sign in to open your private video library across devices." : search || sceneFilter || libraryFilter !== "all" ? "Try another filter or search for a different part of your prompt." : "Create a video and it will appear in this workspace."}</p><button className="library-button" onClick={() => studio.capabilities.signedIn ? go("Create") : setAccountOpen(true)}>{studio.capabilities.signedIn ? <><Plus size={15} /> Create a video</> : <><LogIn size={15} /> Sign in to your library</>}</button></div>}</section>}
 
           {(activeNav === "Create" || activeNav === "Explore") && <section className="inspiration-section">
             <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" />THE LOOKBOOK</div><h2>A world of <span>possibility.</span></h2><p className="section-description">Pick a starting point. Give it your point of view.</p></div>{activeNav === "Create" && <button className="view-all" onClick={() => go("Explore")}>Explore all looks <ArrowUpRight size={15} /></button>}</div>
@@ -502,7 +527,7 @@ export function VideoStudio() {
           {activeNav === "Storyboard" && <section className="storyboard-section">
             <div className="storyboard-intro">
               <div><span className="eyebrow">{scenes.length} / 12 SCENES</span><p>A plan for your next film. Generate each shot separately when you&apos;re ready.</p></div>
-              <div className="board-tools"><button className="library-button" onClick={() => boardFileRef.current?.click()}><Upload size={14} /> Import</button><button className="library-button" disabled={!scenes.length} onClick={exportBoard}><ArrowDownToLine size={14} /> Export</button><button className="library-button" onClick={() => go("Create")}><Plus size={15} /> Write a scene</button></div>
+              <div className="board-tools"><button className="library-button" onClick={() => boardFileRef.current?.click()}><Upload size={14} /> Import</button><button className="library-button" disabled={!scenes.length} onClick={exportBoard}><ArrowDownToLine size={14} /> Export</button><button className="library-button" onClick={() => { setSceneId(undefined); go("Create"); }}><Plus size={15} /> Write a scene</button></div>
             </div>
             {scenes.length > 0 && <div className="sequence-summary" aria-label="Planned sequence duration"><span><Clock3 size={15} />{sequenceTime(plannedDuration)} planned runtime</span><p>Name your shots and arrange the sequence. This is a shot plan; clips are rendered separately.</p></div>}
             {scenes.length ? <div className="storyboard-grid">{scenes.map((scene, index) => <article className="storyboard-card" key={scene.id}>
@@ -514,6 +539,7 @@ export function VideoStudio() {
               <label className="shot-name"><span>SHOT NAME</span><input type="text" maxLength={80} value={scene.title} placeholder={`Scene ${String(index + 1).padStart(2, "0")}`} aria-label={`Name scene ${index + 1}`} onChange={(event) => { const title = event.target.value; setScenes((current) => current.map((item) => item.id === scene.id ? { ...item, title } : item)); }} /></label>
               <div className="shot-timing"><Clock3 size={12} /><span>{sequenceTime(shotTimings[index])} – {sequenceTime(shotTimings[index] + scene.duration)}</span><span>{scene.duration}s shot</span></div>
               <p>{scene.prompt}</p>
+              <div className="shot-takes"><span><Film size={13} />{studio.jobs.filter(job => job.sceneId === scene.id).length} linked takes</span><button className="library-button" disabled={!studio.jobs.some(job => job.sceneId === scene.id)} onClick={() => viewTakes(scene.id)}>Review takes <ArrowUpRight size={13} /></button></div>
               <div className="storyboard-card-footer"><span>{scene.ratio} · {visualStyles.find((item) => item.id === scene.style)?.name} · Seed {scene.seed}</span><div className="shot-actions"><button disabled={scenes.length >= 12} onClick={() => duplicateScene(scene.id)} aria-label={`Duplicate scene ${index + 1}`}><Copy size={13} /> Duplicate</button><button onClick={() => openScene(scene)}>Open scene <ArrowUpRight size={15} /></button></div></div>
             </article>)}</div> : <div className="empty-state"><Clapperboard size={32} /><h3>Give your story a first scene.</h3><p>Write a prompt in Create, then choose Save scene. Save your project above to open its shots on another device.</p><button className="generate-button" onClick={() => go("Create")}>Start writing <ArrowRight size={16} /></button></div>}
           </section>}
@@ -522,6 +548,7 @@ export function VideoStudio() {
         </div>
       </section>
       {selectedJob?.videoUrl && <VideoPreview job={selectedJob} close={() => setSelectedJob(null)} download={(job) => void download(job)} />}
+      {comparisonOpen && comparedJobs.length === 2 && <TakeComparison jobs={[comparedJobs[0], comparedJobs[1]]} close={() => setComparisonOpen(false)} download={(job) => void download(job)} />}
       {guideOpen && <StudioGuide close={() => setGuideOpen(false)} start={() => { go("Create"); setTimeout(() => document.getElementById("video-prompt")?.focus(), 0); }} />}
       {accountOpen && <AccountDialog close={() => { setAccountOpen(false); setAccountIssue(""); }} completed={studio.accountChanged} configured={studio.capabilities.authConfigured} signedIn={studio.capabilities.signedIn} initialMessage={accountIssue} />}
       {notice && !mobileMenu && <div className="toast" role="status"><span className="toast-check"><Check size={13} /></span>{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><X size={14} /></button></div>}

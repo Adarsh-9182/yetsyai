@@ -37,6 +37,14 @@ train a new model. The active application is `src/components/studio` and
    The browser renews library/reference URLs after long-lived tabs resume.
    Missing individual objects retain their metadata without hiding valid media.
 
+Text renders can include a validated storyboard `sceneId`, persisted in render
+settings and returned only through owned library/detail routes. It is association
+metadata, not authorization: local/unsaved shots are valid and no project lookup
+or other account's renders are exposed by supplying an ID. Linked requests use
+fingerprint v2; unlinked v1 requests preserve their deployed canonical identity.
+The studio filters owned takes by shot and compares two available completed clips.
+Playback starts both players but does not promise frame synchronization.
+
 Uncertain submissions retain their UUID and slot; they are never automatically
 submitted again. After one hour a timeout releases the reservation, after first
 checking for a finished result. Signed callbacks and bounded status checks can

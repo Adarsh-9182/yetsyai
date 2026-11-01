@@ -10,6 +10,10 @@ Storyboard includes a named project library: save up to 20 projects to your
 account and open their shots on another device. Saves are explicit; revision
 checks prevent an older device from overwriting newer changes. Save as new keeps
 an alternate version, and removing a project keeps existing rendered videos.
+Open or save a storyboard shot to link subsequent text renders to its stable
+shot ID. Review its takes from the storyboard, or select two available completed
+videos for a comparison view with playback controls, prompt, camera, look and seed.
+Duplicating a shot creates a new identity; its renders start empty.
 
 The studio puts the director’s desk first, with a photographic inspiration card,
 persisted light/dark themes, a first-take guide, searchable status-filtered video
@@ -101,4 +105,7 @@ stubbed. These checks do not validate real GPU inference, Supabase auth/storage
 or PostgreSQL integration. The opt-in `scripts/verify-live.cjs` checks the live
 backend with disposable accounts; see [DEPLOY.md](docs/DEPLOY.md) for its scope.
 See [the product roadmap](docs/ROADMAP.md) for launch gates.
+The optional [local browser check](docs/DEPLOY.md#local-studio-browser-check)
+exercises storyboard takes and comparison at desktop/mobile sizes using fixture
+APIs and an MP4 file. It does not call real auth or inference services.
 Some legacy nutrition modules remain unused; the old chat endpoint returns 410.

@@ -407,3 +407,43 @@ test("concurrent identical request IDs replay one record and reserve one allowan
   assert.equal(await db.videoGeneration.count({ where: { id: scene.requestId } }), 1);
   await require("../src/lib/video/jobs.ts").finishGeneration(await db.videoGeneration.findUnique({ where: { id: scene.requestId } }), { status: "failed", error: "Test cleanup" });
 });
+
+test("storyboard takes retain shot identity across completion and cannot move on replay", async () => {
+  await newWorkspace();
+  const ownerCookies = new Map(cookieStore);
+  const sceneId = randomUUID(), scene = input({ sceneId, camera: "orbit", style: "cinema" });
+  providerStatus = "IN_QUEUE";
+  const response = await routes.POST(request(scene));
+  assert.equal(response.status, 202);
+  assert.equal((await response.json()).generation.sceneId, sceneId);
+  const before = providerCalls.filter(call => call.init.method === "POST").length;
+  assert.equal((await routes.POST(request(scene))).status, 200);
+  assert.equal((await routes.POST(request({ ...scene, sceneId: randomUUID() }))).status, 409);
+  assert.equal((await routes.POST(request({ ...scene, sceneId: undefined }))).status, 409);
+  assert.equal(providerCalls.filter(call => call.init.method === "POST").length, before);
+  providerStatus = "COMPLETED";
+  const completed = (await (await status(scene.requestId)).json()).generation;
+  assert.equal(completed.status, "completed"); assert.equal(completed.sceneId, sceneId);
+  assert.equal(completed.settings.camera, "orbit"); assert.equal(completed.settings.sceneId, undefined);
+  assert.equal((await (await routes.GET()).json()).generations[0].sceneId, sceneId);
+  await newWorkspace();
+  assert.deepEqual((await (await routes.GET()).json()).generations, []);
+  assert.equal((await detail.GET(new Request(`http://localhost:3000/api/generations/${scene.requestId}`), { params: { id: scene.requestId } })).status, 404);
+  assert.equal((await routes.POST(request(scene))).status, 409);
+  cookieStore = ownerCookies;
+});
+
+test("legacy unlinked render fingerprints still replay after storyboard support", async () => {
+  await newWorkspace();
+  const scene = input();
+  assert.equal((await routes.POST(request(scene))).status, 202);
+  // The exact pre-storyboard v1 canonical representation is a compatibility
+  // contract for UUIDs already accepted by the deployed application.
+  const legacy = JSON.stringify(["generation-request-v1", scene.prompt, scene.aspectRatio, 5, false, "blur", 42, "auto", "original", null, null]);
+  const legacyFingerprint = `v1:${require("node:crypto").createHash("sha256").update(legacy).digest("hex")}`;
+  const stored = await db.videoGeneration.findUnique({ where: { id: scene.requestId } });
+  assert.equal(stored.requestFingerprint, legacyFingerprint);
+  assert.equal((await routes.POST(request(scene))).status, 200);
+  assert.equal((await routes.POST(request({ ...scene, sceneId: randomUUID() }))).status, 409);
+  await require("../src/lib/video/jobs.ts").finishGeneration(stored, { status: "failed", error: "Test cleanup" });
+});
