@@ -327,6 +327,7 @@ html[data-theme="light"] .brand-mark { background:#d6e8ad; }
 html[data-theme="light"] .toast { background:#edf3e3; border-color:#b1c18e; color:#34472a; }
 html[data-theme="light"] .account-page { background:var(--bg); }
 html[data-theme="light"] :is(.top-credit,.studio-message strong,.availability-check) { color:#43552f; }
+html[data-theme="light"] .studio-message p { color:#5f6e50; }
 html[data-theme="light"] .prompt-helper { background:#f1f4e9; border-color:#ccd6bc; }
 html[data-theme="light"] .icon-button:hover { background:#e4ead9; color:#34472a; }
 /* Photographic overlays always use light ink, regardless of the page theme. */
