@@ -13,6 +13,7 @@ export function useStudio() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [pollError, setPollError] = useState("");
+  const [libraryRevision, setLibraryRevision] = useState(0);
   const submitLock = useRef(false);
   const loadVersion = useRef(0);
   const lastLoaded = useRef(0);
@@ -28,6 +29,7 @@ export function useStudio() {
       if (signal?.aborted || version !== loadVersion.current) return;
       lastLoaded.current = Date.now();
       setJobs(data.generations);
+      setLibraryRevision(current => current + 1);
       setConfigured(data.configured);
       setStorageConfigured(data.storageConfigured !== false);
       setCapabilities({ model: data.model, provider: data.provider, durations: data.durations || [5], audio: Boolean(data.audio), image: Boolean(data.image), authConfigured: Boolean(data.authConfigured), signedIn: Boolean(data.signedIn), mediaConfigured: Boolean(data.mediaConfigured), configuration: data.configuration || { accounts: false, database: false, media: false, generation: false } });
@@ -42,6 +44,17 @@ export function useStudio() {
     const controller = new AbortController();
     void load(controller.signal);
     return () => controller.abort();
+  }, [load]);
+
+  useEffect(() => {
+    const changed = (event: StorageEvent) => {
+      if (event.key !== "yetsyai-account-change") return;
+      setJobs([]); setCapabilities(current => ({ ...current, signedIn: false }));
+      pendingRequest.current = null;
+      void load(undefined, true);
+    };
+    window.addEventListener("storage", changed);
+    return () => window.removeEventListener("storage", changed);
   }, [load]);
 
   useEffect(() => {
@@ -129,5 +142,10 @@ export function useStudio() {
       setJobs((current) => current.filter((job) => job.id !== id));
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Couldn't delete this video."); }
   };
-  return { jobs, configured, storageConfigured, capabilities, usage, loading, submitting, error, pollError, generate, remove, reload: load, clearError: () => setError("") };
+  const accountChanged = () => {
+    setJobs([]); setCapabilities(current => ({ ...current, signedIn: false }));
+    pendingRequest.current = null;
+    void load();
+  };
+  return { jobs, configured, storageConfigured, capabilities, usage, loading, submitting, error, pollError, libraryRevision, generate, remove, reload: load, accountChanged, clearError: () => setError("") };
 }

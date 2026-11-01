@@ -11,8 +11,9 @@ account and open their shots on another device. Saves are explicit; revision
 checks prevent an older device from overwriting newer changes. Save as new keeps
 an alternate version, and removing a project keeps existing rendered videos.
 
-The studio includes a photographic showcase, shortcuts for directing and planning,
-and a lookbook filtered by cinematic, product, nature and portrait treatments.
+The studio puts the director’s desk first, with a photographic inspiration card,
+persisted light/dark themes, a first-take guide, searchable status-filtered video
+library and a lookbook filtered by cinematic, product, nature and portrait treatments.
 Selecting a look applies its prompt and relevant visual treatment. Inspiration
 photos are labeled separately from generated videos.
 
@@ -30,9 +31,11 @@ for future use. No public third-party demo API or fake render is used.
 Paid fal/Kling is available only with `VIDEO_PROVIDER=fal`, `FAL_KEY` and
 `ENABLE_PAID_GENERATION=true`. An old API key never activates paid mode implicitly.
 
-**Current deployment can be in preview mode.** Real generation, account email
-delivery, PostgreSQL and GPU output quality require credentials and integration
-checks. These are not validated by a successful frontend build.
+**Rendering is currently disabled until the owner’s private worker is connected.**
+Live checks have verified sign-in with disposable confirmed accounts, PostgreSQL
+project saves/revisions/account isolation, and private reference storage. Actual
+signup/recovery email delivery and a real GPU-generated clip remain launch gates.
+These are not validated by a successful frontend build.
 
 ## Local development
 
@@ -68,6 +71,8 @@ what these commands verify and the remaining integration checks.
 ## Reliability and controls
 
 - Server-verified accounts; HttpOnly sessions; account-owned workspaces.
+- Confirmation-email resend, password visibility controls and cross-tab sign-out.
+- Decoded reference uploads strip EXIF/GPS metadata before private storage.
 - Atomic database limits: 2 submissions/account/day, 3 globally/day, 1 active job.
 - Idempotent request UUIDs, conditional job state transitions, stale lock recovery.
 - A database poll lease shares provider checks across tabs and server instances.
@@ -93,5 +98,7 @@ Next.js 15.5 · React · TypeScript · Tailwind · Prisma · Supabase · Wan / Z
 quota/concurrency races and malformed SSE results. `python3 tests/wan-worker.test.py`
 checks worker validation, attempt deduplication and output retention with inference
 stubbed. These checks do not validate real GPU inference, Supabase auth/storage
-or PostgreSQL integration. See [the product roadmap](docs/ROADMAP.md) for launch gates.
+or PostgreSQL integration. The opt-in `scripts/verify-live.cjs` checks the live
+backend with disposable accounts; see [DEPLOY.md](docs/DEPLOY.md) for its scope.
+See [the product roadmap](docs/ROADMAP.md) for launch gates.
 Some legacy nutrition modules remain unused; the old chat endpoint returns 410.

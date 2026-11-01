@@ -1,72 +1,64 @@
-# Deploying NutritiScan to Vercel
+# Deploy YetsyAI
 
-The app is deploy-ready. At this stage it needs **one** environment variable
-(`ANTHROPIC_API_KEY`) and **no database** — nothing queries the DB at runtime
-yet, so Vercel's serverless environment is fine.
+The existing project is `Adarsh-9182/yetsyai`, deployed at
+https://yetsyai.vercel.app. Keep the existing Vercel/Supabase project links.
+The complete service configuration is documented in [SETUP.md](SETUP.md).
 
----
+## Release
 
-## Option A — Vercel dashboard (recommended, ~5 minutes)
+1. Run `npm test`, `npm run lint`, `python3 tests/wan-worker.test.py` and
+   `npm run build`. Tests use a local SQLite fixture, never bill a provider.
+2. Configure production environment values in the existing Vercel project.
+   Use `npm run setup:check -- --env-file .env.production.local` to validate
+   syntax without printing values. Missing worker credentials intentionally keep
+   rendering disabled.
+3. Deploy through the linked Vercel project (`vercel --prod`) or its Git integration.
+   The build command must be `npm run build`, not a bare `next build`: it generates
+   the PostgreSQL Prisma client and applies additive migrations before compilation.
+4. Verify the production alias points to the new deployment, account routes are
+   private/no-store, and anonymous library responses contain no private data.
 
-1. **Push the branch** (already done) and, when you're ready, merge it to your
-   default branch — or just deploy the branch directly in step 3.
-2. Go to <https://vercel.com> → sign in with **GitHub**.
-3. **Add New… → Project** → import the repo **`Adarsh-9182/yetsyai`**.
-   - Vercel auto-detects Next.js. Leave build settings at their defaults
-     (Build: `next build`, Install: `npm install`).
-   - If you're deploying the feature branch, pick it under
-     **Settings → Git → Production Branch**, or deploy it as a preview.
-4. **Environment Variables** — add:
-   | Name | Value |
-   |------|-------|
-   | `ANTHROPIC_API_KEY` | your key from <https://console.anthropic.com> |
-   | `NUTRITISCAN_MODEL` | *(optional)* `claude-opus-5` (default) or `claude-sonnet-5` for lower cost |
-5. Click **Deploy**. In ~2 minutes you get a live URL like
-   `https://nutritiscan.vercel.app`. The AI doctor lives at `/ask`.
+Never commit environment files. Do not enable paid fallback to make a release pass.
+Do not disable email confirmation or make the media bucket public.
 
-That's the launch. Every future push to the branch redeploys automatically.
+## Live backend smoke test
 
----
+The opt-in script creates two tagged, disposable confirmed accounts via Supabase
+Admin, signs in through the deployed API, saves/reopens/revises a storyboard,
+checks stale revisions and account isolation, uploads/opens a reference using a
+signed URL, checks private-bucket access, and signs out. It removes only the
+accounts and data created by that run. It sends no email and makes no GPU call.
 
-## Option B — Vercel CLI
+Generate the PostgreSQL client before running the script:
 
 ```bash
-npm i -g vercel
-vercel login
-vercel            # first run links the project (accept the Next.js defaults)
-vercel env add ANTHROPIC_API_KEY production   # paste your key when prompted
-vercel --prod     # ship to production
+npx prisma generate --schema prisma/postgres/schema.prisma
+node scripts/verify-live.cjs --run --env-file .env.production.local
 ```
 
----
+Add `--video-fixture /absolute/test.mp4` to verify private video access and exact
+download bytes using a disposable, clearly labeled MP4 fixture. This uses no
+inference and is not a generated-video benchmark.
 
-## Verifying the launch
+Restore the SQLite client before local SQLite tests/development:
 
-- Open the URL → landing page loads.
-- Go to `/ask` → send "I've been tired for a week" → you should get a
-  **structured** answer with a confidence indicator and (when the topic matches
-  the knowledge base) a **Sources** section.
-- Try "severe chest pain radiating to my arm" → you should get the **emergency
-  banner**, not a normal chat reply.
+```bash
+npx prisma generate --schema prisma/schema.prisma
+```
 
----
+The smoke test does not prove signup-email delivery, recovery-mail delivery,
+video quality, inference time or callback-to-download operation. Verify these
+with one actual account and one real render after the owner's Space is connected.
 
-## When you add real features later
+## Free worker
 
-- **Database (accounts, saved conversations, timeline):** add a Postgres
-  database (Vercel Postgres / Neon / Supabase), change `provider` in
-  `prisma/schema.prisma` to `postgresql`, set `DATABASE_URL` in Vercel, and run
-  migrations. `postinstall` already runs `prisma generate` on every build.
-- **Custom domain:** Vercel → Project → Settings → Domains.
+Upload `spaces/wan-studio` to the owner's private Gradio Space and select only
+eligible ZeroGPU hardware. Current Hugging Face documentation allows eligible,
+verified personal accounts older than 30 days to host up to two ZeroGPU Spaces
+for free. Eligibility and quota are controlled by Hugging Face; never switch to
+paid hardware automatically. See https://huggingface.co/docs/hub/spaces-zerogpu.
 
----
-
-## ⚠️ Launch responsibly (health product)
-
-A public URL is a great way to demo and gather feedback. Before promoting this
-as a real medical service to the public, the items in
-[`CLINICAL-PLATFORM.md`](CLINICAL-PLATFORM.md) matter — especially clinical
-validation and regulatory review (spec §52–53). Until then, keep the product's
-existing framing: **evidence-informed guidance, not a diagnosis, and not a
-replacement for a clinician.** Don't add claims like "clinically validated" or
-"FDA approved" until they are actually true.
+Set the matching shared secret and completion URL on the Space, then
+`HF_SPACE_URL` and a least-privilege access token on Vercel. Measure one real
+5-second clip before changing render limits or inviting users. An HTTP 200 or
+successful build is not proof of inference.

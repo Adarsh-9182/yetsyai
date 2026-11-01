@@ -1,79 +1,68 @@
-# NutritiScan — Architecture
+# YetsyAI architecture
 
-This document is the map of the system. Read it before adding a feature.
+YetsyAI is a short-video studio built around existing model weights. It does not
+train a new model. The active application is `src/components/studio` and
+`src/lib/video`; unused nutrition modules are legacy code. `/api/chat` returns 410.
 
-## Tech stack
+## Runtime
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Framework | Next.js 14 (App Router) + React 18 + TypeScript (strict) | UI + API routes in one app |
-| Styling | Tailwind CSS + a token-driven design system | tokens in `globals.css` / `tailwind.config.ts` |
-| UI primitives | Hand-built components (`src/components/ui`) with CVA | shadcn-style, no external UI lock-in |
-| Fonts | Geist Sans / Geist Mono (bundled, no network) | tabular numerals for data |
-| Database | Prisma ORM on SQLite (dev) → Postgres (prod) | one-line provider switch |
-| AI | Provider-agnostic layer (`src/lib/ai`) | Anthropic today, swappable |
-| Validation | Zod | request bodies + AI output parsing |
+| Layer | Implementation |
+| --- | --- |
+| Application | Next.js 15.5 App Router, React 18, TypeScript |
+| Studio | Prompt and shot controls, monitor, lookbook, video/reference libraries, storyboard |
+| Design | Geist, Lucide, responsive charcoal/paper themes; theme and navigation preferences stay local |
+| Accounts | Supabase email/password, server-verified HttpOnly session cookies |
+| Database | Prisma; SQLite for local development, PostgreSQL on Vercel |
+| Media | Private Supabase `studio-media` bucket, one-hour signed URLs |
+| Inference | Owner-controlled private Hugging Face Gradio/ZeroGPU Space, Wan 2.2 TI2V 5B |
+| Completion | HMAC-signed callbacks, browser polling and authenticated maintenance |
 
-## Information architecture (routes)
+## Render lifecycle
 
-| Route | Purpose | Status |
-|---|---|---|
-| `/` | Landing page | ✅ built |
-| `/ask` | AI Health Companion (the "doctor") | ✅ v1 built |
-| `/api/chat` | Companion endpoint (server) | ✅ built |
-| `/scan` | Meal scanner | ⏳ planned |
-| `/nutrition` | Nutrition plan & targets | ⏳ planned |
-| `/timeline` | Longitudinal health record | ⏳ planned |
-| `/reports` | Lab report analysis | ⏳ planned |
-| `/profile` | Health profile & privacy center | ⏳ planned |
+1. The browser sends a unique request UUID and validated scene settings to
+   `POST /api/generations`. Camera and treatment presets compile into the exact
+   text displayed in the shot brief.
+2. The server verifies the account and ownership, validates provider capabilities,
+   atomically reserves daily/global quota and one workspace render slot, and
+   creates a `submitting` record before making the provider request.
+3. The adapter submits to the configured private Space with a server-only access
+   token and shared secret. It stores the bounded Gradio event ID, then marks the
+   job `queued`. The Space reserves a GPU only after validating the shared secret.
+4. Signed completion callbacks archive the MP4 in private storage and finish the
+   record even if the browser closes. Polling can recover completion. Database
+   leases coalesce checks across devices; conditional writes preserve terminal states.
+5. Account-owned routes issue signed playback URLs and stream MP4 downloads.
+   The browser renews library/reference URLs after long-lived tabs resume.
 
-## Component system
+Uncertain submissions retain their UUID and slot; they are never automatically
+submitted again. One-hour recovery releases abandoned jobs. Worker attempt IDs
+are cached only until the Space restarts. These controls reduce duplicate inference
+but do not create a durable GPU service or guarantee availability.
 
-- `components/ui/*` — primitives (Button, Card, Badge). Everything is built from these.
-- `components/landing/*` — landing sections.
-- `components/companion/*` — AI-doctor rendering (EmergencyBanner, AIStructuredMessage).
-- Add new primitives here rather than styling ad-hoc in pages.
+## Data boundaries
 
-## AI architecture (multi-agent)
+- `StudioWorkspace`: one account owner and its current active job.
+- `VideoGeneration`: original prompt/settings, provider lifecycle and private media path.
+- `StudioAsset`: bounded image reference; uploads are decoded, validated and
+  re-encoded to strip EXIF/GPS metadata.
+- `StudioProject`: named storyboard, up to 12 shots; explicit saves use optimistic
+  revision checks. Accounts hold up to 20 projects.
+- `StudioQuota`: atomic UTC daily counters and global concurrent reservation.
 
-We do **not** use one giant prompt. Requests flow through an orchestrator:
+The composer and unsaved storyboard are local to the device. Saved projects,
+references and generated videos belong to the account. Signing out clears private
+client libraries; other open tabs receive an account-change event. Database tables
+have RLS/REST restrictions; service credentials never belong in browser code.
 
-```
-user message
-   │
-   ▼
-[ safety net ]  ── deterministic red-flag screen (src/lib/safety/redflags.ts)
-   │  emergency? → short-circuit to EmergencyBanner (never buried)
-   ▼
-[ orchestrator ]  (src/lib/ai/orchestrator.ts)
-   │  routes to a specialized agent by intent
-   ▼
-[ agent ]  triage | nutrition | medical_explanation | safety   (src/lib/ai/agents.ts)
-   │  each has a focused system prompt; triage returns STRICT JSON
-   ▼
-[ provider ]  provider-agnostic interface (src/lib/ai/provider.ts)
-   │  AnthropicProvider today; swap in index.ts
-   ▼
-structured result → UI renders scannable sections
-```
+## Budget and validation
 
-The structured response schema lives in `src/lib/ai/types.ts` and is shared by
-the API and the UI, so the contract is enforced in one place.
+Default caps: two submissions/account/day, three globally/day and one active job.
+Free Hugging Face capacity has independent quotas. No paid provider is enabled by
+default; fal requires three explicit configuration conditions, including
+`ENABLE_PAID_GENERATION=true`.
 
-## AI observability
-
-Every AI call is meant to be traceable via the `AIInteraction` table (model,
-agent, input kind, latency, tokens, safety level). Wiring the writes into the
-orchestrator is a Phase-9 task; the schema is already in place.
-
-## Data model
-
-See `prisma/schema.prisma`. Core entities: User, HealthProfile, HealthGoal,
-Meal/FoodItem, NutritionRecord, Conversation/Message, HealthInsight,
-SymptomRecord, LabReport/LabResult, Medication, HealthEvent, Source,
-AIInteraction, Consent, AuditLog.
-
-## Adding a provider
-
-Implement `AIProvider` (`src/lib/ai/provider.ts`) and register it in
-`src/lib/ai/index.ts`. No feature code changes.
+`npm test` checks routes with SQLite and mocked external providers/storage.
+`python3 tests/wan-worker.test.py` stubs inference. `scripts/verify-live.cjs`
+exercises real auth, PostgreSQL projects and private references with disposable
+accounts; it does not send emails or render a video. A real GPU take and actual
+confirmation/recovery email delivery are separate launch gates in [SETUP.md](SETUP.md).

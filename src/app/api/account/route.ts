@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json({ configured: authConfigured(), user: user ? { email: user.email } : null }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return apiError(error); }
 }
-const input = z.object({ action: z.enum(["signin", "signup", "signout", "reset", "update"]), email: z.string().email().max(254).optional(), password: z.string().min(10).max(128).optional() });
+const input = z.object({ action: z.enum(["signin", "signup", "signout", "reset", "resend", "update"]), email: z.string().trim().email().max(254).optional(), password: z.string().min(1).max(128).optional() }).refine(data => !["signup", "update"].includes(data.action) || Boolean(data.password && data.password.length >= 10));
 export async function POST(request: Request) {
   try {
     if (!isSameOrigin(request)) throw new ProviderError("Use your studio to manage your account.", 403);
@@ -30,6 +30,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Password updated. You can return to your studio." });
     }
     if (!data.email) throw new ProviderError("Enter your email address.", 400);
+    if (data.action === "resend") {
+      const { error } = await client.auth.resend({ type: "signup", email: data.email, options: { emailRedirectTo: `${new URL(request.url).origin}/account/confirm` } });
+      if (error) throw new ProviderError("Couldn't send a confirmation email. Wait a minute, then try again.", 429);
+      return NextResponse.json({ message: "If your account needs confirmation, a new link has been sent." });
+    }
     if (data.action === "reset") {
       // The reset page exchanges the one-time code before accepting a new password.
       const { error } = await client.auth.resetPasswordForEmail(data.email, { redirectTo: `${new URL(request.url).origin}/account/confirm?next=/account/reset` });
@@ -41,7 +46,7 @@ export async function POST(request: Request) {
       ? await client.auth.signUp({ email: data.email, password: data.password, options: { emailRedirectTo: `${new URL(request.url).origin}/account/confirm` } })
       : await client.auth.signInWithPassword({ email: data.email, password: data.password });
     if (result.error) throw new ProviderError(data.action === "signin" ? "Sign-in failed. Check your email, password and email confirmation." : "Couldn't create the account. Try again later or sign in.", 400);
-    return NextResponse.json({ message: result.data.session ? "You're signed in." : "Check your email to confirm your account." });
+    return NextResponse.json({ signedIn: Boolean(result.data.session), message: result.data.session ? "You're signed in." : "Check your email to confirm your account." });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Enter a valid email and a password of at least 10 characters." }, { status: 400 });
     return apiError(error);

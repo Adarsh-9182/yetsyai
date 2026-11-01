@@ -31,8 +31,12 @@ export async function POST(request: Request) {
     let metadata;
     try { metadata = await sharp(bytes, { limitInputPixels: 20000000 }).metadata(); }
     catch { throw new ProviderError("This image couldn't be opened. Use another JPG or PNG.", 400); }
+    if (metadata.format !== "png" && metadata.format !== "jpeg") throw new ProviderError("Choose an actual JPG or PNG image.", 400);
     const { width = 0, height = 0 } = metadata;
     if (width < 300 || height < 300 || width / height > 2.5 || height / width > 2.5) throw new ProviderError("Use an image at least 300 × 300 px, with an aspect ratio between 2:5 and 5:2.", 400);
+    // Strip EXIF/GPS before reserving a record, so decoding failures leave no orphan.
+    const clean = await sharp(bytes, { limitInputPixels: 20000000 }).toFormat(metadata.format).toBuffer();
+    if (clean.length > 3 * 1024 * 1024) throw new ProviderError("This image is too large after processing. Resize it and try again.", 400);
     const id = randomUUID();
     // Reserve the record before uploading so concurrent requests respect the cap.
     // Updating the workspace row serializes uploads across instances.
@@ -42,7 +46,7 @@ export async function POST(request: Request) {
       if (await tx.studioAsset.count({ where: { workspaceId: workspace.id } }) >= 20) throw new ProviderError("Your reference library holds 20 images. Remove one to make room.", 429);
       await tx.studioAsset.create({ data: { id, workspaceId: workspace.id, name: parsed.data.name, path, width, height } });
     });
-    try { await uploadMedia(path, bytes, metadata.format === "png" ? "image/png" : "image/jpeg"); }
+    try { await uploadMedia(path, clean, metadata.format === "png" ? "image/png" : "image/jpeg"); }
     catch (error) { await db.studioAsset.delete({ where: { id } }); throw error; }
     return NextResponse.json({ asset: { id, name: parsed.data.name, width, height, url: await signedMedia(path) } }, { status: 201 });
   } catch (error) { return apiError(error); }

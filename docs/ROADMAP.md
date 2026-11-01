@@ -1,8 +1,10 @@
 # Yetsyai product roadmap
 
-Updated October 4, 2026. Supabase accounts, PostgreSQL migrations and private
-media storage are configured. The owner's GPU Space and first real render remain
-pending; account email delivery and complete user workflows still need validation.
+Updated November 1, 2026. Live smoke checks pass for confirmed-account sign-in,
+PostgreSQL project save/reopen/revision conflicts, cross-account isolation,
+private reference upload/signed access, and sign-out. Disposable test data was
+removed. The owner's GPU Space, actual email delivery and first real render
+remain pending. No GPU inference has been claimed from mocked or fixture tests.
 
 ## Implemented
 
@@ -13,13 +15,16 @@ pending; account email delivery and complete user workflows still need validatio
 - Named account projects with explicit save/open, up to 20 per account, 12 shots
   per project, optimistic revisions and Save as new for alternate versions.
 - Project ownership checks, private database tables and conservative creation limits.
-- Photo-led studio showcase, creative shortcuts, filtered lookbook and responsive charcoal styling.
+- Composer-first director’s desk, photo inspiration, filtered lookbook and responsive light/dark themes.
+- First-take guide, status-filtered video library, confirmation resend and accessible password controls.
+- Reference re-encoding strips embedded metadata; saved reference links renew with library refresh.
 - Account routes, owned library/assets, signed downloads and completion callbacks.
 - Atomic app quotas, request IDs, conditional completion and abandoned lock recovery.
 - Database provider-poll leases, monotonic status updates and batch library media signing.
 - Worker attempt cache, bounded outputs, failed-attempt deduplication and profile controls.
-- Regression checks use SQLite and mocked external services. Browser checks cover
-  local preview workflows; neither validates production provider or account services.
+- Regression checks use SQLite and mocked external services. Opt-in live checks
+  cover auth, PostgreSQL and private media with disposable accounts. Production
+  GPU inference and email delivery remain separate checks.
 
 ## Next gate: one real clip
 

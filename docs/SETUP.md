@@ -155,3 +155,15 @@ Credentials are required for these checks; they have not been performed yet:
 Build success does not validate GPU runtime, authentication delivery, database
 integration or output quality. Billing and subscriptions are intentionally not
 part of this free prototype's scope.
+
+## Live verification tool
+
+See [DEPLOY.md](DEPLOY.md) for the disposable-account live smoke check. It does
+not send mail or call the GPU. An optional `--video-fixture /absolute/test.mp4`
+checks stored-video library access, byte-identical MP4 download, ownership and
+deletion using a clearly labeled test fixture; that is not evidence of inference.
+
+The current studio includes confirmation resend. Default Supabase email limits
+can still prevent public signup; configure a sender you control and test actual
+confirmation/recovery delivery before announcing a public beta. Keep email
+verification enabled.
