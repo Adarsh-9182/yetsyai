@@ -158,6 +158,20 @@ part of this free prototype's scope.
 
 ## Live verification tool
 
+Before enabling generation, run a read-only worker check:
+
+```bash
+npm run setup:worker -- --env-file .env.production.local
+```
+
+It first validates the token against Hugging Face's identity API (discarding the
+private identity response), then checks access to `/gradio_api/info` and the exact seven-input
+`/generate` interface expected by this studio. It never submits inference,
+forwards credentials through redirects or prints provider response bodies.
+Missing credentials stop the check before network access. Passing it does not
+verify the shared secret against the worker, GPU quota or actual video output;
+one real render and callback/download check are still required.
+
 See [DEPLOY.md](DEPLOY.md) for the disposable-account live smoke check. It does
 not send mail or call the GPU. An optional `--video-fixture /absolute/test.mp4`
 checks stored-video library access, byte-identical MP4 download, ownership and
