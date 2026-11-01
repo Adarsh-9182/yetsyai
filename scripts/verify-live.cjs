@@ -18,6 +18,7 @@ const base = "https://yetsyai.vercel.app";
 const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(20000) }) } });
 const users = [];
 const sessions = [];
+const credentials = [];
 const assetIds = [];
 const fixtureIndex = process.argv.indexOf("--video-fixture");
 const fixturePath = fixtureIndex >= 0 ? process.argv[fixtureIndex + 1] : null;
@@ -42,6 +43,7 @@ async function main() {
     const result = await client.auth.admin.createUser({ email, password, email_confirm: true, app_metadata: { yetsyai_smoke: true } });
     assert.ok(!result.error && result.data.user, "Could not create a disposable test account");
     users.push(result.data.user.id);
+    credentials.push({ email, password });
     const jar = new Map(); sessions.push(jar);
     phase = "sign in through the deployed account API";
     const signedIn = await request(jar, "/api/account", "POST", { action: "signin", email, password });
@@ -107,6 +109,30 @@ async function main() {
   assert.equal((await request(owner, "/api/account")).data.user, null);
   assert.deepEqual((await request(owner, "/api/generations")).data.generations, []);
   console.log("PASS sign-out discards authenticated access");
+  phase = "one-time recovery link on a fresh device session (no email)";
+  const recovery = await client.auth.admin.generateLink({ type: "recovery", email: credentials[0].email });
+  assert.ok(!recovery.error && recovery.data.properties?.hashed_token, "Could not create disposable recovery link");
+  const recoveryUrl = new URL(`${base}/account/confirm`);
+  recoveryUrl.searchParams.set("token_hash", recovery.data.properties.hashed_token);
+  recoveryUrl.searchParams.set("type", "recovery");
+  const recovered = new Map();
+  const callback = await fetch(recoveryUrl, { redirect: "manual", signal: AbortSignal.timeout(30000) });
+  assert.equal(callback.status, 307);
+  assert.equal(callback.headers.get("location"), `${base}/account/reset`);
+  assert.equal(callback.headers.get("referrer-policy"), "no-referrer");
+  for (const cookie of callback.headers.getSetCookie()) { const item = cookie.split(";")[0]; const split = item.indexOf("="); recovered.set(item.slice(0, split), item.slice(split + 1)); }
+  assert.equal((await request(recovered, "/api/account")).data.user?.email, credentials[0].email);
+  const newPassword = randomBytes(24).toString("base64url");
+  assert.equal((await request(new Map(), "/api/account", "POST", { action: "update", password: newPassword })).status, 401);
+  assert.equal((await request(recovered, "/api/account", "POST", { action: "update", password: newPassword })).status, 200);
+  assert.equal((await request(recovered, "/api/account", "POST", { action: "signout" })).status, 200);
+  const fresh = new Map();
+  assert.equal((await request(fresh, "/api/account", "POST", { action: "signin", ...credentials[0] })).status, 400);
+  assert.equal((await request(fresh, "/api/account", "POST", { action: "signin", email: credentials[0].email, password: newPassword })).status, 200);
+  assert.equal((await request(fresh, "/api/account", "POST", { action: "signout" })).status, 200);
+  const replay = await fetch(recoveryUrl, { redirect: "manual", signal: AbortSignal.timeout(30000) });
+  assert.equal(replay.headers.get("location"), `${base}/?account=expired`);
+  console.log("PASS cross-device recovery callback, password change, old-password rejection and one-time-link replay rejection (no mail delivery tested)");
 }
 
 async function cleanup() {

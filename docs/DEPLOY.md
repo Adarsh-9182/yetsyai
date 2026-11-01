@@ -46,6 +46,11 @@ Restore the SQLite client before local SQLite tests/development:
 npx prisma generate --schema prisma/schema.prisma
 ```
 
+The script also generates a recovery link administratively (without sending an
+email), exchanges it through the live confirmation callback in a fresh session,
+updates the disposable account password, checks the old password is rejected and
+verifies the consumed recovery link cannot be reused.
+
 The smoke test does not prove signup-email delivery, recovery-mail delivery,
 video quality, inference time or callback-to-download operation. Verify these
 with one actual account and one real render after the owner's Space is connected.

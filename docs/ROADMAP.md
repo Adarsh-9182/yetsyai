@@ -6,6 +6,12 @@ private reference upload/signed access, and sign-out. Disposable test data was
 removed. The owner's GPU Space, actual email delivery and first real render
 remain pending. No GPU inference has been claimed from mocked or fixture tests.
 
+Live recovery checks also pass: fresh-session callback, password update,
+old-password rejection and consumed-link rejection. These generate a link through
+the admin API without sending mail. Desktop Safari inspection covered the dark
+and light creation layouts; follow-up fixes keep status text readable on pale
+surfaces and photo captions light in both themes. Mobile visual QA remains open.
+
 ## Implemented
 
 - Responsive studio, movable/collapsible navigation, prompt composer and photo looks.
