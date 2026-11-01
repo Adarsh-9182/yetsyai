@@ -18,6 +18,9 @@ remain pending. No GPU inference has been claimed from mocked or fixture tests.
 - Composer-first director’s desk, photo inspiration, filtered lookbook and responsive light/dark themes.
 - First-take guide, status-filtered video library, confirmation resend and accessible password controls.
 - Reference re-encoding strips embedded metadata; saved reference links renew with library refresh.
+- Next.js 15.5.28 and Zod 4.6.7 security updates, compatible transitive fixes;
+  npm audit reports zero known findings as of November 1, 2026. Route tests and
+  production build pass after the validation-library migration.
 - Account routes, owned library/assets, signed downloads and completion callbacks.
 - Atomic app quotas, request IDs, conditional completion and abandoned lock recovery.
 - Database provider-poll leases, monotonic status updates and batch library media signing.
