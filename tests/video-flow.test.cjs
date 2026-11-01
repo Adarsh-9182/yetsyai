@@ -315,3 +315,95 @@ test("late completion clears an earlier submission warning and releases its slot
   assert.ok(results.every((result) => result.status === "completed" && result.error === null));
   assert.equal((await db.studioQuota.findUnique({ where: { id: "active" } })).used, before - 1);
 });
+
+test("request identity canonicalizes defaults and rejects changed settings without another submission", async () => {
+  await newWorkspace();
+  const scene = { requestId: randomUUID(), prompt: "  A boat crossing a sunlit lake  ", aspectRatio: "16:9", duration: 5 };
+  const created = await routes.POST(request(scene));
+  assert.equal(created.status, 202);
+  const payload = await created.json(); const id = payload.generation.id;
+  assert.equal(payload.generation.requestFingerprint, undefined, "Request fingerprints remain server-only");
+  const canonical = { ...scene, prompt: scene.prompt.trim(), generateAudio: false, negativePrompt: "blur, distort, and low quality", seed: 42, camera: "auto", style: "original" };
+  const submitCount = providerCalls.filter(call => call.init.method === "POST").length;
+  const replay = await routes.POST(request(canonical));
+  assert.equal(replay.status, 200); assert.equal((await replay.json()).generation.id, id);
+  for (const change of [{ prompt: "A different scene" }, { aspectRatio: "9:16" }, { duration: 10 }, { generateAudio: true }, { negativePrompt: "different avoidance" }, { seed: 43 }, { camera: "orbit" }, { style: "cinema" }, { assetId: randomUUID() }]) {
+    const response = await routes.POST(request({ ...canonical, ...change }));
+    assert.equal(response.status, 409, `Changed request field ${Object.keys(change)[0]} must conflict before asset resolution`);
+  }
+  assert.equal(providerCalls.filter(call => call.init.method === "POST").length, submitCount);
+  assert.equal((await (await routes.GET()).json()).usage.used, 1);
+  assert.match((await db.videoGeneration.findUnique({ where: { id } })).requestFingerprint, /^v1:[a-f0-9]{64}$/);
+  await require("../src/lib/video/jobs.ts").finishGeneration(await db.videoGeneration.findUnique({ where: { id } }), { status: "failed", error: "Test cleanup" });
+});
+
+test("raw reference identity is hashed and changed reference content cannot replay a UUID", async () => {
+  await newWorkspace();
+  const makeImage = async background => `data:image/png;base64,${(await require("sharp")({ create: { width: 320, height: 320, channels: 3, background } }).png().toBuffer()).toString("base64")}`;
+  const referenceImage = await makeImage("#abcdef");
+  const changedImage = await makeImage("#fedcba");
+  const scene = input({ referenceImage });
+  assert.equal((await routes.POST(request(scene))).status, 202);
+  const submitCount = providerCalls.filter(call => call.init.method === "POST").length;
+  assert.equal((await routes.POST(request(scene))).status, 200);
+  assert.equal((await routes.POST(request({ ...scene, referenceImage: changedImage }))).status, 409);
+  assert.equal((await routes.POST(request({ ...scene, referenceImage: undefined }))).status, 409);
+  const stored = await db.videoGeneration.findUnique({ where: { id: scene.requestId } });
+  assert.ok(!JSON.stringify(stored).includes(referenceImage), "Encoded private images must not be persisted in request identity");
+  assert.equal(providerCalls.filter(call => call.init.method === "POST").length, submitCount);
+  await require("../src/lib/video/jobs.ts").finishGeneration(stored, { status: "failed", error: "Test cleanup" });
+});
+
+test("same asset request replays after reference deletion and changed asset identity conflicts before any read", async () => {
+  await newWorkspace();
+  const workspaceId = cookieStore.get("yetsyai_workspace");
+  const assetId = randomUUID();
+  await db.studioAsset.create({ data: { id: assetId, workspaceId, name: "Test reference", path: `${workspaceId}/${assetId}.png`, width: 320, height: 320 } });
+  const bytes = await require("sharp")({ create: { width: 320, height: 320, channels: 3, background: "#aabbcc" } }).png().toBuffer();
+  const storage = require("../src/lib/video/storage.ts"); const originalRead = storage.readAsset;
+  let reads = 0;
+  storage.readAsset = async () => { reads++; return `data:image/png;base64,${bytes.toString("base64")}`; };
+  const scene = input({ assetId });
+  try {
+    assert.equal((await routes.POST(request(scene))).status, 202);
+    assert.equal(reads, 1);
+    await db.studioAsset.delete({ where: { id: assetId } });
+    const before = providerCalls.filter(call => call.init.method === "POST").length;
+    assert.equal((await routes.POST(request(scene))).status, 200, "Replay does not need an asset that was already consumed");
+    assert.equal((await routes.POST(request({ ...scene, assetId: randomUUID() }))).status, 409);
+    assert.equal(reads, 1);
+    assert.equal(providerCalls.filter(call => call.init.method === "POST").length, before);
+  } finally {
+    storage.readAsset = originalRead;
+    const stored = await db.videoGeneration.findUnique({ where: { id: scene.requestId } });
+    if (stored) await require("../src/lib/video/jobs.ts").finishGeneration(stored, { status: "failed", error: "Test cleanup" });
+  }
+});
+
+test("legacy requests without a fingerprint reject replay explicitly instead of guessing payload identity", async () => {
+  await newWorkspace();
+  const scene = input();
+  assert.equal((await routes.POST(request(scene))).status, 202);
+  const stored = await db.videoGeneration.update({ where: { id: scene.requestId }, data: { requestFingerprint: null } });
+  const before = providerCalls.filter(call => call.init.method === "POST").length;
+  for (const candidate of [scene, { ...scene, prompt: "A changed legacy request" }]) {
+    const replay = await routes.POST(request(candidate));
+    assert.equal(replay.status, 409); assert.match((await replay.json()).error, /older render cannot be safely replayed/);
+  }
+  assert.equal(providerCalls.filter(call => call.init.method === "POST").length, before);
+  await require("../src/lib/video/jobs.ts").finishGeneration(stored, { status: "failed", error: "Test cleanup" });
+});
+
+test("concurrent identical request IDs replay one record and reserve one allowance", async () => {
+  await newWorkspace();
+  const scene = input();
+  const before = providerCalls.filter(call => call.init.method === "POST").length;
+  const responses = await Promise.all([routes.POST(request(scene)), routes.POST(request(scene))]);
+  assert.deepEqual(responses.map(response => response.status).sort(), [200, 202]);
+  const results = await Promise.all(responses.map(response => response.json()));
+  assert.ok(results.every(result => result.generation.id === scene.requestId));
+  assert.equal(providerCalls.filter(call => call.init.method === "POST").length, before + 1);
+  assert.equal((await (await routes.GET()).json()).usage.used, 1);
+  assert.equal(await db.videoGeneration.count({ where: { id: scene.requestId } }), 1);
+  await require("../src/lib/video/jobs.ts").finishGeneration(await db.videoGeneration.findUnique({ where: { id: scene.requestId } }), { status: "failed", error: "Test cleanup" });
+});

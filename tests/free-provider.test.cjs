@@ -99,3 +99,41 @@ test("library media is signed in one batch without public URLs", async () => {
     assert.equal(calls, 1, "An empty library must not call storage");
   } finally { delete process.env.NEXT_PUBLIC_SUPABASE_URL; delete process.env.SUPABASE_SERVICE_ROLE_KEY; }
 });
+
+test("one unavailable media object does not hide valid signed library files", async () => {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test-studio.supabase.co";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "test-only-service-key";
+  let calls = 0;
+  global.fetch = async (url, options) => {
+    calls++;
+    assert.match(new URL(url).pathname, /object\/sign\/studio-media$/);
+    assert.deepEqual(JSON.parse(options.body).paths, ["owner/videos/available.mp4", "owner/videos/missing.mp4"]);
+    return Response.json([
+      { path: "owner/videos/available.mp4", signedURL: "/object/sign/studio-media/owner/videos/available.mp4?token=test-token", error: null },
+      { path: "owner/videos/missing.mp4", signedURL: null, error: "Object not found" },
+    ]);
+  };
+  try {
+    const { signedMediaBatch } = require("../src/lib/video/storage.ts");
+    const urls = await signedMediaBatch(["owner/videos/available.mp4", "owner/videos/missing.mp4"]);
+    assert.equal(calls, 1, "Missing objects must not trigger individual signing retries");
+    assert.equal(urls.size, 1);
+    assert.match(urls.get("owner/videos/available.mp4"), /token=test-token/);
+    assert.equal(urls.has("owner/videos/missing.mp4"), false);
+  } finally { delete process.env.NEXT_PUBLIC_SUPABASE_URL; delete process.env.SUPABASE_SERVICE_ROLE_KEY; }
+});
+
+test("library signing service failures stay retriable instead of declaring every object missing", async () => {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test-studio.supabase.co";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "test-only-service-key";
+  try {
+    const { signedMediaBatch } = require("../src/lib/video/storage.ts");
+    for (const failure of [
+      async () => Response.json({ message: "private-upstream-diagnostic" }, { status: 503 }),
+      async () => { throw new Error("private-upstream-diagnostic"); },
+    ]) {
+      global.fetch = failure;
+      await assert.rejects(signedMediaBatch(["owner/videos/available.mp4"]), error => error.status === 503 && !error.message.includes("private-upstream-diagnostic"));
+    }
+  } finally { delete process.env.NEXT_PUBLIC_SUPABASE_URL; delete process.env.SUPABASE_SERVICE_ROLE_KEY; }
+});

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { VideoGeneration } from "@prisma/client";
 import sharp from "sharp";
 import { db, databaseConfigured } from "@/lib/video/db";
 import { ProviderError, validReferenceImage } from "@/lib/video/fal";
@@ -7,14 +8,22 @@ import { requireAccount, currentUser, authConfigured } from "@/lib/video/auth";
 import { mediaConfigured, readAsset } from "@/lib/video/storage";
 import { reserveRender, usage } from "@/lib/video/limits";
 import { apiError, boundedJson } from "@/lib/video/http";
-import { publicGeneration, publicGenerations, refreshGeneration, finishGeneration } from "@/lib/video/jobs";
+import { publicGeneration, publicGenerations, refreshGeneration, finishGeneration, recoverablePollWhere } from "@/lib/video/jobs";
 import { getWorkspace, isSameOrigin } from "@/lib/video/session";
 import { generationInput } from "@/lib/video/types";
 import { compileScene } from "@/lib/video/direction";
+import { generationRequestFingerprint } from "@/lib/video/request-fingerprint";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+async function replayGeneration(job: VideoGeneration, workspaceId: string, fingerprint: string) {
+  if (job.workspaceId !== workspaceId) throw new ProviderError("This request ID is already in use.", 409);
+  if (!job.requestFingerprint) throw new ProviderError("This older render cannot be safely replayed. Check your library; use a new request ID only for a new render.", 409);
+  if (job.requestFingerprint !== fingerprint) throw new ProviderError("This request ID belongs to different scene settings. Check your library or use a new request ID for a new render.", 409);
+  return NextResponse.json({ generation: await publicGeneration(job), usage: await usage(workspaceId) });
+}
 
 export async function GET() {
   try {
@@ -24,8 +33,8 @@ export async function GET() {
     const configured = providerConfigured() && authConfigured() && mediaConfigured();
     if (!user && process.env.NODE_ENV === "production") return NextResponse.json({ ...capabilities, configured, storageConfigured: true, generations: [], usage: { used: 0, limit: 2 } }, { headers: { "Cache-Control": "private, no-store" } });
     const workspace = (await getWorkspace(true))!;
-    const stale = await db.videoGeneration.findMany({ where: { workspaceId: workspace.id, status: { in: ["submitting", "queued", "processing"] }, createdAt: { lt: new Date(Date.now() - 3600000) } }, take: 10 });
-    for (const job of stale) await refreshGeneration(job);
+    const stale = await db.videoGeneration.findMany({ where: { workspaceId: workspace.id, OR: [{ status: { in: ["submitting", "queued", "processing"] }, createdAt: { lt: new Date(Date.now() - 3600000) } }, recoverablePollWhere()] }, take: 1 });
+    for (const job of stale) { try { await refreshGeneration(job); } catch { /* A transient provider outage must not hide saved library records. */ } }
     const jobs = await db.videoGeneration.findMany({ where: { workspaceId: workspace.id }, orderBy: { createdAt: "desc" }, take: 100 });
     return NextResponse.json({ ...capabilities, configured, storageConfigured: true, generations: await publicGenerations(jobs), usage: await usage(workspace.id) }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return apiError(error); }
@@ -41,6 +50,11 @@ export async function POST(request: Request) {
     const parsed = generationInput.safeParse(await boundedJson(request));
     if (!parsed.success) throw new ProviderError(parsed.error.issues[0]?.message || "Check the generation settings.", 400);
     const input = parsed.data;
+    const requestFingerprint = generationRequestFingerprint(input);
+    // Resolve retries before touching reference assets, which may have been
+    // removed since the original accepted submission.
+    const existing = await db.videoGeneration.findUnique({ where: { id: input.requestId } });
+    if (existing) return await replayGeneration(existing, workspace.id, requestFingerprint);
     const directedPrompt = compileScene(input.prompt, input.camera, input.style);
     if (directedPrompt.length > 2500) throw new ProviderError("Shorten your scene to leave room for camera and style directions (2500 characters total).", 400);
     if (input.assetId) {
@@ -56,29 +70,31 @@ export async function POST(request: Request) {
       const { width = 0, height = 0 } = metadata;
       if (width < 300 || height < 300 || width / height > 2.5 || height / width > 2.5) throw new ProviderError("Use a reference at least 300 × 300 px, with an aspect ratio between 2:5 and 5:2.", 400);
     }
-    const existing = await db.videoGeneration.findUnique({ where: { id: input.requestId } });
-    if (existing) {
-      if (existing.workspaceId !== workspace.id) throw new ProviderError("This request ID is already in use.", 409);
-      return NextResponse.json({ generation: await publicGeneration(existing), usage: await usage(workspace.id) });
-    }
     if (!providerConfigured()) throw new ProviderError("The studio's video service is being connected. Save a draft and check back soon.", 503);
     if (providerName() === "huggingface" && !mediaConfigured()) throw new ProviderError("The studio's saved-video storage is being connected. Please try later.", 503);
     if (providerName() !== "fal" && (input.referenceImage || input.duration !== 5 || input.generateAudio)) throw new ProviderError("Free generation currently supports text prompts, 5 seconds and no audio.", 400);
     // Recover abandoned locks even when the originating browser never returns.
-    const abandoned = await db.videoGeneration.findMany({ where: { status: { in: ["submitting", "queued", "processing"] }, createdAt: { lt: new Date(Date.now() - 3600000) } }, take: 20 });
+    const abandoned = await db.videoGeneration.findMany({ where: { status: { in: ["submitting", "queued", "processing"] }, createdAt: { lt: new Date(Date.now() - 3600000) } }, take: 1, orderBy: { createdAt: "asc" } });
     for (const old of abandoned) await refreshGeneration(old);
 
-    const job = await db.$transaction(async (tx) => {
+    let job: VideoGeneration;
+    try { job = await db.$transaction(async (tx) => {
       const lock = await tx.studioWorkspace.updateMany({ where: { id: workspace.id, activeJobId: null }, data: { activeJobId: input.requestId } });
       if (lock.count === 0) throw new ProviderError("Your current video is still rendering. Wait for it to finish before creating another.", 409);
       await reserveRender(tx, workspace.id);
       if (await tx.videoGeneration.count({ where: { workspaceId: workspace.id } }) >= 50) throw new ProviderError("Your library holds 50 videos. Delete an older video to make room.", 429);
       return tx.videoGeneration.create({ data: {
-        id: input.requestId, workspaceId: workspace.id, prompt: input.prompt, model: modelName(), provider: providerName(), seed: input.seed, quotaReserved: true,
+        id: input.requestId, workspaceId: workspace.id, prompt: input.prompt, model: modelName(), provider: providerName(), seed: input.seed, quotaReserved: true, requestFingerprint,
         settings: JSON.stringify({ camera: input.camera, style: input.style, negativePrompt: input.negativePrompt, generateAudio: input.generateAudio }),
         duration: input.duration, aspectRatio: input.referenceImage ? "Reference image" : input.aspectRatio,
       } });
-    });
+    }); } catch (error) {
+      // Another identical request may have committed after the first lookup.
+      // Recover its record without retrying a transaction or provider submission.
+      const raced = await db.videoGeneration.findUnique({ where: { id: input.requestId } });
+      if (raced) return await replayGeneration(raced, workspace.id, requestFingerprint);
+      throw error;
+    }
 
     try {
       const provider = await submitGeneration({ ...input, prompt: directedPrompt });

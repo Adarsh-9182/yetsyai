@@ -21,7 +21,9 @@ train a new model. The active application is `src/components/studio` and
 
 1. The browser sends a unique request UUID and validated scene settings to
    `POST /api/generations`. Camera and treatment presets compile into the exact
-   text displayed in the shot brief.
+   text displayed in the shot brief. A versioned SHA-256 fingerprint binds that
+   UUID to normalized settings and reference identity. Identical retries replay
+   the record; changed payloads and ambiguous legacy retries return 409.
 2. The server verifies the account and ownership, validates provider capabilities,
    atomically reserves daily/global quota and one workspace render slot, and
    creates a `submitting` record before making the provider request.
@@ -33,9 +35,14 @@ train a new model. The active application is `src/components/studio` and
    leases coalesce checks across devices; conditional writes preserve terminal states.
 5. Account-owned routes issue signed playback URLs and stream MP4 downloads.
    The browser renews library/reference URLs after long-lived tabs resume.
+   Missing individual objects retain their metadata without hiding valid media.
 
 Uncertain submissions retain their UUID and slot; they are never automatically
-submitted again. One-hour recovery releases abandoned jobs. Worker attempt IDs
+submitted again. After one hour a timeout releases the reservation, after first
+checking for a finished result. Signed callbacks and bounded status checks can
+recover a late success for 24 hours from submission without releasing quota
+again or disturbing a newer render. Definitive failures cannot recover. Daily
+maintenance checks one task per invocation, prioritizing active jobs. Worker attempt IDs
 are cached only until the Space restarts. These controls reduce duplicate inference
 but do not create a durable GPU service or guarantee availability.
 
@@ -66,3 +73,6 @@ default; fal requires three explicit configuration conditions, including
 exercises real auth, PostgreSQL projects and private references with disposable
 accounts; it does not send emails or render a video. A real GPU take and actual
 confirmation/recovery email delivery are separate launch gates in [SETUP.md](SETUP.md).
+
+Public provider contracts and the scoped REA analysis of a shipped Runway SDK
+are documented in [VIDEO_BACKEND_RESEARCH.md](VIDEO_BACKEND_RESEARCH.md).

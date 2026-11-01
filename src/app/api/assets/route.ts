@@ -16,7 +16,7 @@ export async function GET() {
     const workspace = await getWorkspace();
     const assets = workspace ? await db.studioAsset.findMany({ where: { workspaceId: workspace.id }, orderBy: { createdAt: "desc" }, take: 20 }) : [];
     const urls = await signedMediaBatch(assets.map((asset) => asset.path));
-    return NextResponse.json({ assets: assets.map(({ path, workspaceId: _, ...asset }) => ({ ...asset, url: urls.get(path)! })) }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ assets: assets.map(({ path, workspaceId: _, ...asset }) => ({ ...asset, url: urls.get(path) ?? null, ...(!urls.has(path) ? { mediaUnavailable: true } : {}) })) }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return apiError(error); }
 }
 export async function POST(request: Request) {

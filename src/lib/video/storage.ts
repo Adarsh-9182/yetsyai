@@ -27,7 +27,8 @@ export async function signedMediaBatch(paths: string[]) {
   for (const item of data) {
     if (!item.error && item.path && item.signedUrl) urls.set(item.path, item.signedUrl);
   }
-  if (unique.some((path) => !urls.has(path))) throw new ProviderError("One of your saved files couldn't be opened. Please retry.", 503);
+  // Per-object errors leave that entry unavailable without hiding unrelated
+  // files. A top-level storage/transport error above remains retriable.
   return urls;
 }
 export async function readAsset(path: string) {

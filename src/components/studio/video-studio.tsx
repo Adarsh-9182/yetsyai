@@ -27,7 +27,7 @@ const suggestions = ["A perfume ad in golden hour", "A quiet moment in Tokyo", "
 type LookCategory = "ALL" | "CINEMATIC" | "PRODUCT" | "NATURE" | "PORTRAIT";
 type NavPage = "Create" | "Explore" | "My videos" | "Assets" | "Storyboard";
 type Reference = { name: string; data: string; width: number; height: number; assetId?: string };
-type Asset = { id: string; name: string; width: number; height: number; url: string };
+type Asset = { id: string; name: string; width: number; height: number; url: string | null; mediaUnavailable?: boolean };
 type Scene = SavedScene;
 const cameras = cameraDirections;
 
@@ -209,13 +209,17 @@ export function VideoStudio() {
       const data = await response.json();
       if (!controller.signal.aborted) {
         setAssets(data.assets);
-        setReference(current => { const renewed = data.assets.find((asset: Asset) => asset.id === current?.assetId); return renewed && current ? { ...current, data: renewed.url } : current; });
+        setReference(current => {
+          if (!current?.assetId) return current;
+          const renewed = data.assets.find((asset: Asset) => asset.id === current.assetId);
+          return renewed?.url ? { ...current, data: renewed.url } : null;
+        });
       }
     }).catch(() => { if (!controller.signal.aborted) setNotice("Couldn't load your saved references. Check your connection and refresh."); });
     return () => controller.abort();
   }, [studio.capabilities.signedIn, studio.libraryRevision]);
   useEffect(() => { if (studio.loading) return; if (!studio.capabilities.audio) setAudio(false); if (!studio.capabilities.durations.includes(duration)) setDuration(5); }, [studio.capabilities, duration, studio.loading]);
-  useEffect(() => { setSelectedJob((current) => current ? studio.jobs.find((job) => job.id === current.id) || null : null); }, [studio.jobs]);
+  useEffect(() => { setSelectedJob((current) => current ? studio.jobs.find((job) => job.id === current.id && job.status === "completed" && job.videoUrl) || null : null); }, [studio.jobs]);
 
   useEffect(() => {
     if (!notice) return;
@@ -383,9 +387,9 @@ export function VideoStudio() {
     <div className="creation-grid jobs-grid">
       {jobs.map((job) => (
         <article className="creation-card job-card" key={job.id}>
-          <button className={`creation-image job-image job-${job.status}`} disabled={job.status !== "completed"} onClick={() => setSelectedJob(job)} aria-label={job.status === "completed" ? `Play ${job.prompt}` : `${job.status}: ${job.prompt}`}>
-            {job.videoUrl ? <video src={job.videoUrl} muted playsInline preload="metadata" className="job-thumbnail" /> : <div className="job-placeholder">{isActive(job.status) ? <><span className="spinner" /><span>{job.status === "submitting" ? "Submitting your scene" : job.status === "queued" ? "Waiting in queue" : "Creating your video"}</span><small>This may take a few minutes</small></> : <><CircleAlert size={22} /><span>Render failed</span></>}</div>}
-            <span className={`creation-tag status-${job.status}`}>{job.status.toUpperCase()}</span>
+          <button className={`creation-image job-image job-${job.status}`} disabled={job.status !== "completed" || !job.videoUrl} onClick={() => { if (job.videoUrl) setSelectedJob(job); }} aria-label={job.status === "completed" ? job.videoUrl ? `Play ${job.prompt}` : `Video unavailable: ${job.prompt}` : `${job.status}: ${job.prompt}`}>
+            {job.videoUrl ? <video src={job.videoUrl} muted playsInline preload="metadata" className="job-thumbnail" /> : <div className="job-placeholder">{isActive(job.status) ? <><span className="spinner" /><span>{job.status === "submitting" ? "Submitting your scene" : job.status === "queued" ? "Waiting in queue" : "Creating your video"}</span><small>This may take a few minutes</small></> : <><CircleAlert size={22} /><span>{job.mediaUnavailable || job.status === "completed" ? "Video unavailable" : "Render failed"}</span>{(job.mediaUnavailable || job.status === "completed") && <small>Refresh to check again. Your scene settings are still saved.</small>}</>}</div>}
+            <span className={`creation-tag status-${job.mediaUnavailable ? "unavailable" : job.status}`}>{job.mediaUnavailable ? "UNAVAILABLE" : job.status.toUpperCase()}</span>
             {job.videoUrl && <span className="play-button"><Play size={15} fill="currentColor" /></span>}
             <span className="image-duration">{job.duration}s</span>
           </button>
@@ -471,7 +475,28 @@ export function VideoStudio() {
           </section>}
 
 
-          {activeNav === "Assets" && <section className="asset-section">{!studio.capabilities.image && <div className="studio-message"><ImagePlus size={18} /><div>Collect references for your next scene. Image animation will open when a compatible backend is connected.</div></div>}{reference ? <div className="asset-card"><div role="img" aria-label={reference.name} className="asset-image" style={{ backgroundImage: `url(${reference.data})` }} /><h2>{reference.name}</h2><p>{reference.width} × {reference.height} · {reference.assetId ? "Saved to your account" : "Selected on this device"}</p><div>{studio.capabilities.image && <button className="generate-button" onClick={() => { setMode("reference"); go("Create"); }}><Film size={15} /> Animate image</button>}{!reference.assetId && <button className="generate-button" disabled={savingAsset || !studio.capabilities.mediaConfigured} onClick={() => void saveReference()}><Bookmark size={15} />{savingAsset ? "Saving…" : "Save reference"}</button>}<button className="library-button" onClick={removeReference}><X size={15} /> Clear selection</button></div></div> : <div className="empty-state"><ImagePlus size={30} /><h3>Your next starting point.</h3><p>Collect a face, a place or a product. Sign in to save references across devices.</p><button className="generate-button" disabled={readingReference} onClick={() => fileRef.current?.click()}><Plus size={15} />{readingReference ? "Reading…" : "Choose image"}</button>{fileError && <p className="inline-error" role="alert">{fileError}</p>}</div>}{assets.length > 0 && <div className="creation-grid assets-grid">{assets.map((asset) => <article className="creation-card" key={asset.id}><button className="creation-image" onClick={() => setReference({ name: asset.name, data: asset.url, width: asset.width, height: asset.height, assetId: asset.id })}><div className="thumb" role="img" aria-label={asset.name} style={{ backgroundImage: `url(${asset.url})` }} /></button><div className="creation-info"><div><h3>{asset.name}</h3><p>{asset.width} × {asset.height}</p></div><button className="icon-button" onClick={() => void deleteAsset(asset.id)} aria-label={`Remove ${asset.name}`}><Trash2 size={14} /></button></div></article>)}</div>}</section>}
+          {activeNav === "Assets" && <section className="asset-section">
+            {!studio.capabilities.image && <div className="studio-message"><ImagePlus size={18} /><div>Collect references for your next scene. Image animation will open when a compatible backend is connected.</div></div>}
+            {reference ? <div className="asset-card">
+              <div role="img" aria-label={reference.name} className="asset-image" style={{ backgroundImage: `url(${reference.data})` }} />
+              <h2>{reference.name}</h2><p>{reference.width} × {reference.height} · {reference.assetId ? "Saved to your account" : "Selected on this device"}</p>
+              <div>
+                {studio.capabilities.image && <button className="generate-button" onClick={() => { setMode("reference"); go("Create"); }}><Film size={15} /> Animate image</button>}
+                {!reference.assetId && <button className="generate-button" disabled={savingAsset || !studio.capabilities.mediaConfigured} onClick={() => void saveReference()}><Bookmark size={15} />{savingAsset ? "Saving…" : "Save reference"}</button>}
+                <button className="library-button" onClick={removeReference}><X size={15} /> Clear selection</button>
+              </div>
+            </div> : <div className="empty-state">
+              <ImagePlus size={30} /><h3>Your next starting point.</h3><p>Collect a face, a place or a product. Sign in to save references across devices.</p>
+              <button className="generate-button" disabled={readingReference} onClick={() => fileRef.current?.click()}><Plus size={15} />{readingReference ? "Reading…" : "Choose image"}</button>
+              {fileError && <p className="inline-error" role="alert">{fileError}</p>}
+            </div>}
+            {assets.length > 0 && <div className="creation-grid assets-grid">{assets.map((asset) => <article className="creation-card" key={asset.id}>
+              <button className="creation-image" disabled={!asset.url} aria-label={asset.url ? `Select reference: ${asset.name}` : `Reference unavailable: ${asset.name}`} onClick={() => { if (asset.url) setReference({ name: asset.name, data: asset.url, width: asset.width, height: asset.height, assetId: asset.id }); }}>
+                {asset.url ? <div className="thumb" role="img" aria-label={asset.name} style={{ backgroundImage: `url(${asset.url})` }} /> : <div className="job-placeholder"><CircleAlert size={22} /><span>Reference unavailable</span><small>Refresh to check again, or remove this reference.</small></div>}
+              </button>
+              <div className="creation-info"><div><h3>{asset.name}</h3><p>{asset.width} × {asset.height}{!asset.url && " · File unavailable"}</p></div><button className="icon-button" onClick={() => void deleteAsset(asset.id)} aria-label={`Remove ${asset.name}`}><Trash2 size={14} /></button></div>
+            </article>)}</div>}
+          </section>}
 
           <ProjectLibrary scenes={scenes} replaceScenes={setScenes} enabled={studio.capabilities.signedIn && studio.capabilities.configuration.database} hidden={activeNav !== "Storyboard"} signIn={() => setAccountOpen(true)} />
           {activeNav === "Storyboard" && <section className="storyboard-section">
@@ -496,7 +521,7 @@ export function VideoStudio() {
           <footer className="studio-footer"><span>yetsyai. <span>Made for your next big idea.</span></span><span>INDEPENDENT SPIRIT. OPEN POSSIBILITIES. <Aperture size={15} /></span></footer>
         </div>
       </section>
-      {selectedJob && <VideoPreview job={selectedJob} close={() => setSelectedJob(null)} download={(job) => void download(job)} />}
+      {selectedJob?.videoUrl && <VideoPreview job={selectedJob} close={() => setSelectedJob(null)} download={(job) => void download(job)} />}
       {guideOpen && <StudioGuide close={() => setGuideOpen(false)} start={() => { go("Create"); setTimeout(() => document.getElementById("video-prompt")?.focus(), 0); }} />}
       {accountOpen && <AccountDialog close={() => { setAccountOpen(false); setAccountIssue(""); }} completed={studio.accountChanged} configured={studio.capabilities.authConfigured} signedIn={studio.capabilities.signedIn} initialMessage={accountIssue} />}
       {notice && !mobileMenu && <div className="toast" role="status"><span className="toast-check"><Check size={13} /></span>{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><X size={14} /></button></div>}

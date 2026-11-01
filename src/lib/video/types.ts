@@ -28,6 +28,7 @@ export type Generation = {
   duration: number;
   status: GenerationStatus;
   videoUrl: string | null;
+  mediaUnavailable?: boolean;
   error: string | null;
   createdAt: string;
   seed: number;

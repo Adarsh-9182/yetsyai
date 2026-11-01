@@ -67,6 +67,8 @@ model VideoGeneration {
   videoUrl          String?
   error             String?
   settings          String?
+  requestFingerprint String?
+  failureCode       String?
   pollAfter         DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

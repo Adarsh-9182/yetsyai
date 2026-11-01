@@ -1,0 +1,164 @@
+{
+  "package": "@runwayml/sdk",
+  "version": "4.24.0",
+  "registryTarball": "https://registry.npmjs.org/@runwayml/sdk/-/sdk-4.24.0.tgz",
+  "registryIntegrity": "sha512-mcimaIxrh+ta/HPWuyxGt99y+CLgQBPr0o53AJu82T0ln2YGDFVJ9TDyIfMhDsSTR8oxSzFwu3OCud+oPPHYZw==",
+  "evidenceId": "ev_7fafdfe8447cc6fe06e3152a81afc8765d431199a1aef79eb22654a2d52714c3",
+  "parentEvidenceId": "ev_385908fdc9701b7b59be22b5c8a9d97283740eb45da934aa1a13f39988e97520",
+  "artifactSha256": "2c978e4f718538f4bd63daf8a0825c8e8863311cb32366b1137b4eda8dc0eb76",
+  "inspection": {
+    "input_path": "/private/tmp/yetsyai-runway-sdk-ibu0kb_4/package",
+    "format": "directory",
+    "root_artifact_sha256": "2c978e4f718538f4bd63daf8a0825c8e8863311cb32366b1137b4eda8dc0eb76",
+    "source_selection": {
+      "requested_paths": [
+        "resources/tasks.js",
+        "lib/polling.js",
+        "resources/generate/video.js",
+        "client.js"
+      ],
+      "unselected_files": 685
+    },
+    "statistics": {
+      "relevant_files": 689,
+      "nested_asar_containers": 0,
+      "text_bytes_read": 39491,
+      "invalid_utf8_files": 0,
+      "parsed_javascript_files": 4,
+      "skipped_javascript_files": 0,
+      "visited_ast_nodes": 4315,
+      "findings": 138,
+      "modules": 0,
+      "parse_failures": 0
+    },
+    "electron": {
+      "browser_windows": 0,
+      "explicit_web_preferences": 0,
+      "preload_entrypoints": 0,
+      "context_bridge_apis": 0,
+      "exposed_api_members": 0,
+      "ipc": {
+        "operations": 0,
+        "literal_channels": 0,
+        "dynamic_channel_operations": 0,
+        "renderer_transmissions": 0,
+        "renderer_listeners": 0,
+        "main_handlers": 0,
+        "paired_renderer_transmissions": 0,
+        "ambiguous_renderer_transmissions": 0,
+        "unpaired_literal_renderer_transmissions": 0
+      },
+      "sender_validation_observations": 0,
+      "utility_processes": 0,
+      "resolved_utility_entrypoints": 0,
+      "native_addon_bindings": 0,
+      "resolved_native_addon_bindings": 0
+    },
+    "coverage": {
+      "application": {
+        "status": "partial",
+        "truncated": false,
+        "omitted_count": null,
+        "limits": []
+      },
+      "semantic": {
+        "status": "partial",
+        "truncated": false,
+        "omitted_nodes": null,
+        "omitted_relations": null,
+        "limits": [],
+        "families": [
+          {
+            "family": "boundary",
+            "status": "partial",
+            "retained_relations": 7,
+            "omitted_relations": null,
+            "unknown_count": 379
+          },
+          {
+            "family": "call-flow",
+            "status": "partial",
+            "retained_relations": 16,
+            "omitted_relations": null,
+            "unknown_count": 657
+          },
+          {
+            "family": "child-process",
+            "status": "partial",
+            "retained_relations": 0,
+            "omitted_relations": null,
+            "unknown_count": 378
+          },
+          {
+            "family": "closure",
+            "status": "partial",
+            "retained_relations": 123,
+            "omitted_relations": null,
+            "unknown_count": 378
+          },
+          {
+            "family": "configuration",
+            "status": "partial",
+            "retained_relations": 0,
+            "omitted_relations": null,
+            "unknown_count": 378
+          },
+          {
+            "family": "data-flow",
+            "status": "partial",
+            "retained_relations": 1630,
+            "omitted_relations": null,
+            "unknown_count": 606
+          },
+          {
+            "family": "event",
+            "status": "partial",
+            "retained_relations": 0,
+            "omitted_relations": null,
+            "unknown_count": 378
+          },
+          {
+            "family": "object-flow",
+            "status": "partial",
+            "retained_relations": 309,
+            "omitted_relations": null,
+            "unknown_count": 887
+          },
+          {
+            "family": "promise-ownership",
+            "status": "partial",
+            "retained_relations": 30,
+            "omitted_relations": null,
+            "unknown_count": 399
+          },
+          {
+            "family": "request",
+            "status": "partial",
+            "retained_relations": 0,
+            "omitted_relations": null,
+            "unknown_count": 378
+          },
+          {
+            "family": "resource-lifecycle",
+            "status": "partial",
+            "retained_relations": 0,
+            "omitted_relations": null,
+            "unknown_count": 378
+          },
+          {
+            "family": "timer",
+            "status": "partial",
+            "retained_relations": 4,
+            "omitted_relations": null,
+            "unknown_count": 378
+          }
+        ]
+      },
+      "application_unknowns": 685,
+      "semantic_unknowns": 5574
+    },
+    "limitation_count": 7
+  },
+  "scope": "Static selected-file inspection only; no SDK execution, account access, paid API call or proprietary backend inspection.",
+  "fullEvidenceExport": "/private/tmp/yetsyai-runway-rea-evidence.json"
+}

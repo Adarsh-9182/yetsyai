@@ -4,9 +4,8 @@ import { z } from "zod";
 import { db } from "@/lib/video/db";
 import { ProviderError } from "@/lib/video/fal";
 import { validVideoUrl } from "@/lib/video/provider";
-import { finishGeneration } from "@/lib/video/jobs";
+import { finishGeneration, isRecoverableTimeout, archiveCompletedGeneration } from "@/lib/video/jobs";
 import { apiError } from "@/lib/video/http";
-import { archiveVideo } from "@/lib/video/storage";
 import { isActive } from "@/lib/video/types";
 
 export const runtime = "nodejs";
@@ -29,12 +28,11 @@ export async function POST(request: Request) {
     const event = z.object({ id: z.string().uuid(), status: z.enum(["completed", "failed"]), videoUrl: z.string().url().refine(validVideoUrl).optional() }).parse(JSON.parse(body));
     const job = await db.videoGeneration.findUnique({ where: { id: event.id } });
     if (!job || job.provider !== "huggingface") throw new ProviderError("Render not found.", 404);
-    if (!isActive(job.status)) return NextResponse.json({ accepted: true });
+    if (!isActive(job.status) && !isRecoverableTimeout(job)) return NextResponse.json({ accepted: true });
     if (event.status === "completed" && event.videoUrl) {
-      const storagePath = await archiveVideo(event.videoUrl, job.workspaceId, job.id);
-      await finishGeneration(job, { status: "completed", videoUrl: event.videoUrl, storagePath });
+      await archiveCompletedGeneration(job, event.videoUrl);
     } else if (event.status === "failed") {
-      await finishGeneration(job, { status: "failed", error: "The free GPU couldn't finish this scene. Its quota may be exhausted. Please try later." });
+      await finishGeneration(job, { status: "failed", failureCode: "provider_failed", error: "The free GPU couldn't finish this scene. Its quota may be exhausted. Please try later." });
     } else throw new ProviderError("Missing video.", 400);
     return NextResponse.json({ accepted: true });
   } catch (error) { return apiError(error); }
