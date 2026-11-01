@@ -5,7 +5,11 @@ import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState("dark");
-  useEffect(() => { setTheme(document.documentElement.dataset.theme || "dark"); }, []);
+  useEffect(() => {
+    const current = document.documentElement.dataset.theme || "dark";
+    setTheme(current);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", current === "light" ? "#f5f5ef" : "#0b0c0e");
+  }, []);
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
