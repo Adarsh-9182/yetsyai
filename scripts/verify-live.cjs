@@ -97,6 +97,12 @@ async function main() {
     assert.equal(library.data.generations[0].settings.camera, "push");
     assert.equal((await request(owner, `/api/generations/${id}`)).data.generation.sceneId, scene.id);
     assert.equal((await request(other, `/api/generations/${id}`)).status, 404);
+    phase = "save and reopen a preferred storyboard take";
+    const withTake = await request(owner, "/api/projects", "PUT", { ...body, revision: 2, scenes: [{ ...scene, preferredGenerationId: id }] });
+    assert.equal(withTake.status, 200); assert.equal(withTake.data.project.revision, 3);
+    assert.equal((await request(owner, `/api/projects?id=${projectId}`)).data.project.scenes[0].preferredGenerationId, id);
+    assert.equal((await request(other, `/api/projects?id=${projectId}`)).status, 404);
+    console.log("PASS preferred take persists with the owned project and remains isolated from other accounts");
     phase = "isolate deliberately missing fixture media";
     const missingId = randomUUID(), missingAssetId = randomUUID();
     await db.videoGeneration.create({ data: { id: missingId, workspaceId: workspace.id, prompt: "DISPOSABLE MISSING-MEDIA FIXTURE", model: "Missing-file test", provider: "huggingface", status: "completed", storagePath: `${workspace.id}/videos/${missingId}.mp4`, duration: 5, aspectRatio: "16:9" } });

@@ -45,6 +45,15 @@ fingerprint v2; unlinked v1 requests preserve their deployed canonical identity.
 The studio filters owned takes by shot and compares two available completed clips.
 Playback starts both players but does not promise frame synchronization.
 
+Each saved shot may also contain a `preferredGenerationId`. The studio resolves
+it only against the current account's library, requires the render's `sceneId`
+to match, and excludes active/failed/unavailable media. Project JSON stores the
+UUID, never a signed media URL. A missing choice stays in the plan for explicit
+replacement or clearing; deleting a video does not silently pick another take.
+The sequence player uses one video element to play choices in storyboard order.
+It pauses on close and requires a playable choice for every shot. This is
+browser playback, with possible load gaps between files, not a combined MP4.
+
 Uncertain submissions retain their UUID and slot; they are never automatically
 submitted again. After one hour a timeout releases the reservation, after first
 checking for a finished result. Signed callbacks and bounded status checks can

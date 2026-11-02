@@ -1,6 +1,6 @@
 # Yetsyai product roadmap
 
-Updated November 1, 2026. Live smoke checks pass for confirmed-account sign-in,
+Updated November 2, 2026. Live smoke checks pass for confirmed-account sign-in,
 PostgreSQL project save/reopen/revision conflicts, cross-account isolation,
 private reference upload/signed access, and sign-out. Disposable test data was
 removed. The owner's GPU Space, actual email delivery and first real render
@@ -40,6 +40,11 @@ and production-inference QA remain open.
   linked-shot composer with update/detach controls. Duplicate shots start without takes.
 - Two-take comparison with common start/pause controls, individual players and
   recorded prompt/camera/look/seed/model settings; stacks vertically on mobile.
+- Explicit preferred takes stored with storyboard/project shots, preserved when
+  editing a shot and cleared on duplication. Missing choices remain editable.
+- Sequence preview plays each chosen clip in storyboard order, with automatic
+  advance, shot navigation, replay and sound controls. It requires every shot
+  to have a playable choice; it does not silently replace unavailable clips.
 - Worker attempt cache, bounded outputs, failed-attempt deduplication and profile controls.
 - Regression checks use SQLite and mocked external services. Opt-in live checks
   cover auth, PostgreSQL and private media with disposable accounts. Production
@@ -71,7 +76,7 @@ free account. Model quality has not been benchmarked. Setup instructions are in
 ## Later improvements, once generation works
 
 - Image-to-video after a compatible model path passes real integration checks.
-- Clip trimming, sequence assembly and soundtrack editing without more inference.
+- Clip trimming, downloadable sequence assembly and soundtrack editing without more inference.
 - A durable worker queue when measured demand exceeds the one-active-render prototype.
 - Capacity expansion needs GPU resources; increasing frontend traffic does not increase
   free GPU quota. The current budget supports a limited beta, not unlimited rendering.

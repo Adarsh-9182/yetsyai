@@ -8,6 +8,7 @@ export const sceneDraft = generationInput.pick({ prompt: true, seed: true, camer
 export const savedScene = sceneDraft.extend({
   id: z.string().uuid(),
   title: z.string().trim().max(80).default(""),
+  preferredGenerationId: z.string().uuid().optional(),
 });
 export const editableDraft = sceneDraft.extend({ prompt: z.string().max(2500), sceneId: z.string().uuid().optional() });
 export const storyboardFile = z.object({ version: z.literal(1), scenes: z.array(savedScene).max(12) });

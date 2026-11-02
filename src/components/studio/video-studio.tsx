@@ -15,6 +15,9 @@ import { ProjectLibrary } from "./project-library";
 import { ThemeToggle } from "./theme-toggle";
 import { StudioGuide } from "./studio-guide";
 import { TakeComparison } from "./take-comparison";
+import { ShotTakePicker } from "./shot-take-picker";
+import { SequencePreview, PlayableShot } from "./sequence-preview";
+import { resolveSequence } from "@/lib/video/sequence";
 import { cameraDirections, visualStyles, compileScene, sceneAdvice } from "@/lib/video/direction";
 import { editableDraft, savedScene, storyboardFile, SavedScene } from "@/lib/video/drafts";
 
@@ -50,15 +53,16 @@ function RenderProgress({ job }: { job: Generation }) {
 
 function VideoPreview({ job, close, download }: { job: Generation; close: () => void; download: (job: Generation) => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const playerRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
-    const dialog = dialogRef.current;
+    const dialog = dialogRef.current, video = playerRef.current;
     dialog?.showModal();
-    return () => dialog?.close();
+    return () => { video?.pause(); dialog?.close(); };
   }, []);
   return (
     <dialog ref={dialogRef} className="preview-dialog" onCancel={close} aria-labelledby="preview-title">
       <div className="preview-heading"><h2 id="preview-title">Your video</h2><button className="icon-button" onClick={close} aria-label="Close preview"><X size={19} /></button></div>
-      <video src={job.videoUrl!} controls autoPlay playsInline className="preview-video" />
+      <video ref={playerRef} src={job.videoUrl!} controls autoPlay playsInline className="preview-video" />
       <p className="preview-prompt">{job.prompt}</p>
       <div className="preview-details"><span>{job.model} · {job.duration}s · {job.aspectRatio}</span><button className="generate-button" onClick={() => download(job)}><ArrowDownToLine size={15} /> Download MP4</button></div>
     </dialog>
@@ -87,6 +91,7 @@ export function VideoStudio() {
   const [selectedJob, setSelectedJob] = useState<Generation | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [sequenceOpen, setSequenceOpen] = useState(false);
   const [sceneFilter, setSceneFilter] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -121,6 +126,9 @@ export function VideoStudio() {
   const scopedJobs = studio.jobs.filter(job => activeNav !== "My videos" || !sceneFilter || job.sceneId === sceneFilter);
   const filteredJobs = scopedJobs.filter((job) => job.prompt.toLowerCase().includes(search.toLowerCase()) && (activeNav !== "My videos" || libraryFilter === "all" || (libraryFilter === "active" ? isActive(job.status) : job.status === libraryFilter)));
   const comparedJobs = compareIds.flatMap(id => { const job = studio.jobs.find(job => job.id === id && job.status === "completed" && job.videoUrl); return job ? [job] : []; });
+  const sequence = resolveSequence(scenes, studio.jobs);
+  const playableSequence = sequence.filter((shot): shot is PlayableShot => Boolean(shot.generation));
+  const sequenceReady = !studio.loading && scenes.length > 0 && playableSequence.length === scenes.length;
   const latestVideo = studio.jobs.find((job) => job.status === "completed" && job.videoUrl);
   const currentJob = studio.jobs.find((job) => isActive(job.status));
   const monitorRatio = currentJob?.aspectRatio || latestVideo?.aspectRatio || ratio;
@@ -211,6 +219,7 @@ export function VideoStudio() {
   useEffect(() => { if (draftReady && sceneId && !linkedScene) setSceneId(undefined); }, [draftReady, sceneId, linkedScene]);
   useEffect(() => { setCompareIds(ids => ids.filter(id => studio.jobs.some(job => job.id === id && job.status === "completed" && job.videoUrl))); }, [studio.jobs]);
   useEffect(() => { if (comparedJobs.length !== 2) setComparisonOpen(false); }, [comparedJobs.length]);
+  useEffect(() => { if (!sequenceReady) setSequenceOpen(false); }, [sequenceReady]);
   useEffect(() => {
     setAssets([]);
     if (!studio.capabilities.signedIn) { setReference(null); setSelectedJob(null); return; }
@@ -279,7 +288,7 @@ export function VideoStudio() {
       const index = current.findIndex((scene) => scene.id === id);
       if (index < 0) return current;
       const source = current[index];
-      const copy = { ...source, id: copyId, title: source.title ? `${source.title.slice(0, 73)} (copy)` : "" };
+      const copy = { ...source, id: copyId, title: source.title ? `${source.title.slice(0, 73)} (copy)` : "", preferredGenerationId: undefined };
       return [...current.slice(0, index + 1), copy, ...current.slice(index + 1)];
     });
     setNotice("Shot duplicated with its prompt and all settings.");
@@ -349,7 +358,7 @@ export function VideoStudio() {
     if (prompt.trim().length < 3) { setNotice("Describe your scene first."); return; }
     if (mode === "reference") { setNotice("Storyboard saves text shots. Save the image in Assets for your reference clip."); return; }
     if (!linkedScene && scenes.length >= 12) { setNotice("Your storyboard holds 12 scenes. Remove one to make room."); return; }
-    const shot = { id: linkedScene?.id ?? crypto.randomUUID(), title: linkedScene?.title ?? "", prompt: prompt.trim(), ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt };
+    const shot = { ...linkedScene, id: linkedScene?.id ?? crypto.randomUUID(), title: linkedScene?.title ?? "", prompt: prompt.trim(), ratio, seed, camera: cameras[camera].id, style: visualStyles[style].id, duration, generateAudio: audio, negativePrompt };
     setScenes(current => linkedScene ? current.map(scene => scene.id === linkedScene.id ? shot : scene) : [...current, shot]);
     setSceneId(shot.id);
     setNotice(linkedScene ? "Shot updated on this device. Save your project to sync the changes." : "Scene saved to your storyboard. New renders will be linked to this shot.");
@@ -529,7 +538,7 @@ export function VideoStudio() {
               <div><span className="eyebrow">{scenes.length} / 12 SCENES</span><p>A plan for your next film. Generate each shot separately when you&apos;re ready.</p></div>
               <div className="board-tools"><button className="library-button" onClick={() => boardFileRef.current?.click()}><Upload size={14} /> Import</button><button className="library-button" disabled={!scenes.length} onClick={exportBoard}><ArrowDownToLine size={14} /> Export</button><button className="library-button" onClick={() => { setSceneId(undefined); go("Create"); }}><Plus size={15} /> Write a scene</button></div>
             </div>
-            {scenes.length > 0 && <div className="sequence-summary" aria-label="Planned sequence duration"><span><Clock3 size={15} />{sequenceTime(plannedDuration)} planned runtime</span><p>Name your shots and arrange the sequence. This is a shot plan; clips are rendered separately.</p></div>}
+            {scenes.length > 0 && <div className="sequence-summary" aria-label="Planned sequence duration"><span><Clock3 size={15} />{sequenceTime(plannedDuration)} planned runtime</span><p>{playableSequence.length} of {scenes.length} shots have a playable take. Choose one for every shot to preview your film in order.</p><button className="generate-button" disabled={!sequenceReady} onClick={() => setSequenceOpen(true)}><Play size={14} /> Preview sequence</button></div>}
             {scenes.length ? <div className="storyboard-grid">{scenes.map((scene, index) => <article className="storyboard-card" key={scene.id}>
               <div className="storyboard-card-heading">
                 <span>SCENE {String(index + 1).padStart(2, "0")}</span>
@@ -539,6 +548,7 @@ export function VideoStudio() {
               <label className="shot-name"><span>SHOT NAME</span><input type="text" maxLength={80} value={scene.title} placeholder={`Scene ${String(index + 1).padStart(2, "0")}`} aria-label={`Name scene ${index + 1}`} onChange={(event) => { const title = event.target.value; setScenes((current) => current.map((item) => item.id === scene.id ? { ...item, title } : item)); }} /></label>
               <div className="shot-timing"><Clock3 size={12} /><span>{sequenceTime(shotTimings[index])} – {sequenceTime(shotTimings[index] + scene.duration)}</span><span>{scene.duration}s shot</span></div>
               <p>{scene.prompt}</p>
+              <ShotTakePicker scene={scene} position={index} jobs={studio.jobs} choose={id => setScenes(current => current.map(shot => shot.id === scene.id ? { ...shot, preferredGenerationId: id } : shot))} preview={setSelectedJob} />
               <div className="shot-takes"><span><Film size={13} />{studio.jobs.filter(job => job.sceneId === scene.id).length} linked takes</span><button className="library-button" disabled={!studio.jobs.some(job => job.sceneId === scene.id)} onClick={() => viewTakes(scene.id)}>Review takes <ArrowUpRight size={13} /></button></div>
               <div className="storyboard-card-footer"><span>{scene.ratio} · {visualStyles.find((item) => item.id === scene.style)?.name} · Seed {scene.seed}</span><div className="shot-actions"><button disabled={scenes.length >= 12} onClick={() => duplicateScene(scene.id)} aria-label={`Duplicate scene ${index + 1}`}><Copy size={13} /> Duplicate</button><button onClick={() => openScene(scene)}>Open scene <ArrowUpRight size={15} /></button></div></div>
             </article>)}</div> : <div className="empty-state"><Clapperboard size={32} /><h3>Give your story a first scene.</h3><p>Write a prompt in Create, then choose Save scene. Save your project above to open its shots on another device.</p><button className="generate-button" onClick={() => go("Create")}>Start writing <ArrowRight size={16} /></button></div>}
@@ -549,6 +559,7 @@ export function VideoStudio() {
       </section>
       {selectedJob?.videoUrl && <VideoPreview job={selectedJob} close={() => setSelectedJob(null)} download={(job) => void download(job)} />}
       {comparisonOpen && comparedJobs.length === 2 && <TakeComparison jobs={[comparedJobs[0], comparedJobs[1]]} close={() => setComparisonOpen(false)} download={(job) => void download(job)} />}
+      {sequenceOpen && sequenceReady && <SequencePreview key={playableSequence.map(shot => `${shot.scene.id}:${shot.generation.id}`).join(",")} shots={playableSequence} close={() => setSequenceOpen(false)} />}
       {guideOpen && <StudioGuide close={() => setGuideOpen(false)} start={() => { go("Create"); setTimeout(() => document.getElementById("video-prompt")?.focus(), 0); }} />}
       {accountOpen && <AccountDialog close={() => { setAccountOpen(false); setAccountIssue(""); }} completed={studio.accountChanged} configured={studio.capabilities.authConfigured} signedIn={studio.capabilities.signedIn} initialMessage={accountIssue} />}
       {notice && !mobileMenu && <div className="toast" role="status"><span className="toast-check"><Check size={13} /></span>{notice}<button onClick={() => setNotice("")} aria-label="Dismiss"><X size={14} /></button></div>}

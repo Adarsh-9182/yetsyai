@@ -70,7 +70,8 @@ node scripts/verify-studio-ui.cjs --video-fixture /absolute/test.mp4 --playwrigh
 The script refuses non-loopback targets and intercepts all application API calls.
 It checks shot identity in render payloads, per-shot library filtering, selecting
 two completed takes, real fixture playback/pause/close, shot update/duplicate/
-detach, both themes, and desktop/mobile horizontal overflow. Screenshots go to a
+detach, preferred-take persistence, automatic sequence transitions/replay/mute,
+unavailable choices, both themes, and desktop/mobile horizontal overflow. Screenshots go to a
 temporary directory by default; `--output-dir` selects another location. These
 are local UI fixtures, not evidence of real account services or model inference.
 

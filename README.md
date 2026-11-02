@@ -14,6 +14,10 @@ Open or save a storyboard shot to link subsequent text renders to its stable
 shot ID. Review its takes from the storyboard, or select two available completed
 videos for a comparison view with playback controls, prompt, camera, look and seed.
 Duplicating a shot creates a new identity; its renders start empty.
+Choose a preferred take for each shot, save the project to sync those choices,
+then preview the selected clips in storyboard order. The preview supports shot
+navigation, automatic advance, replay and sound controls. It plays existing
+clips; combined-file export and trimming are not implemented yet.
 
 The studio puts the director’s desk first, with a photographic inspiration card,
 persisted light/dark themes, a first-take guide, searchable status-filtered video
