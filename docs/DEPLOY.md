@@ -57,6 +57,12 @@ with one actual account and one real render after the owner's Space is connected
 
 ## Local studio browser check
 
+The deployed OAuth endpoints can be checked without accounts, mail or provider
+consent by adding `--oauth-only` to `scripts/verify-live.cjs --run --env-file
+.env.production.local`. It reports the actual enabled Google/GitHub flags,
+same-origin guards, secure authorization starts when enabled, and cancellation
+handling. It does not claim that provider consent/session exchange was completed.
+
 Start the local development server on loopback. The browser script requires
 Playwright and its Chromium browser in your development tooling, plus a valid
 MP4 fixture. An existing Playwright module can be supplied explicitly:
@@ -74,6 +80,11 @@ detach, preferred-take persistence, automatic sequence transitions/replay/mute,
 unavailable choices, both themes, and desktop/mobile horizontal overflow. Screenshots go to a
 temporary directory by default; `--output-dir` selects another location. These
 are local UI fixtures, not evidence of real account services or model inference.
+
+`scripts/verify-auth-ui.cjs --playwright-module /absolute/path/to/playwright`
+checks the sign-in modal on that same local server: Google/GitHub buttons,
+sign-in/signup/reset views, unavailable providers, outage retry, callback errors,
+both themes and desktop/mobile dialog overflow. It intercepts all app API calls.
 
 ## Free worker
 

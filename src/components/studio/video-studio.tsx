@@ -201,8 +201,15 @@ export function VideoStudio() {
       if (Array.isArray(board)) setScenes(board.slice(0, 12).flatMap((item) => { const parsed = savedScene.safeParse(item); return parsed.success ? [parsed.data] : []; }));
     } catch { /* A disabled browser store should not prevent creation. */ }
     setDraftReady(true);
-    if (new URLSearchParams(window.location.search).get("account") === "expired") {
-      setAccountIssue("This link has expired or was already used. Sign in, resend confirmation, or request a new password reset below.");
+    const accountResult = new URLSearchParams(window.location.search).get("account");
+    if (accountResult === "signed-in") {
+      try { localStorage.setItem("yetsyai-account-change", crypto.randomUUID()); } catch { /* Storage is optional. */ }
+      studio.accountChanged();
+      setNotice("You're signed in. Your private studio is ready.");
+      const url = new URL(window.location.href); url.searchParams.delete("account"); window.history.replaceState(null, "", url);
+    }
+    if (accountResult === "expired" || accountResult === "oauth-error") {
+      setAccountIssue(accountResult === "oauth-error" ? "Social sign-in was cancelled or couldn't finish. Please try again, or sign in with email." : "This link has expired or was already used. Sign in, resend confirmation, or request a new password reset below.");
       setAccountOpen(true);
       const url = new URL(window.location.href); url.searchParams.delete("account"); window.history.replaceState(null, "", url);
     }

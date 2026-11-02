@@ -36,6 +36,29 @@ async function request(jar, path, method = "GET", body, origin = base) {
 
 async function main() {
   assert.equal(db._engineConfig.activeProvider, "postgresql", "Generate the PostgreSQL Prisma client before live testing");
+  phase = "check social sign-in readiness and secure OAuth start";
+  const social = await request(new Map(), "/api/account/oauth");
+  assert.equal(social.status, 200);
+  assert.equal((await request(new Map(), "/api/account/oauth", "POST", { provider: "google" }, "https://untrusted.example")).status, 403);
+  assert.equal((await request(new Map(), "/api/account/oauth", "POST", { provider: "unsupported" })).status, 400);
+  for (const provider of ["google", "github"]) {
+    assert.equal(typeof social.data.providers[provider], "boolean");
+    const start = await request(new Map(), "/api/account/oauth", "POST", { provider });
+    if (social.data.providers[provider]) {
+      assert.equal(start.status, 200);
+      const destination = new URL(start.data.url);
+      assert.equal(destination.origin, new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin);
+      assert.equal(destination.searchParams.get("redirect_to"), `${base}/account/confirm`);
+      assert.equal(destination.searchParams.get("provider"), provider);
+      assert.equal(destination.searchParams.get("code_challenge_method"), "s256");
+      assert.ok(start.headers.getSetCookie().some(cookie => /httponly/i.test(cookie) && /secure/i.test(cookie)));
+    } else { assert.equal(start.status, 503); assert.equal(start.data.url, undefined); }
+  }
+  const denied = await fetch(`${base}/account/confirm?error=access_denied&error_description=DISPOSABLE_TEST_DETAIL`, { redirect: "manual", signal: AbortSignal.timeout(30000) });
+  assert.equal(denied.headers.get("location"), `${base}/?account=oauth-error`);
+  assert.equal(denied.headers.get("referrer-policy"), "no-referrer");
+  console.log(`PASS OAuth readiness/start guards and sanitized cancellation. Enabled: Google=${social.data.providers.google}, GitHub=${social.data.providers.github}. No provider consent/login attempted.`);
+  if (process.argv.includes("--oauth-only")) { await db.$disconnect(); return; }
   phase = "create disposable confirmed accounts";
   for (let i = 0; i < 2; i++) {
     const email = `yetsyai-smoke-${randomUUID()}@example.com`;

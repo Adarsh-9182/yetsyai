@@ -22,6 +22,9 @@ clips; combined-file export and trimming are not implemented yet.
 The studio puts the director’s desk first, with a photographic inspiration card,
 persisted light/dark themes, a first-take guide, searchable status-filtered video
 library and a lookbook filtered by cinematic, product, nature and portrait treatments.
+Account access supports email/password plus Google and GitHub OAuth when enabled
+in Supabase. The dialog shows provider availability; see the
+[provider setup](docs/SETUP.md#google-and-github-sign-in) before enabling public use.
 Selecting a look applies its prompt and relevant visual treatment. Inspiration
 photos are labeled separately from generated videos.
 

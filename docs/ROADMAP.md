@@ -26,6 +26,9 @@ and production-inference QA remain open.
 - Project ownership checks, private database tables and conservative creation limits.
 - Composer-first director’s desk, photo inspiration, filtered lookbook and responsive light/dark themes.
 - First-take guide, status-filtered video library, confirmation resend and accessible password controls.
+- Google/GitHub sign-in buttons with provider availability, server-side PKCE,
+  owned session cookies, callback errors and cross-tab refresh. Provider client
+  credentials and actual consent checks remain owner setup requirements.
 - Reference re-encoding strips embedded metadata; saved reference links renew with library refresh.
 - Next.js 15.5.28 and Zod 4.6.7 security updates, compatible transitive fixes;
   npm audit reports zero known findings as of November 1, 2026. Route tests and

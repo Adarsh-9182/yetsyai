@@ -74,6 +74,16 @@ test("password updates require a session and recovery callbacks cannot redirect 
   assert.equal(signup.headers.get("location"), "https://studio.example/");
   assert.equal((await confirm.GET(new Request("https://studio.example/account/confirm"))).headers.get("location"), "https://studio.example/?account=expired");
 });
+test("OAuth callbacks exchange codes, notify signed-in tabs and strip provider failure details", async () => {
+  calls = [];
+  const success = await confirm.GET(new Request("https://studio.example/account/confirm?code=test-code&next=https://attacker.example"));
+  assert.deepEqual(calls[0], ["exchange", "test-code"]);
+  assert.equal(success.headers.get("location"), "https://studio.example/?account=signed-in");
+  assert.equal(success.headers.get("referrer-policy"), "no-referrer");
+  const failed = await confirm.GET(new Request("https://studio.example/account/confirm?error=access_denied&error_description=PRIVATE_PROVIDER_DETAIL"));
+  assert.equal(failed.headers.get("location"), "https://studio.example/?account=oauth-error");
+  assert.doesNotMatch(await failed.text(), /PRIVATE_PROVIDER_DETAIL/);
+});
 test("reference uploads reject disguised formats before reserving storage and remove embedded metadata", async () => {
   const source = sharp({ create: { width: 320, height: 320, channels: 3, background: "#000000" } });
   const gif = await source.clone().gif().toBuffer();

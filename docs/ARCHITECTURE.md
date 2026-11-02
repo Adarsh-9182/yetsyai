@@ -11,7 +11,7 @@ train a new model. The active application is `src/components/studio` and
 | Application | Next.js 15.5 App Router, React 18, TypeScript |
 | Studio | Prompt and shot controls, monitor, lookbook, video/reference libraries, storyboard |
 | Design | Geist, Lucide, responsive charcoal/paper themes; theme and navigation preferences stay local |
-| Accounts | Supabase email/password, server-verified HttpOnly session cookies |
+| Accounts | Supabase email/password and configured Google/GitHub OAuth, server-verified HttpOnly session cookies |
 | Database | Prisma; SQLite for local development, PostgreSQL on Vercel |
 | Media | Private Supabase `studio-media` bucket, one-hour signed URLs |
 | Inference | Owner-controlled private Hugging Face Gradio/ZeroGPU Space, Wan 2.2 TI2V 5B |
@@ -64,6 +64,14 @@ are cached only until the Space restarts. These controls reduce duplicate infere
 but do not create a durable GPU service or guarantee availability.
 
 ## Data boundaries
+
+Social sign-in checks the Supabase project's enabled provider settings, then
+uses the SSR SDK to create an S256 PKCE challenge and HttpOnly verifier cookies.
+`POST /api/account/oauth` requires same-origin requests and allowlists Google and
+GitHub. Only the configured project's authorization URL and the fixed
+`/account/confirm` application redirect are accepted. Callback failures never
+reflect raw provider details. Provider app credentials live in Supabase settings,
+not frontend code; no repository scope is requested for GitHub sign-in.
 
 - `StudioWorkspace`: one account owner and its current active job.
 - `VideoGeneration`: original prompt/settings, provider lifecycle and private media path.

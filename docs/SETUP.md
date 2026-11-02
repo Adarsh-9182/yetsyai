@@ -83,6 +83,38 @@ studio tables through Supabase's public REST interface. Keep DB owner credential
 server-only; do not use a database role that is restricted by the new RLS rules
 without adding narrowly scoped server policies.
 
+### Google and GitHub sign-in
+
+The sign-in dialog includes both social providers. Availability is read from
+Supabase's public Auth settings; disabled providers stay visibly unavailable
+instead of redirecting users into a broken login. Email/password remains usable.
+
+To activate the providers in the existing Supabase project:
+
+1. Create a Google OAuth **Web application** client. Set the app origin to
+   `https://yetsyai.vercel.app`. Register the callback shown by Supabase's Google
+   provider settings: `https://<project-ref>.supabase.co/auth/v1/callback`.
+2. Create a GitHub OAuth App with homepage `https://yetsyai.vercel.app` and that
+   same Supabase callback URL. The application requests only `user:email` beyond
+   GitHub's normal sign-in profile; it does not request repository access.
+3. Save each provider's client ID and secret in Supabase **Authentication → Sign
+   In / Providers**, then enable the provider. Keep secrets out of source control,
+   browser code and chat. These are provider-specific app credentials, not your
+   personal Google/GitHub passwords or a GitHub personal access token.
+4. Keep `https://yetsyai.vercel.app/account/confirm` in Supabase's redirect allow
+   list. The OAuth app callback points to Supabase; the application redirect
+   points back to YetsyAI. Do not interchange them.
+5. Reload sign-in and test each provider with consent, cancellation and sign-out.
+
+The app uses server-side PKCE and HttpOnly cookies. It accepts only same-origin
+sign-in starts and redirects only to this Supabase project's authorization URL.
+The callback exchanges the one-time code, strips provider error descriptions,
+and refreshes account state in other open tabs. Actual Google/GitHub consent
+cannot be tested until the owner's provider clients are configured.
+
+Official setup: [Google](https://supabase.com/docs/guides/auth/social-sign-in/auth-google),
+[GitHub](https://supabase.com/docs/guides/auth/social-sign-in/auth-github).
+
 ## 2. Hugging Face ZeroGPU Space
 
 Use **your own** private Space; do not rely on someone else's public demo API.
